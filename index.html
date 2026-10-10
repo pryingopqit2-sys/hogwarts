@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hogwarts Quiz</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b0e14;color:#f1ead8;font-family:"Noto Sans Thai",system-ui,sans-serif;display:flex;justify-content:center;padding:14px}
+#app{width:100%;max-width:480px;background:#1c2530;border:2px solid #c9a85c;border-radius:16px;padding:18px 16px 26px}
+h1{font-size:1.45rem;text-align:center;margin:6px 0 10px;line-height:1.3}
+h2{font-size:1.15rem;text-align:center;margin:14px 0 10px}
+.dev{color:#c9a85c;text-align:center;font-size:.85rem;margin-bottom:14px}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0;border-radius:14px;padding:13px 14px;color:#fff;font-weight:700;width:100%;margin:5px 0}
+input,select{width:100%;padding:13px 14px;margin:6px 0;border-radius:14px;border:1px solid #c9a85c;background:#10161e;color:#f1ead8}
+.tabs{display:flex;gap:8px}.tabs button{background:#10161e;border:1px solid #c9a85c;color:#c9a85c}.tabs .on{background:#c9a85c;color:#1b1500}
+.green{background:#2ca84a}.purple{background:#7b52d4}.orange{background:#ff8533}.grey{background:#4a525c}
+.card{border:1px solid #c9a85c;border-radius:14px;padding:12px;margin:10px 0;background:#10161e}
+.prof{display:flex;gap:14px;align-items:center}
+.av{font-size:3.2rem;line-height:1}
+.nm{color:#c9a85c;font-weight:700;font-size:1.15rem}
+.bar{height:7px;background:#2b3542;border-radius:6px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:#c9a85c}
+.hs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.hs div{border:1px solid #2b3542;border-radius:10px;padding:8px 2px;text-align:center;font-size:.78rem}
+.hs .me{border:2px solid #f5d90a}
+.hs b{display:block;font-size:.8rem;word-break:break-all}
+.opt{background:#10161e;border:1px solid #c9a85c;font-weight:400;text-align:left}
+.opt.ok{background:#14452a;border-color:#2ca84a}.opt.no{background:#4a1a22;border-color:#c0392b}
+.opt.off{opacity:.25}
+.story{line-height:1.7}
+.item{display:flex;gap:12px;align-items:center}.item .e{font-size:2.2rem}.item .t{flex:1;font-size:.9rem}.item .t b{color:#c9a85c;display:block}
+.price{width:auto;padding:8px 12px;background:#4a525c;margin:0;white-space:nowrap}
+.price.can{background:#c9a85c;color:#1b1500}
+.msg{color:#f5a623;min-height:1.4em;text-align:center}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #2b3542;font-size:.95rem}
+small{color:#a9b0c0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{width:auto;margin:0;padding:7px 11px;background:#10161e;border:1px solid #c9a85c;font-size:.85rem;font-weight:600}
+.chip.on{background:#c9a85c;color:#1b1500}
+.room{position:relative;height:380px;border-radius:16px;overflow:hidden;border:2px solid #c9a85c;background:linear-gradient(#f0d6b0 0 58%,#b5835a 58%);margin:8px 0}
+.room .win{position:absolute;top:8%;left:10%;font-size:3.4rem;line-height:1}
+.room .rug{position:absolute;left:50%;top:80%;width:62%;height:15%;transform:translate(-50%,-50%);background:#a8473f;border-radius:50%;opacity:.85}
+.di{position:absolute;transform:translate(-50%,-50%);line-height:1;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;padding:3px;border-radius:10px}
+.di.sel{outline:2px dashed #fff}
+.tr{width:auto;background:#10161e;border:1px solid #c9a85c;padding:8px 10px;margin:0;font-size:1.8rem;line-height:1}
+.hud{display:flex;align-items:center;gap:8px;margin:8px 0;padding:10px;border-radius:14px;background:linear-gradient(#bfe3f2,#f6e3b5)}
+.pill{background:#fff;color:#2b2b3a;border-radius:999px;padding:7px 12px;font-weight:700;font-size:.9rem;white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.pill.ttl{border:2px solid #e8b44a;color:#8a5a00;background:#fffaf0}
+.xpw{flex:1;text-align:center;font-size:.72rem;color:#2b2b3a;font-weight:700}
+.xpb{height:14px;border-radius:8px;background:#e6e6ef;overflow:hidden;margin-bottom:2px}
+.xpb i{display:block;height:100%;background:#a64ce0}
+.npills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.scene{position:relative;height:340px;border-radius:16px;overflow:hidden;background:linear-gradient(#ffb673,#ffd9a8 62%,#fbe9cf);margin:8px 0 12px;border:2px solid #c9a85c}
+.scene .e{position:absolute;line-height:1}
+.fx{pointer-events:none}
+.sway{transform-origin:50% 100%;animation:sway 4s ease-in-out infinite alternate}
+.bob{animation:bob 2.6s ease-in-out infinite}
+.wave{transform-origin:20% 100%;animation:wave 1.8s ease-in-out infinite alternate}
+.glowy{animation:pulse 4s ease-in-out infinite}
+.twk{animation:twk 3s ease-in-out infinite}
+@keyframes sway{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes wave{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.12);opacity:1}}
+@keyframes twk{0%,100%{opacity:.15;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+@keyframes fall{from{transform:translate(0,0)}to{transform:translate(var(--dx),380px)}}
+@keyframes rise{from{transform:translateY(0);opacity:.9}to{transform:translateY(-300px);opacity:0}}
+@keyframes crossl{from{left:-12%}to{left:112%}}
+@keyframes floaty{from{transform:translate(0,0)}to{transform:translate(var(--dx),-18px)}}
+@media (prefers-reduced-motion:reduce){.scene *{animation:none!important}}
+.scene .ground{position:absolute;left:0;right:0;bottom:0;height:32%;background:linear-gradient(#86c94a,#5ea32d)}
+.scene .items{position:absolute;left:4%;bottom:3%;display:flex;flex-wrap:wrap;gap:4px;font-size:1.5rem;max-width:52%;line-height:1}
+.scene .bub{position:absolute;right:3%;bottom:54%;background:#fff;color:#333;border-radius:12px;padding:4px 8px;font-size:.62rem;font-weight:700;max-width:33%;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.scene .who{position:absolute;right:3%;bottom:2%;color:#fff;font-weight:700;font-size:.85rem;text-shadow:0 1px 3px #000;max-width:40%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body{padding-bottom:110px}
+#nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;z-index:5}
+#nav[hidden]{display:none}
+#top{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;align-items:center;gap:8px;padding:8px 10px;z-index:6;pointer-events:none}
+#hudbar{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:14px;background:linear-gradient(#bfe3f2,#f6e3b5);pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#hudbar[hidden]{display:none}
+#top{padding:5px 8px;gap:6px}#hudbar{padding:4px 8px;gap:6px;border-radius:12px}#hudbar .pill{padding:3px 9px;font-size:.74rem}#hudbar .xpw{font-size:.6rem;line-height:1.25}#hudbar .xpw>div:first-child{font-size:.6rem!important}#hudbar .xpb{height:8px;margin-bottom:1px}
+#mus{width:32px;height:32px;border-radius:50%;padding:0;margin:0 0 0 auto;flex:none;background:#10161e;border:2px solid #c9a85c;font-size:1rem;pointer-events:auto}
+.mfl{display:block;text-align:center;background:#7b52d4;color:#fff;border-radius:14px;padding:13px 14px;font-weight:700;margin:5px 0;cursor:pointer}
+#nav #navt{display:block;margin:0 auto;width:auto;min-width:64px;height:24px;padding:0 14px;border:2px solid #c9a85c;border-bottom:0;border-radius:12px 12px 0 0;background:#10161e;color:#c9a85c;font-size:.78rem;line-height:1;font-weight:700}
+#navb{display:flex;background:#10161e;border-top:2px solid #c9a85c;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+#nav.closed #navb{display:none}
+#navb button{flex:1;background:none;border:0;border-radius:10px;margin:0;padding:6px 0;color:#a9b0c0;font-size:.72rem;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px}
+#navb button span{font-size:1.5rem;line-height:1}
+#navb button.on{color:#ff8533}
+.del{width:auto;margin:0;padding:6px 14px;background:#4a1a22;border:1px solid #c0392b}
+.uc{width:58px;height:84px;border-radius:12px;border:3px solid #fff;color:#fff;font-weight:700;font-size:1.3rem;padding:0;margin:0;text-shadow:0 1px 2px #000}
+.uc.dim{opacity:.4}
+.hand{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;justify-content:center}
+.g24n{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}
+.num{background:#2b3542;border:1px solid #c9a85c;padding:14px 0;margin:0;font-size:1.1rem}
+.num.ok{background:#14452a;border-color:#2ca84a}.num.no{background:#4a1a22;border-color:#c0392b}
+.chars{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.ch{background:#10161e;border:2px solid #2b3542;font-size:2rem;padding:10px 0;margin:0}
+.ch.on{border-color:#f5d90a;background:#2b3542}
+.story p{margin:0 0 12px}
+button:disabled{opacity:.4}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fff}
+
+.tabs button{padding:10px 4px;font-size:.8rem}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.pbtn{position:relative;margin:0;padding:12px 6px;background:#1b2230;border:1px solid #c9a85c;font-size:.9rem;line-height:1.35}
+.pbtn.wide{text-align:left;padding:12px}.pbtn small{font-weight:400;color:#a9b0c0}
+.dot{position:absolute;top:-6px;right:-4px;background:#e0334a;color:#fff;border-radius:999px;font-size:.7rem;min-width:20px;padding:1px 5px}
+.nightov{position:absolute;inset:0;background:rgba(10,15,60,.52);pointer-events:none}
+.petw{animation:pwalk 20s linear infinite;pointer-events:none}
+@keyframes pwalk{0%{left:6%;transform:scaleX(1)}48%{left:66%;transform:scaleX(1)}50%{left:66%;transform:scaleX(-1)}98%{left:6%;transform:scaleX(-1)}100%{left:6%;transform:scaleX(1)}}
+.room.rt-gry{background:linear-gradient(#e8b4a0 0 58%,#7a2a2a 58%)}.room.rt-gry .rug{background:#d4a017}
+.room.rt-sly{background:linear-gradient(#bfe0c8 0 58%,#2f5d46 58%)}.room.rt-sly .rug{background:#9aa3a8}
+.room.rt-huf{background:linear-gradient(#f7e08a 0 58%,#6b5a2a 58%)}.room.rt-huf .rug{background:#222}
+.room.rt-rav{background:linear-gradient(#b9c9ee 0 58%,#3b4a7a 58%)}.room.rt-rav .rug{background:#b08d57}
+@keyframes demo{from{left:0}to{left:100%}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="top"><div id="hudbar" hidden></div><button id="mus" aria-label="เปิดหรือปิดเพลง">🔇</button></div>
+<nav id="nav" hidden></nav>
+<script>
+var HOUSE={G:["Gryffindor","🦁"],S:["Slytherin","🐍"],H:["Hufflepuff","🦡"],R:["Ravenclaw","🦅"]};
+var ST=[
+["ศิลาอาถรรพ์","แฮร์รี่เด็กกำพร้าที่อยู่กับครอบครัวเดอร์สลีย์ รู้ว่าตนเป็นพ่อมดวันอายุ 11 ปี ไปเรียนที่ฮอกวอตส์ ได้เพื่อนอย่างรอนและเฮอร์ไมโอนี่ และปกป้องศิลาอาถรรพ์จากโวลเดอมอร์",[["ใครคือเจ้าของนกฮูกของแฮร์รี่?","เฮดวิก","ทรีโว","ครุกแชงค์"],["ลูกอะไรที่ซีกเกอร์ต้องจับ?","ลูกสนิช","ลูกควัฟเฟิล","ลูกบลัดเจอร์"],["ศาสตราจารย์คนไหนมีโวลเดอมอร์อยู่หลังศีรษะ?","ควีเรลล์","สเนป","ฟลิตวิก"],["สุนัขสามหัวที่เฝ้าประตูกลชื่ออะไร?","ฟลัฟฟี่","แฟงก์","นอร์เบิร์ต"]]],
+["ห้องแห่งความลับ","ห้องแห่งความลับถูกเปิดอีกครั้ง นักเรียนถูกสาปให้กลายเป็นหิน แฮร์รี่ตามรอยสมุดบันทึกของทอม ริดเดิ้ล จนพบสัตว์ร้ายในห้องใต้ดิน",[["สัตว์ร้ายในห้องแห่งความลับคือตัวอะไร?","บาซิลิสก์","ฮิปโปกริฟ","มังกร"],["สมุดบันทึกเป็นของใคร?","ทอม ริดเดิ้ล","ซิเรียส แบล็ก","ลูเซียส มัลฟอย"],["เอลฟ์บ้านที่พยายามเตือนแฮร์รี่ชื่ออะไร?","ด็อบบี้","ครีเชอร์","วิงกี้"],["แฮร์รี่มีความสามารถพิเศษอะไรที่ทำให้ถูกสงสัย?","พูดภาษางู","มองเห็นอนาคต","ล่องหน"]]],
+["นักโทษแห่งอัซคาบัน","ซิเรียส แบล็กหนีจากคุกอัซคาบัน ทุกคนคิดว่าเขาตามล่าแฮร์รี่ แต่ความจริงแล้วปีเตอร์ เพ็ตติกรูคือคนทรยศ",[["ผู้คุมวิญญาณของอัซคาบันเรียกว่าอะไร?","ดีเมนเตอร์","โบการ์ต","กริม"],["ซิเรียส แบล็กเป็นอะไรของแฮร์รี่?","พ่อทูนหัว","ลุง","ครูสอน"],["ศาสตราจารย์ลูปินเป็นอะไร?","มนุษย์หมาป่า","แวมไพร์","ยักษ์"],["คาถาเรียกผู้พิทักษ์คือข้อใด?","เอ็กเปคโต แพโทรนัม","เอ็กเปลลิอาร์มัส","อาวาดา เคดาฟรา"]]],
+["จอกอัคนี","แฮร์รี่ถูกเลือกเป็นนักแข่งคนที่สี่โดยไม่ตั้งใจ ต้องผ่านภารกิจอันตราย และจบด้วยการกลับมาของโวลเดอมอร์",[["การแข่งขันที่ฮอกวอตส์ปีนี้ชื่ออะไร?","ไตรภาคีพ่อมด","ควิดดิชเวิลด์คัพ","ดวลพ่อมด"],["ใครเสียชีวิตที่สุสานคืนสุดท้าย?","เซดริก ดิกกอรี","วิกเตอร์ ครัม","ฟลอร์ เดอลากูร์"],["คำสาปสังหารคือคำสาปอะไร?","อาวาดา เคดาฟรา","ครูซิโอ","อิมเพริโอ"],["ใครปลอมตัวเป็นมูดี้ตาเดียว?","บาร์ตี้ เคราช์ จูเนียร์","ปีเตอร์ เพ็ตติกรู","ลูปิน"]]],
+["Order of the Phoenix","กระทรวงไม่เชื่อว่าโวลเดอมอร์กลับมา ฮอกวอตส์ถูกควบคุมโดยอัมบริดจ์ แฮร์รี่จึงตั้งกลุ่มฝึกคาถาลับ",[["ผู้ตรวจการชุดชมพูชื่ออะไร?","โดโลเรส อัมบริดจ์","ซิบิล เทรลอว์นี","มิเนอร์ว่า แมคกอนนากัล"],["กลุ่มฝึกคาถาลับของแฮร์รี่ชื่ออะไร?","กองทัพดัมเบิลดอร์","ผู้เสพความตาย","สมาคมนักปราชญ์"],["ใครเสียชีวิตที่กระทรวงเวทมนตร์?","ซิเรียส แบล็ก","ด็อบบี้","สเนป"],["พวกเขาฝึกกันที่ห้องอะไร?","ห้องต้องประสงค์","ห้องใต้ดิน","หอดูดาว"]]],
+["เจ้าชายเลือดผสม","แฮร์รี่ได้ตำราปรุงยาของเจ้าชายเลือดผสม ดัมเบิลดอร์พาเขาดูความทรงจำของริดเดิ้ล เพื่อตามหาฮอร์ครักซ์",[["เจ้าชายเลือดผสมคือใคร?","เซเวอรัส สเนป","ทอม ริดเดิ้ล","รีมัส ลูปิน"],["ฮอร์ครักซ์คืออะไร?","วัตถุเก็บชิ้นส่วนวิญญาณ","คาถาป้องกัน","สัตว์วิเศษ"],["ใครสอนปรุงยาคนใหม่ในปีนี้?","ฮอเรซ สลักฮอร์น","สเนป","สเปราท์"],["ใครสังหารดัมเบิลดอร์บนหอคอย?","สเนป","เบลลาทริกซ์","แฮกริด"]]],
+["เครื่องรางยมทูต 1","แฮร์รี่ รอน และเฮอร์ไมโอนี่ออกเดินทางตามหาฮอร์ครักซ์ โดยหนีการตามล่าของผู้เสพความตาย",[["ทั้งสามคนออกตามหาอะไร?","ฮอร์ครักซ์","ศิลาอาถรรพ์","ถ้วยทอง"],["ใครช่วยพวกเขาหนีจากคฤหาสน์มัลฟอย แล้วเสียชีวิต?","ด็อบบี้","วิงกี้","ครีเชอร์"],["ดัมเบิลดอร์ทิ้งอะไรไว้ให้รอน?","ไฟดับ","กระจกอีรีสเด","หมวกคัดสรร"],["เครื่องรางยมทูตมีกี่สิ่ง?","3","5","7"]]],
+["เครื่องรางยมทูต 2","การต่อสู้สุดท้ายที่ฮอกวอตส์ แฮร์รี่ต้องเผชิญหน้าโวลเดอมอร์ และเรื่องราวจบลงอย่างสงบ",[["ใครสังหารงูนาจินี?","เนวิลล์","แฮร์รี่","รอน"],["การต่อสู้สุดท้ายเกิดขึ้นที่ไหน?","ฮอกวอตส์","กริงกอตส์","ตรอกไดแอกอน"],["ใครคือเจ้าของไม้เอลเดอร์ที่แท้จริงในตอนท้าย?","แฮร์รี่","ดราโก","สเนป"],["ฉากสุดท้ายเกิดขึ้นที่สถานีอะไร?","คิงส์ครอส ชานชาลา 9¾","แพดดิงตัน","ยูสตัน"]]]
+];
+var SHOP=[["ยาตัดตัวเลือก 50:50","🧪","ใช้ตอนตอบคำถาม ตัดคำตอบผิดออก 2 ข้อ (ซื้อซ้ำได้)",10,"potion"],["ไม้กายสิทธิ์ไม้ฮอลลี่","🪄","โชว์ในการ์ดผู้เล่น",20,"wand"],["ตัวละครกวางแพโทรนัม","🦌","ปลดล็อกตัวละครพิเศษ",25,"🦌"],["ตัวละครนกอินทรี","🦅","ปลดล็อกตัวละครพิเศษ",25,"🦅"],["ตัวละครหมาป่า","🐺","ปลดล็อกตัวละครพิเศษ",25,"🐺"],["ผ้าคลุมล่องหน","🧥","โชว์ในการ์ดผู้เล่น",30,"cloak"],
+["บัตรช็อกโกแลตกบ","🍫","สะสมโชว์ในการ์ดผู้เล่น",15,"i:choc"],
+["ถั่วทุกรสชาติ","🍬","สะสมโชว์ในการ์ดผู้เล่น",12,"i:bean"],
+["เบียร์เนยหวาน","🧋","สะสมโชว์ในการ์ดผู้เล่น",20,"i:butter"],
+["แว่นกลมของแฮร์รี่","👓","สะสมโชว์ในการ์ดผู้เล่น",30,"i:glasses"],
+["ตุ๊กตาด็อบบี้","🧦","ถุงเท้าที่ปลดปล่อยเอลฟ์ สะสมโชว์",35,"i:sock"],
+["ผ้าพันคอประจำบ้าน","🧣","สะสมโชว์ในการ์ดผู้เล่น",40,"i:scarf"],
+["ลูกสนิชทองคำ","✨","สะสมโชว์ในการ์ดผู้เล่น",45,"i:snitch"],
+["ตำราเวทมนตร์","📖","สะสมโชว์ในการ์ดผู้เล่น",50,"i:book"],
+["แผนที่ตัวป่วน","🗺️","สะสมโชว์ในการ์ดผู้เล่น",55,"i:map"],
+["หมวกคัดสรร","🎩","สะสมโชว์ในการ์ดผู้เล่น",60,"i:hat"],
+["กระจกอีรีสเด","🪞","สะสมโชว์ในการ์ดผู้เล่น",70,"i:mirror"],
+["ไม้กวาดนิมบัส 2000","🧹","สะสมโชว์ในการ์ดผู้เล่น",90,"i:broom"],
+["ไทม์เทิร์นเนอร์","⏳","สะสมโชว์ในการ์ดผู้เล่น",150,"i:timer"],
+["เครื่องรางยมทูต","🔺","สะสมโชว์ในการ์ดผู้เล่น",200,"i:hallows"]];
+var EX=[
+[["แฮร์รี่ได้ไม้กายสิทธิ์จากร้านใคร?","ออลลิแวนเดอร์","บอร์จินแอนด์เบิร์กส์","ฟลอริช แอนด์ บอตส์"],["แฮร์รี่ถูกคัดเข้าบ้านอะไร?","กริฟฟินดอร์","สลิธีริน","เรเวนคลอ"],["รถไฟไปฮอกวอตส์ออกจากชานชาลาหมายเลขอะไร?","9¾","7½","10"],["ใครพาแฮร์รี่ไปซื้อของที่ตรอกไดแอกอน?","แฮกริด","สเนป","ฟิลช์"],["ใครเป็นผู้อำนวยการฮอกวอตส์?","อัลบัส ดัมเบิลดอร์","ลูเซียส มัลฟอย","คอร์เนเลียส ฟัดจ์"],["ใครเสียสละตัวเองในเกมหมากรุกยักษ์เพื่อให้แฮร์รี่เดินต่อ?","รอน","เฮอร์ไมโอนี่","เนวิลล์"]],
+[["รอนขับอะไรไปรับแฮร์รี่?","รถฟอร์ดแองเกลียบินได้","ไม้กวาด","รถไฟ"],["นกฟีนิกซ์ของดัมเบิลดอร์ชื่ออะไร?","ฟอว์กส์","เฮดวิก","บัคบีค"],["แฮร์รี่ใช้อะไรสังหารบาซิลิสก์?","ดาบกริฟฟินดอร์","ไม้กายสิทธิ์","คาถาสังหาร"],["พืชที่ใช้ทำยาชุบชีวิตคนที่ถูกสาปเป็นหินคืออะไร?","แมนเดรก","ว่านหางจระเข้","ต้นหนาม"],["ใครถูกสมุดบันทึกควบคุมจนเปิดห้องแห่งความลับ?","จินนี่ วีสลีย์","เฮอร์ไมโอนี่","ลูน่า เลิฟกู๊ด"],["ใครสอนศาสตร์ป้องกันศาสตร์มืดปีนี้?","กิลเดอรอย ล็อกฮาร์ต","ควีเรลล์","ลูปิน"]],
+[["ปีเตอร์ เพ็ตติกรูแปลงร่างเป็นสัตว์อะไร?","หนู","แมว","นก"],["สัตว์ครึ่งนกครึ่งม้าที่แฮร์รี่ขี่ชื่ออะไร?","ฮิปโปกริฟ","ยูนิคอร์น","เธสทรัล"],["เครื่องที่เฮอร์ไมโอนี่ใช้ย้อนเวลาเรียกว่าอะไร?","ไทม์เทิร์นเนอร์","กระจกอีรีสเด","เพนซีฟ"],["ใครสอนศาสตร์ป้องกันศาสตร์มืดในภาคนี้?","รีมัส ลูปิน","สเนป","ล็อกฮาร์ต"],["ความจริงถูกเปิดเผยที่ไหน?","กระท่อมกรีดร้อง","ป่าต้องห้าม","หอคอยดาราศาสตร์"],["แผนที่ที่บอกว่าใครอยู่ที่ไหนในปราสาทเรียกว่าอะไร?","แผนที่ตัวป่วน","แผนที่ลับ","แผนที่ฮอกส์มี้ด"]],
+[["งานแรกของการแข่งขันไตรภาคีคือเผชิญอะไร?","มังกร","ใต้ทะเลสาบ","เขาวงกต"],["มังกรที่แฮร์รี่เจอคือพันธุ์อะไร?","ฮังการีฮอร์นเทล","เวลส์กรีน","นอร์เวย์ริดจ์แบ็ก"],["โรงเรียนที่มาร่วมแข่งกับฮอกวอตส์คือ?","โบซ์บาตงและเดิร์มสแตรง","อิลเวอร์มอร์นีและคาสเตโลบรูกซู","ไวต์ดิบและบีซิล"],["นักแข่งจากเดิร์มสแตรงชื่ออะไร?","วิกเตอร์ ครัม","เซดริก ดิกกอรี","ฟลอร์ เดอลากูร์"],["ภารกิจสุดท้ายอยู่ที่ไหน?","เขาวงกต","ทะเลสาบ","สนามควิดดิช"],["ใครทำพิธีชุบชีวิตโวลเดอมอร์ที่สุสาน?","ปีเตอร์ เพ็ตติกรู","เบลลาทริกซ์","ลูเซียส มัลฟอย"]],
+[["คำทำนายถูกเก็บไว้ที่แผนกใด?","แผนกปริศนา","แผนกคดี","แผนกกฎหมายเวทมนตร์"],["ใครสังหารซิเรียส แบล็ก?","เบลลาทริกซ์ เลสเตรนจ์","ลูเซียส มัลฟอย","ปีเตอร์ เพ็ตติกรู"],["อัมบริดจ์พยายามไล่ใครออกจากตำแหน่งผู้อำนวยการ?","ดัมเบิลดอร์","สเนป","แมคกอนนากัล"],["สัตว์ที่เห็นได้เฉพาะคนที่เคยเห็นความตายคืออะไร?","เธสทรัล","ฮิปโปกริฟ","บาซิลิสก์"],["องค์กรลับที่ต่อต้านโวลเดอมอร์ชื่ออะไร?","ออร์เดอร์ออฟเดอะฟีนิกซ์","ผู้เสพความตาย","สมาคมนักปราชญ์"],["ใครเป็นผู้ฝึกสอนในกองทัพดัมเบิลดอร์?","แฮร์รี่","สเนป","อัมบริดจ์"]],
+[["แฮร์รี่ได้ยาโชคดีจากใคร?","สลักฮอร์น","สเนป","ดัมเบิลดอร์"],["ใครซ่อมตู้หายตัวเพื่อเปิดทางให้ผู้เสพความตาย?","ดราโก มัลฟอย","เนวิลล์","วิกเตอร์ ครัม"],["ดัมเบิลดอร์ดื่มอะไรในถ้ำจนอ่อนแรง?","ยาพิษ","น้ำผึ้ง","น้ำชา"],["อ่างที่ใช้ดูความทรงจำเรียกว่าอะไร?","เพนซีฟ","ลูกแก้ว","กระจก"],["ของที่ดัมเบิลดอร์กับแฮร์รี่ได้จากถ้ำคืออะไร?","ล็อกเก็ต","แหวน","ถ้วย"],["แฮร์รี่เป็นกัปตันควิดดิชของบ้านอะไรในภาคนี้?","กริฟฟินดอร์","สลิธีริน","ฮัฟเฟิลพัฟฟ์"]],
+[["บ้านที่ซิเรียสทิ้งไว้ให้แฮร์รี่อยู่ที่ไหน?","12 กริมโมลด์เพลซ","โพรงกระต่าย","คฤหาสน์มัลฟอย"],["ใครจัดงานแต่งงานที่ถูกโจมตี?","บิลกับฟลอร์","รอนกับเฮอร์ไมโอนี่","จอร์จกับแองเจลิน่า"],["เฮอร์ไมโอนี่เก็บข้าวของทั้งหมดไว้ในอะไร?","กระเป๋าลูกปัด","กระเป๋าสะพาย","หีบไม้"],["ของที่เฮอร์ไมโอนี่ได้จากดัมเบิลดอร์คืออะไร?","หนังสือนิทานบีเดิลนักกวี","ไม้กายสิทธิ์","ลูกสนิช"],["ใครทำลายล็อกเก็ตฮอร์ครักซ์ด้วยดาบ?","รอน","แฮร์รี่","เฮอร์ไมโอนี่"],["ทั้งสามคนถูกจับไปที่ไหน?","คฤหาสน์มัลฟอย","อัซคาบัน","กระทรวงเวทมนตร์"]],
+[["ฮอร์ครักซ์ชิ้นใดอยู่ในห้องนิรภัยของเบลลาทริกซ์?","ถ้วยฮัฟเฟิลพัฟฟ์","แหวน","มงกุฎ"],["พวกเขาหนีออกจากกริงกอตส์ด้วยอะไร?","มังกร","ไม้กวาด","พอร์ตคีย์"],["ใครดึงดาบกริฟฟินดอร์ออกจากหมวกคัดสรรในตอนท้าย?","เนวิลล์","แฮร์รี่","รอน"],["สเนปรักใครมาตลอดชีวิต?","ลิลลี่ พอตเตอร์","มิเนอร์ว่า แมคกอนนากัล","นาร์ซิสซา"],["ใครคือฮอร์ครักซ์ที่โวลเดอมอร์ไม่ได้ตั้งใจสร้าง?","แฮร์รี่","รอน","เนวิลล์"],["คาถาที่แฮร์รี่ใช้ตอนท้ายสู้กับโวลเดอมอร์คืออะไร?","เอ็กเปลลิอาร์มัส","อาวาดา เคดาฟรา","ครูซิโอ"]]
+];
+EX.forEach(function(e,i){ST[i][2]=ST[i][2].concat(e)});
+var DB,me,mode="login",view="login",Q;
+var app=document.getElementById("app");
+function $(i){return document.getElementById(i)}
+function load(){try{DB=JSON.parse(localStorage.getItem("hqdb"))}catch(e){}if(!DB||!DB.u)DB={u:{},v:2,h:{G:0,S:0,H:0,R:0}};
+  var ch=0;if(DB.v!==2){Object.keys(DB.u).forEach(function(k){var p=DB.u[k],o=Math.floor((p.xp||0)/100)+1;p.xp=xpFor(o)+(p.xp||0)%100});DB.v=2;ch=1}
+  Object.keys(DB.u).forEach(function(k){var p=DB.u[k];
+    if(/เทพทั|theppathat/i.test(p.name)&&p.xp<100&&!isVip(p)){delete DB.u[k];ch=1}});
+  Object.keys(DB.u).forEach(function(k){var p=DB.u[k];if(isVip(p)&&p.gal<VIPGAL/2){p.gal=VIPGAL;ch=1}if(isVip(p)&&p.xp<VIPXP){p.xp=VIPXP;ch=1}});
+  Object.keys(DB.u).forEach(function(k){var p=DB.u[k];if(/ทดลอง/.test(p.name)&&p.house==="S"){p.house="G";ch=1}});
+  DB.h=DB.h||{G:0,S:0,H:0,R:0};
+  if(!(DB.h.G>=999999999999999)){DB.h.G=999999999999999;ch=1}
+  if(ch)save()}
+function save(){if(me&&isVip(me)){if(me.gal<VIPGAL/2)me.gal=VIPGAL;if(me.xp<VIPXP)me.xp=VIPXP}if(me){me._t=Date.now();netHp();netSched()}try{localStorage.setItem("hqdb",JSON.stringify(DB))}catch(e){}hudUpd()}
+var VIPGAL=999999999999999,VIPXP=xpFor(100000);
+function isVip(p){return/^(เทพทัต|theppathat)$/i.test(String(p&&p.name||"").trim())}
+function galTxt(){return isVip(me)?"∞":me.gal.toLocaleString()}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function hash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return h}
+function xpCost(l){return 100+10*(l-1)}
+function xpFor(l){var n=l-1;return 100*n+5*n*(n-1)}
+function lvl(p){var x=Math.max(0,p.xp||0),n=Math.max(0,Math.floor((-85+Math.sqrt(7225+20*x))/10));while(xpFor(n+2)<=x)n++;while(n>0&&xpFor(n+1)>x)n--;return n+1}
+function xpIn(p){var l=lvl(p);return[p.xp-xpFor(l),xpCost(l)]}
+function fmt(n){return Math.round(n).toLocaleString("en-US")}
+var TITLES=[[1,"🥚","เด็กใหม่หัวใจเวทมนตร์"],[5,"📜","ศิษย์จดตำรา"],[10,"🪄","ผู้ถือไม้กายสิทธิ์"],[15,"🧪","นักปรุงยามือใหม่"],[20,"🦉","ผู้ส่งสารนกฮูก"],[25,"🧹","นักบินไม้กวาด"],[30,"📚","หนอนหนังสือแห่งหอสมุด"],[40,"🛡️","นักป้องกันศาสตร์มืด"],[50,"🔮","ผู้เชี่ยวชาญคาถา"],[60,"🐉","ผู้ฝ่าด่านมังกร"],[70,"⚔️","อัศวินแห่งปราสาท"],[80,"🌟","พ่อมดดาวรุ่ง"],[90,"🧙","จอมเวทอาวุโส"],[100,"👑","ผู้พิทักษ์ฮอกวอตส์"],[150,"🏆","ตำนานแห่งปราสาท"],[200,"🌌","จอมเวทแห่งจักรวาล"],[300,"🔥","ราชันย์ฟีนิกซ์"],[500,"⚡","มหาเวทย์เหนือกาลเวลา"],[750,"🏰","อาร์คเมจแห่งฮอกวอตส์"],[999,"✨","เทพเจ้าแห่งเวทมนตร์"]];
+function titleOf(p){var l=lvl(p),t=TITLES[0];if(l>=1000)return[1000,"🌠","ตำนานนิรันดร์ ขั้น "+(Math.floor((l-1000)/100)+1)];TITLES.forEach(function(x){if(l>=x[0])t=x});return t}
+function titlesHtml(){var c=titleOf(me);return '<div class="card"><h3>🎖️ ฉายาตามเลเวล</h3>'+TITLES.map(function(x,i){var nx=TITLES[i+1],r=nx?(x[0]===nx[0]-1?"Lv "+x[0]:"Lv "+x[0]+"–"+(nx[0]-1)):"Lv "+x[0]+"+";var on=x===c;return '<div class="row" style="'+(on?'background:rgba(255,215,0,.18);border-radius:8px;padding:4px 6px':'opacity:'+(lvl(me)>=x[0]?'1':'.5'))+'"><span>'+x[1]+' '+x[2]+(on?' <small>◀ คุณ</small>':'')+'</span><small>'+r+(lvl(me)>=x[0]?'':' 🔒')+'</small></div>'}).join('')+'<div class="row" style="'+(lvl(me)>=1000?'background:rgba(255,215,0,.18);border-radius:8px;padding:4px 6px':'opacity:.5')+'"><span>🌠 ตำนานนิรันดร์ ขั้น 1, 2, 3…'+(lvl(me)>=1000?' <small>◀ คุณ</small>':'')+'</span><small>Lv 1000+ ♾️'+(lvl(me)>=1000?'':' 🔒')+'</small></div><small>เลเวลไม่มีที่สิ้นสุด — ทุก 100 เลเวลหลัง 1000 ได้ขั้นฉายาใหม่</small></div>'}
+function rank(p){if(p.name.toLowerCase()==="theppathat")return"พ่อ";var y=Math.min(7,Math.floor(lvl(p)/10)+1);return"นักเรียนปี"+["","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด"][y]}
+function shuffle(a){return a.map(function(x){return[Math.random(),x]}).sort(function(a,b){return a[0]-b[0]}).map(function(x){return x[1]})}
+function go(v){view=v;render()}
+function render(){plusStop();var V=({login:rLogin,pick:rPick,sort:rSort,hub:rHub,story:rStory,quiz:rQuiz,stage:rStage,shop:rShop,gacha:rGacha,g24:rG24,uno:rUno,event:rEvent,room:rRoom,yard:rYard,deco:rDeco,list:rList});(V[view]||PV[view])();window.scrollTo(0,0);navUpd();hudUpd()}
+var DEV='<div class="dev">ผู้พัฒนาเกม: ด.ช.เทพทัต แก้วจันทร์</div>';
+
+function rLogin(){
+  app.innerHTML='<h1>🏰 ยินดีต้อนรับสู่ฮอกวอตส์ 🏰</h1>'+DEV+
+  '<div class="tabs"><button id="tl" class="'+(mode==="login"?"on":"")+'">🔑 เข้าสู่ระบบ</button><button id="tr" class="'+(mode==="reg"?"on":"")+'">✨ สมัครสมาชิก</button></div>'+
+  '<input id="n" placeholder="ชื่อสมาชิก (ใช้ชื่อเล่นได้)" maxlength="20" autocomplete="off"><input id="p" type="password" placeholder="รหัสผ่าน (อย่างน้อย 4 ตัว)">'+
+  (mode==="reg"?'<input id="p2" type="password" placeholder="ยืนยันรหัสผ่านอีกครั้ง"><small style="display:block;text-align:center;color:#a9b0c0;margin:4px 0">💡 อย่าใช้รหัสผ่านเดียวกับที่อื่น และไม่ต้องใช้ชื่อจริง</small>':'')+
+  '<div class="msg" id="m">'+(NET.bt?'⏳ กำลังตรวจสอบการเข้าสู่ระบบอัตโนมัติ...':'')+'</div><button class="green" id="go">🚪 '+(mode==="login"?"เข้าเกม":"สมัครและเข้าเกม")+'</button><button class="purple" id="pl">👥 รายชื่อผู้เล่นที่สมัครแล้ว</button>';
+  $("tl").onclick=function(){mode="login";render()};$("tr").onclick=function(){mode="reg";render()};
+  $("pl").onclick=function(){go("list")};
+  $("go").onclick=function(){
+    var nm=$("n").value.trim(),pw=$("p").value,k=nkey(nm),m=$("m");
+    if(!nm){m.textContent="กรอกชื่อก่อน";return}
+    if(pw.length<4){m.textContent="รหัสผ่านต้องมีอย่างน้อย 4 ตัว";return}
+    if(mode==="reg"&&$("p2").value!==pw){m.textContent="รหัสผ่านทั้งสองช่องไม่ตรงกัน";return}
+    var btn=$("go");btn.disabled=true;m.textContent="⏳ กำลังเชื่อมต่อเซิร์ฟเวอร์...";
+    netLoad(function(ok){
+      if(!ok){btn.disabled=false;localLogin(nm,pw,k,m);return}
+      netAuth(nm,pw,k).then(function(r){
+        btn.disabled=false;
+        if(r.err){m.textContent=r.err;return}
+        netEnter(k,r.obj,r.uid);afterLogin(k);save();go(next());netAfterEnter()})
+    })
+  };
+}
+function localLogin(nm,pw,k,m){
+  if(mode==="reg"){
+    if(DB.u[k]){m.textContent="ชื่อนี้มีคนใช้แล้ว";return}
+    DB.u[k]={name:nm,pw:hash(pw),house:null,xp:0,gal:0,potion:0,own:FREE.slice(),av:null,best:{},wand:0,cloak:0};
+  }else if(!DB.u[k]){m.textContent="เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ และยังไม่มีบัญชีนี้ในเครื่อง ลองใหม่เมื่อมีอินเทอร์เน็ต";return}
+  else if(DB.u[k].pw!==hash(pw)){m.textContent="ชื่อหรือรหัสผ่านไม่ถูกต้อง";return}
+  me=DB.u[k];NET.uid=null;afterLogin(k);save();go(next())}
+var HT="home";
+function profScene(){
+  var ev=curEnv(),h=HOUSE[me.house],pets=["🦌","🦅","🐺"].filter(function(p){return me.own.indexOf(p)>-1&&outHouse("pet"+p)});
+  var inv=(me.inv||[]).filter(outHouse).map(function(k){var it=shopItem(k);return it?it[1]:""}).join("");
+  var bub=me.eq?"🪄 "+esc(me.eq):"ยินดีต้อนรับสู่ "+h[0];
+  return '<div class="npills"><span class="pill">👤 '+esc(me.name)+' • '+h[0]+'</span><span class="pill ttl">✏️ '+rank(me)+'</span></div>'+
+  '<div class="scene" style="background:'+ev.sky+'"><span class="e" style="top:6%;left:6%;font-size:2.6rem">'+h[1]+'</span>'+ev.d.map(decorSpan).join("")+
+  '<div class="ground" style="background:'+ev.gr+'"></div>'+treesHtml(ev)+'<span class="e" style="left:42%;bottom:22%;font-size:'+shownHouse().sz+'rem;transform:translateX(-50%)">'+shownHouse().e+'</span>'+
+  ''+flowersHtml(ev)+fxHtml(ev)+yardHtml()+petHtml()+nightHtml()+'<span class="e bob" style="left:19%;bottom:12%;font-size:2.3rem">🐈‍⬛</span>'+
+  '<div class="items">'+(me.wand&&outHouse("wand")?'🪄':'')+(me.cloak&&outHouse("cloak")?'🧥':'')+inv+pets.join("")+'</div>'+
+  '<div class="bub">'+bub+'</div><span class="e wave" style="right:12%;bottom:34%;font-size:2rem">🚩</span>'+
+  '<span class="e bob" style="right:5%;bottom:11%;font-size:4.4rem">'+me.av+'</span><div class="who">'+esc(me.name)+'</div></div>';
+}
+var RSEL=null;
+var ENV=[
+{id:"spring",e:"🌸",n:"ฤดูใบไม้ผลิ (เริ่มต้น)",p:0,sky:"linear-gradient(#ffb673,#ffd9a8 62%,#fbe9cf)",gr:"linear-gradient(#86c94a,#5ea32d)",d:[["☁️",34,12,2.4],["☁️",72,6,2],["🌸",8,46,1.5]]},
+{id:"summer",e:"☀️",n:"ฤดูร้อน",p:60,sky:"linear-gradient(#5fc3ff,#bfe9ff 60%,#fff3c4)",gr:"linear-gradient(#9be04f,#6fb52f)",d:[["☀️",74,5,2.6],["☁️",30,14,2.2],["🌴",9,38,2.6]]},
+{id:"autumn",e:"🍂",n:"ฤดูใบไม้ร่วง",p:70,sky:"linear-gradient(#f4a259,#f9d9a6 62%,#fdeccb)",gr:"linear-gradient(#cf9a3e,#a8742a)",d:[["🍁",14,14,1.8],["🍂",70,10,1.8],["🍁",88,38,1.6],["🌳",8,40,2.6]]},
+{id:"rain",e:"🌧️",n:"ฤดูฝน",p:70,sky:"linear-gradient(#6f8196,#b8c5d1 62%,#d9e1e8)",gr:"linear-gradient(#5e9448,#3f7432)",d:[["🌧️",32,6,3],["☁️",72,10,2.4],["🌂",10,48,1.6]]},
+{id:"winter",e:"❄️",n:"ฤดูหนาว",p:80,sky:"linear-gradient(#bcd9ee,#eaf5fc 62%,#f8fcff)",gr:"linear-gradient(#f2f7fb,#d7e6f0)",d:[["❄️",16,10,1.6],["❄️",50,6,1.4],["❄️",82,18,1.8],["⛄",8,44,2.6]]},
+{id:"night",e:"🌙",n:"ราตรีประดับดาว",p:90,sky:"linear-gradient(#0a1238,#2a2f6b 62%,#4a4a8c)",gr:"linear-gradient(#23603a,#143d24)",d:[["🌙",74,6,2.6],["⭐",22,12,1.2],["✨",48,8,1.4],["⭐",88,32,1.1]]},
+{id:"quid",e:"🏟️",n:"สนามควิดดิช",hog:1,p:200,sky:"linear-gradient(#58b9ff,#cfeeff 62%,#f4fbff)",gr:"linear-gradient(#7ed348,#4f9f2a)",d:[["🏟️",50,20,4.4],["🧹",14,28,2],["☁️",86,8,2]]},
+{id:"hogsmeade",e:"🏘️",n:"หมู่บ้านฮอกส์มี้ด",hog:1,p:220,sky:"linear-gradient(#a9c7e8,#e9f2fb 62%,#fafdff)",gr:"linear-gradient(#f2f7fb,#cfe0ec)",d:[["🏘️",30,22,3.8],["❄️",82,10,1.6],["❄️",58,14,1.3],["⛄",88,40,2]]},
+{id:"forest",e:"🌲",n:"ป่าต้องห้าม",hog:1,p:250,sky:"linear-gradient(#0d2a1c,#1d4a30 62%,#2c6a45)",gr:"linear-gradient(#1f5a2e,#123a1d)",d:[["🌲",8,20,3.8],["🌲",32,26,3],["🌲",90,20,3.8],["🦌",72,40,2],["🦉",56,8,1.8]]},
+{id:"lake",e:"🌊",n:"ทะเลสาบดำ",hog:1,p:250,sky:"linear-gradient(#10243f,#2a5a7a 62%,#6aa5bf)",gr:"linear-gradient(#2d7fa8,#14506f)",d:[["🌙",16,8,2.2],["🏰",84,16,2.6],["🦑",76,44,2.2],["🌊",40,46,2.4]]},
+{id:"castle",e:"🏰",n:"ปราสาทฮอกวอตส์",hog:1,p:300,sky:"linear-gradient(#4b3a86,#e07b6a 62%,#f6c177)",gr:"linear-gradient(#4a8a3c,#2f6a2a)",d:[["🏰",50,16,5.6],["✨",16,10,1.4],["🦉",86,10,1.8],["✨",32,28,1.2]]}
+];
+var ENVX={
+spring:{tr:[["🌳",3,30,3.4],["🌳",63,32,2.8]],fl:"🌷🌼🌸🌷",fx:[["fall","🌸",6],["cross","🐦",2]]},
+summer:{tr:[["🌴",3,30,3.6],["🌳",63,32,2.8]],fl:"🌻🌼🌻",fx:[["cross","🐦",2],["float","🦋",3]]},
+autumn:{tr:[["🌳",3,30,3.4],["🌳",63,32,3]],fl:"🍄🍂🍄",fx:[["fall","🍂🍁",9]]},
+rain:{tr:[["🌳",3,30,3.2],["🌳",63,32,2.8]],fl:"🍄🌿",fx:[["fall","💧",18,"fast"]]},
+winter:{tr:[["🌲",3,30,3.4],["🎄",63,32,2.8]],fl:"⛄❄️",fx:[["fall","❄️",14]]},
+night:{tr:[["🌳",3,30,3.2],["🌲",63,32,2.8]],fl:"🍄",fx:[["twinkle","✨⭐",8],["glow","✨",7]]},
+quid:{tr:[["🌳",3,30,3],["🌳",63,32,2.6]],fl:"🌼🌱",fx:[["cross","🧹",2],["cross","🐦",1]]},
+hogsmeade:{tr:[["🎄",3,30,3.2],["🌲",63,32,2.8]],fl:"⛄",fx:[["fall","❄️",12]]},
+forest:{tr:[["🌲",3,30,3.6],["🌲",13,31,3],["🌲",63,32,3.2]],fl:"🍄🌿🍄",fx:[["glow","✨",9],["cross","🦇",2]]},
+lake:{tr:[["🌿",3,30,2.8],["🌿",63,32,2.6]],fl:"🌺🌿",fx:[["rise","🫧",8],["cross","🦢",1]]},
+castle:{tr:[["🌲",3,30,3.2],["🌲",63,32,2.8]],fl:"🌷🍄",fx:[["cross","🦉",1],["twinkle","✨",8],["cross","🦇",2]]}
+};
+function rnd(a,b){return a+Math.random()*(b-a)}
+function decorSpan(x,i){
+  var c=x[0]==="☁️"?" cloud":(x[0]==="☀️"||x[0]==="🌙")?" glowy":(x[0]==="⭐"||x[0]==="✨")?" twk":(x[0]==="🌴"||x[0]==="🌳"||x[0]==="🌲")?" sway":"";
+  var st="left:"+x[1]+"%;top:"+x[2]+"%;font-size:"+x[3]+"rem";
+  if(c===" cloud"){var D=48+i*17;st+=";left:-12%;animation:crossl "+D+"s linear "+(-(x[1]+12)/124*D).toFixed(1)+"s infinite"}
+  else if(c===" twk")st+=";animation-delay:"+(-rnd(0,3)).toFixed(1)+"s";
+  return'<span class="e'+c+'" style="'+st+'">'+x[0]+'</span>';
+}
+function treesHtml(ev){
+  var x=ENVX[ev.id]||ENVX.spring;
+  return x.tr.map(function(t){return'<span class="e sway" style="left:'+t[1]+'%;bottom:'+t[2]+'%;font-size:'+t[3]+'rem;animation-delay:'+(-rnd(0,4)).toFixed(1)+'s">'+t[0]+'</span>'}).join("");
+}
+function flowersHtml(ev){
+  var x=ENVX[ev.id]||ENVX.spring,a=Array.from(x.fl),pos=[30,38,46,54,22,60];
+  return a.map(function(c,i){return'<span class="e sway" style="left:'+pos[i%pos.length]+'%;bottom:'+(9+(i%3)*4)+'%;font-size:1.2rem;animation-delay:'+(-rnd(0,4)).toFixed(1)+'s">'+c+'</span>'}).join("");
+}
+function fxHtml(ev){
+  var x=ENVX[ev.id]||ENVX.spring,h="";
+  x.fx.forEach(function(f){
+    var ch=Array.from(f[1]);
+    for(var k=0;k<f[2];k++){
+      var c=ch[k%ch.length],L=rnd(2,96).toFixed(0),st="",cls="e fx";
+      if(f[0]==="fall"){var D=f[3]==="fast"?rnd(1.2,2.2):rnd(7,13);st="left:"+L+"%;top:-8%;font-size:"+rnd(.8,1.5).toFixed(1)+"rem;--dx:"+rnd(-40,40).toFixed(0)+"px;animation:fall "+D.toFixed(1)+"s linear "+(-rnd(0,D)).toFixed(1)+"s infinite"}
+      else if(f[0]==="rise"){var D2=rnd(6,10);st="left:"+L+"%;top:90%;font-size:"+rnd(.9,1.4).toFixed(1)+"rem;animation:rise "+D2.toFixed(1)+"s ease-in "+(-rnd(0,D2)).toFixed(1)+"s infinite"}
+      else if(f[0]==="cross"){var D3=rnd(16,28);st="top:"+rnd(6,34).toFixed(0)+"%;font-size:1.4rem;animation:crossl "+D3.toFixed(1)+"s linear "+(-rnd(0,D3)).toFixed(1)+"s infinite"}
+      else if(f[0]==="float"){st="left:"+L+"%;top:"+rnd(38,62).toFixed(0)+"%;font-size:1.1rem;--dx:"+rnd(-30,30).toFixed(0)+"px;animation:floaty "+rnd(3,5).toFixed(1)+"s ease-in-out "+(-rnd(0,3)).toFixed(1)+"s infinite alternate"}
+      else{var top=f[0]==="glow"?rnd(52,86):rnd(3,40);st="left:"+L+"%;top:"+top.toFixed(0)+"%;font-size:"+rnd(.8,1.3).toFixed(1)+"rem;animation:twk "+rnd(1.6,3.6).toFixed(1)+"s ease-in-out "+(-rnd(0,3)).toFixed(1)+"s infinite"}
+      h+='<span class="'+cls+'" style="'+st+'">'+c+'</span>';
+    }
+  });
+  return h;
+}
+function curEnv(){var id=me.env||"spring";return ENV.filter(function(v){return v.id===id})[0]||ENV[0]}
+function bindEnv(){
+  app.querySelectorAll("[data-e]").forEach(function(b){b.onclick=function(){
+    var v=ENV[+b.dataset.e],own=v.p===0||(me.envs||[]).indexOf(v.id)>-1;
+    if(!own){if(me.gal<v.p)return;me.gal-=v.p;me.envs=me.envs||[];me.envs.push(v.id)}
+    me.env=v.id;save();rShop()}});
+}
+var HOUSES=[
+{e:"🏠",n:"บ้านหลังเล็ก",p:0,lv:1,cap:6,sz:6.2},
+{e:"🏡",n:"บ้านสวน",p:300,lv:8,cap:12,sz:6.6},
+{e:"🏛️",n:"คฤหาสน์",p:1500,lv:20,cap:20,sz:6.8},
+{e:"🏯",n:"วังเวทมนตร์",p:5000,lv:35,cap:30,sz:7},
+{e:"🏰",n:"ปราสาทส่วนตัว",p:15000,lv:50,cap:45,sz:7.2},
+{e:"🏦",n:"หอคลังมังกร",p:30000,lv:65,cap:60,sz:7.2},
+{e:"🏢",n:"หอคอยกระทรวงเวทมนตร์",p:100000,lv:100,cap:80,sz:7.2},
+{e:"🌆",n:"มหานครเวทมนตร์",p:500000,lv:200,cap:110,sz:7.2}
+];
+var HMSG="",RMSG="";
+function curHouse(){return HOUSES[Math.min(me.hl||0,HOUSES.length-1)]}
+function houseCard(){
+  var i=Math.min(me.hl||0,HOUSES.length-1),c=HOUSES[i],n=HOUSES[i+1],h='<div class="card"><b>'+c.e+' บ้านของคุณ: '+c.n+'</b><br><small>ระดับ '+(i+1)+' / '+HOUSES.length+' • วางของในบ้านได้ '+c.cap+' ชิ้น</small>';
+  if(n){
+    var lvOk=lvl(me)>=n.lv,can=lvOk&&me.gal>=n.p;
+    h+='<div class="row"><span>'+n.e+' '+n.n+'<br><small>ราคาบ้าน 💰 '+n.p.toLocaleString()+' • ต้องเลเวล '+n.lv+' • วางของได้ '+n.cap+' ชิ้น</small></span><button class="price '+(can?"can":"")+'" id="hu">'+(lvOk?(can?"อัปเกรด":"💰 "+n.p.toLocaleString()):"ต้อง Lv "+n.lv)+'</button></div>';
+  }else h+='<p style="margin:8px 0 0">🎉 บ้านอัปเกรดสูงสุดแล้ว</p>';
+  h+=housePicker()+'<div class="msg">'+HMSG+'</div></div>';HMSG="";return h;
+}
+function upHouse(){
+  var i=me.hl||0,n=HOUSES[i+1];if(!n)return;
+  if(lvl(me)<n.lv)HMSG="ต้องมีเลเวล "+n.lv+" ขึ้นไปก่อนถึงจะอัปเกรดได้";
+  else if(me.gal<n.p)HMSG="แกลเลียนไม่พอ ต้องใช้ "+n.p.toLocaleString();
+  else{me.gal-=n.p;me.hl=i+1;save();HMSG="🎉 อัปเกรดเป็น "+n.n+" แล้ว!"}
+  render();
+}
+var EVT=[
+["ปีใหม่เวทมนตร์","🎆","พลุเวทมนตร์ปีใหม่","🎇"],["เทศกาลแห่งรัก","💝","ช็อกโกแลตแห่งรัก","💝"],["วสันตฤดูบาน","🌷","ช่อทิวลิปวิเศษ","💐"],["สงกรานต์เวทมนตร์","💦","ขันน้ำสงกรานต์","🪣"],
+["ฤดูควิดดิช","🏆","ถ้วยควิดดิช","🏆"],["มหาสมุทรลับ","🐚","เปลือกหอยวิเศษ","🐚"],["เทศกาลดาวตก","🌠","ดาวตกในขวด","🌠"],["ค่ายพ่อมดฤดูร้อน","⛺","เต็นท์พ่อมด","⛺"],
+["เปิดเทอมฮอกวอตส์","🎒","กระเป๋านักเรียนฮอกวอตส์","🎒"],["ฮาโลวีนที่ฮอกวอตส์","🎃","ฟักทองเวทมนตร์","🎃"],["ราตรีเทียนลอยฟ้า","🕯️","เทียนลอยฟ้า","🕯️"],["คริสต์มาสที่ฮอกวอตส์","🎄","กล่องของขวัญวิเศษ","🎁"]];
+var EVM=[
+{id:"quiz",n:"ตอบคำถามให้ถูก",t:30,xp:150,g:100},
+{id:"g24",n:"ชนะเกม 24",t:5,xp:100,g:150},
+{id:"uno",n:"ชนะ UNO",t:3,xp:100,g:150},
+{id:"spin",n:"หมุนกาชาปอง",t:10,xp:80,g:200},
+{id:"read",n:"อ่านเนื้อเรื่องด่าน",t:4,xp:60,g:80}];
+var EVF={xp:300,g:500},EVMSG="";
+var MTH=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+function monthKey(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)}
+function moGet(){var k=monthKey();if(!me.mo||me.mo.k!==k)me.mo={k:k,p:{},c:{}};return me.mo}
+function moAdd(id,n){var m=moGet();m.p[id]=(m.p[id]||0)+n;plusBump(id,n);save()}
+function shopItem(k){
+  var it=SHOP.filter(function(x){return x[4]===k})[0];if(it)return it;
+  if(k.indexOf("i:ev")===0){var t=EVT[(+k.slice(-2)-1)%12]||EVT[0];return[t[2],t[3],"ของสะสมกิจกรรมประจำเดือน",0,k]}
+}
+function evClaimable(){var m=moGet(),n=EVM.filter(function(x){return(m.p[x.id]||0)>=x.t&&!m.c[x.id]}).length;if(EVM.every(function(x){return m.c[x.id]})&&!m.c.fin)n++;return n}
+function rEvent(){
+  var m=moGet(),d=new Date(),mi=d.getMonth(),T=EVT[mi],left=Math.ceil((new Date(d.getFullYear(),mi+1,1)-d)/86400000);
+  var allc=EVM.every(function(x){return m.c[x.id]});
+  var h='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button><h1>📅 กิจกรรมประจำเดือน</h1>'+
+  '<div class="card" style="text-align:center"><div style="font-size:2.6rem">'+T[1]+'</div><b>'+T[0]+'</b><br><small>เดือน'+MTH[mi]+' • เหลืออีก '+left+' วัน</small><br><small>ภารกิจรีเซ็ตทุกต้นเดือน</small></div>';
+  EVM.forEach(function(x){
+    var p=Math.min(m.p[x.id]||0,x.t),done=p>=x.t,cl=m.c[x.id];
+    h+='<div class="card"><div class="row" style="border:0;padding:0"><span><b>'+x.n+' '+x.t+' ครั้ง</b><br><small>รางวัล ⭐ '+x.xp+' XP • 💰 '+x.g+'</small></span><button class="price '+(done&&!cl?"can":"")+'" data-m="'+x.id+'"'+(done&&!cl?"":" disabled")+'>'+(cl?"รับแล้ว":done?"รับรางวัล":p+" / "+x.t)+'</button></div><div class="bar"><i style="width:'+(p/x.t*100)+'%"></i></div></div>';
+  });
+  h+='<div class="card" style="border-width:2px"><b>🎁 รางวัลใหญ่ประจำเดือน</b><div style="font-size:2.4rem;margin:6px 0">'+T[3]+'</div>'+T[2]+'<br><small>ไอเทมสะสมเฉพาะเดือนนี้ + ⭐ '+EVF.xp+' XP + 💰 '+EVF.g+'<br>ต้องรับรางวัลภารกิจย่อยครบทั้ง 5 ข้อก่อน</small><button class="'+(allc&&!m.c.fin?"orange":"grey")+'" id="fin"'+(allc&&!m.c.fin?"":" disabled")+'>'+(m.c.fin?"รับแล้ว":allc?"รับรางวัลใหญ่":"ทำภารกิจให้ครบก่อน")+'</button></div><div class="msg">'+EVMSG+'</div>';
+  EVMSG="";
+  app.innerHTML=h;
+  $("bk").onclick=function(){go("hub")};
+  app.querySelectorAll("[data-m]").forEach(function(b){b.onclick=function(){
+    var x=EVM.filter(function(v){return v.id===b.dataset.m})[0];
+    if((m.p[x.id]||0)<x.t||m.c[x.id])return;
+    m.c[x.id]=1;me.xp+=x.xp;me.gal+=x.g;save();EVMSG="ได้รับ +"+x.xp+" XP และ +"+x.g+" แกลเลียน";rEvent()}});
+  if($("fin"))$("fin").onclick=function(){
+    if(!allc||m.c.fin)return;
+    m.c.fin=1;me.xp+=EVF.xp;me.gal+=EVF.g;me.inv=me.inv||[];
+    if(me.inv.indexOf("i:ev"+m.k)<0)me.inv.push("i:ev"+m.k);
+    save();EVMSG="🎉 ได้รับ "+T[3]+" "+T[2]+" +"+EVF.xp+" XP +"+EVF.g+" แกลเลียน";rEvent()};
+}
+var HSK=[["tent","⛺","เต็นท์พ่อมด",40,5.2],["hut","🛖","กระท่อมกลางป่า",80,5.6],["haunt","🏚️","บ้านร้างผีสิง",100,5.8],["circus","🎪","เต็นท์ละครสัตว์เวทมนตร์",200,6],["row","🏘️","บ้านแถวตรอกไดแอกอน",150,6],["dorm","🏫","หอพักฮอกวอตส์",250,6.4]];
+function shownHouse(){
+  var w=me.shw||"",cur=Math.min(me.hl||0,HOUSES.length-1);
+  if(w.indexOf("s:")===0&&(me.skins||[]).indexOf(w.slice(2))>-1){var k=HSK.filter(function(x){return x[0]===w.slice(2)})[0];if(k)return{e:k[1],n:k[2],sz:k[4]}}
+  if(w.charAt(0)==="t"){var i=+w.slice(1);if(i>=0&&i<=cur)return HOUSES[i]}
+  return HOUSES[cur];
+}
+function housePicker(){
+  var cur=Math.min(me.hl||0,HOUSES.length-1),opts=[],i;
+  for(i=0;i<=cur;i++)opts.push(["t"+i,HOUSES[i].e,HOUSES[i].n]);
+  (me.skins||[]).forEach(function(id){var k=HSK.filter(function(x){return x[0]===id})[0];if(k)opts.push(["s:"+id,k[1],k[2]])});
+  var sel=me.shw,valid=opts.some(function(o){return o[0]===sel});if(!valid)sel="t"+cur;
+  return '<div style="margin-top:10px"><small>เลือกบ้านที่แสดงในฉาก ('+opts.length+' แบบ)</small><div class="tray" style="margin-top:6px">'+opts.map(function(o){return'<button class="tr" data-sh="'+o[0]+'" title="'+esc(o[2])+'" style="'+(o[0]===sel?"border-color:#ff8533;background:#2b3542":"opacity:.6")+'">'+o[1]+'</button>'}).join("")+'</div></div>';
+}
+function bindSkin(){
+  app.querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){
+    var v=HSK[+b.dataset.k],own=(me.skins||[]).indexOf(v[0])>-1;
+    if(!own){if(me.gal<v[3])return;me.gal-=v[3];me.skins=me.skins||[];me.skins.push(v[0])}
+    me.shw="s:"+v[0];save();rShop()}});
+}
+function outHouse(id){return(me.room||[]).concat(me.yard||[]).map(function(r){return r.id}).indexOf(id)<0}
+var DECAT=[
+{n:"พืชและต้นไม้",e:"🌳",s:"พืช",i:[["🌱","ต้นกล้า",10],["🌷","แปลงทิวลิป",20],["🌻","ทานตะวัน",25],["🌹","กุหลาบแดง",30],["🌿","พุ่มสมุนไพร",35],["🌵","กระบองเพชร",40],["🎋","ไผ่เวทมนตร์",60],["🌴","ปาล์มชายหาด",80],["🌲","ต้นสนสูง",100],["🌳","ต้นโอ๊กใหญ่",150]]},
+{n:"เฟอร์นิเจอร์สวน",e:"🪑",s:"เฟอร์นิเจอร์",i:[["🪵","ท่อนไม้นั่ง",20],["🧺","ตะกร้าปิกนิก",25],["🪑","เก้าอี้สวน",30],["🪜","บันไดไม้",30],["🔥","กองไฟ",60],["⛱️","ร่มชายหาด",50],["🚪","ประตูลับ",70],["🛋️","โซฟากลางแจ้ง",80],["🛏️","เตียงพักผ่อน",90],["🏕️","ลานกางเต็นท์",100]]},
+{n:"ของประดับสวน",e:"⛲",s:"ของประดับ",i:[["🪨","ก้อนหินสวน",15],["🕯️","เทียนสวน",20],["🎐","กระดิ่งลม",25],["🪔","ตะเกียงน้ำมัน",35],["🏮","โคมไฟกระดาษ",40],["🏺","โถโบราณ",80],["🗿","รูปปั้นหิน",90],["⛲","น้ำพุ",120],["🌉","สะพานเล็ก",150],["⛩️","ประตูโทริอิ",200]]},
+{n:"สัตว์เลี้ยง",e:"🐾",s:"สัตว์เลี้ยง",i:[["🐓","ไก่",25],["🦆","เป็ด",30],["🐢","เต่า",35],["🐇","กระต่าย",40],["🐿️","กระรอก",40],["🐑","แกะ",45],["🦔","เม่น",45],["🐈","แมวส้ม",50],["🐕","สุนัข",50],["🦜","นกแก้ว",60]]},
+{n:"ของเวทมนตร์",e:"🔮",s:"เวทมนตร์",i:[["🪄","ไม้เวทปักดิน",30],["🧪","ขวดยาวิเศษ",40],["🧿","ตาคุ้มครอง",50],["📜","ม้วนคัมภีร์",60],["🗝️","กุญแจทอง",70],["⚗️","หม้อต้มยา",80],["🌟","ดาวเวทมนตร์",90],["🌙","พระจันทร์ประดับ",100],["🔮","ลูกแก้วคริสตัล",120],["💎","อัญมณีเวทมนตร์",200]]},
+{n:"เทศกาลและงานเลี้ยง",e:"🎉",s:"เทศกาล",i:[["🎈","ลูกโป่ง",15],["🎁","กล่องของขวัญ",30],["🧨","ประทัดเวทมนตร์",35],["🎃","ฟักทองฮาโลวีน",40],["🎏","ธงปลาคราฟ",45],["🎊","ลูกบอลปาร์ตี้",50],["⛄","ตุ๊กตาหิมะ",55],["🪅","ปิญาต้า",60],["🎄","ต้นคริสต์มาส",80],["🎆","พลุเฉลิมฉลอง",100]]},
+{n:"สิ่งปลูกสร้างเล็ก",e:"🏰",s:"สิ่งปลูกสร้าง",i:[["⛺","เต็นท์",80],["🛖","กระท่อมเล็ก",120],["🎪","เต็นท์ละคร",150],["🏠","บ้านหลังเล็กข้าง",200],["🗼","หอคอยแดง",250],["⛪","โบสถ์เล็ก",280],["🏯","ศาลาเก่า",300],["🚉","สถานีรถไฟ",320],["🏭","โรงงานเวทมนตร์",350],["🏟️","สนามเล็ก",400]]},
+{n:"พาหนะ",e:"🚲",s:"พาหนะ",i:[["🛴","สกู๊ตเตอร์",40],["🚲","จักรยาน",60],["🛶","เรือแคนู",90],["🧹","ไม้กวาดบิน",100],["🎠","ม้าหมุน",180],["⛵","เรือใบ",250],["🚗","รถยนต์",300],["🚂","รถไฟฮอกวอตส์",400],["🚁","เฮลิคอปเตอร์",500],["🛸","จานบิน",600]]},
+{n:"อาหารและเครื่องดื่ม",e:"🍰",s:"อาหาร",i:[["🍞","ขนมปัง",10],["🍎","แอปเปิ้ล",10],["🍇","องุ่น",15],["🍰","เค้กวันเกิด",20],["🍦","ไอศกรีม",20],["🍯","โถน้ำผึ้ง",25],["☕","กาน้ำชา",25],["🍕","พิซซ่า",30],["🥧","พายฟักทอง",35],["🍺","ถังเบียร์เนยหวาน",40]]},
+{n:"ของสะสมหายาก",e:"👑",s:"หายาก",i:[["🥇","เหรียญทอง",500],["💰","ถุงเงินทอง",600],["🏆","ถ้วยรางวัล",800],["🌈","รุ้งกินน้ำ",900],["👑","มงกุฎทอง",1000],["🪐","ดาวเคราะห์",1200],["🦄","ยูนิคอร์น",1500],["🦅","ฟีนิกซ์",1800],["🐉","มังกร",2000],["🌌","ทางช้างเผือก",3000]]}
+];
+var DCI=0;
+function decItem(id){var m=/^d:(\d+)_(\d+)$/.exec(id);if(!m)return null;var c=DECAT[+m[1]],it=c&&c.i[+m[2]];return it?{e:it[0],n:it[1],p:it[2]}:null}
+function yardHtml(){
+  var L=decorList(),by={};L.forEach(function(i){by[i.id]=i});
+  return(me.yard||[]).map(function(r){var it=by[r.id];return it?'<span class="e" style="left:'+r.x+'%;top:'+r.y+'%;font-size:'+(2.4*r.s)+'rem;transform:translate(-50%,-50%)">'+it.e+'</span>':''}).join("");
+}
+function rDeco(){
+  var c=DECAT[DCI],own=me.dec||[];
+  var h=shopTabs("deco")+'<h1>🛋️ ของตกแต่ง</h1><div class="card">💰 '+galTxt()+' แกลเลียน • สะสมแล้ว '+own.length+' / 100 ชิ้น<br><small>ซื้อแล้วนำไปวางตกแต่งได้ทั้งในบ้านและนอกบ้าน (แท็บโปรไฟล์)</small></div><div class="chips">';
+  DECAT.forEach(function(x,i){h+='<button class="chip'+(i===DCI?" on":"")+'" data-cat="'+i+'">'+x.e+' '+x.s+'</button>'});
+  h+='</div><h2>'+c.e+' '+c.n+'</h2>';
+  c.i.forEach(function(it,j){var id="d:"+DCI+"_"+j,has=own.indexOf(id)>-1;
+    h+='<div class="card item"><div class="e">'+it[0]+'</div><div class="t"><b>'+it[1]+'</b>'+c.s+'</div><button class="price '+(!has&&(isVip(me)||me.gal>=it[2])?"can":"")+'" data-d="'+id+'"'+(has?" disabled":"")+'>'+(has?"มีแล้ว":"💰 "+it[2].toLocaleString())+'</button></div>'});
+  app.innerHTML=h;bindST();
+  app.querySelectorAll("[data-cat]").forEach(function(b){b.onclick=function(){DCI=+b.dataset.cat;rDeco()}});
+  app.querySelectorAll("[data-d]").forEach(function(b){b.onclick=function(){
+    var it=decItem(b.dataset.d);if(!it||own.indexOf(b.dataset.d)>-1||me.gal<it.p)return;
+    me.gal-=it.p;me.dec=me.dec||[];me.dec.push(b.dataset.d);save();rDeco()}});
+}
+function rYard(){
+  me.room=me.room||[];me.yard=me.yard||[];
+  var L=decorList(),by={};L.forEach(function(i){by[i.id]=i});
+  me.yard=me.yard.filter(function(r){return by[r.id]});
+  var ids=me.room.concat(me.yard).map(function(r){return r.id}),tray=L.filter(function(i){return ids.indexOf(i.id)<0});
+  var cur=me.yard.filter(function(r){return r.id===RSEL})[0],ev=curEnv(),h0=HOUSE[me.house],sh=shownHouse(),cap=curHouse().cap;
+  var h='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← กลับ</button><h1>🌳 ตกแต่งภายนอกบ้าน</h1><p style="text-align:center;color:#a9b0c0">ลากของไปวางที่สนามหน้าบ้าน แตะเพื่อเลือกแล้วปรับขนาดหรือเก็บออก<br>วางแล้ว '+me.yard.length+' / '+cap+' ชิ้น</p><div class="msg">'+RMSG+'</div>';
+  h+='<div class="scene" id="room" style="background:'+ev.sky+'"><span class="e" style="top:6%;left:6%;font-size:2.6rem">'+h0[1]+'</span>'+ev.d.map(decorSpan).join("")+'<div class="ground" style="background:'+ev.gr+'"></div>'+treesHtml(ev)+'<span class="e" style="left:42%;bottom:22%;font-size:'+sh.sz+'rem;transform:translateX(-50%)">'+sh.e+'</span>'+flowersHtml(ev)+petHtml()+nightHtml();
+  me.yard.forEach(function(r){h+='<span class="di'+(r.id===RSEL?" sel":"")+'" data-id="'+esc(r.id)+'" style="left:'+r.x+'%;top:'+r.y+'%;font-size:'+(2.4*r.s)+'rem">'+by[r.id].e+'</span>'});
+  h+='</div><div class="card" id="tb" style="display:'+(cur?"flex":"none")+';gap:8px;align-items:center;justify-content:center"><span>'+(cur?by[cur.id].e+" "+esc(by[cur.id].n):"")+'</span><button class="num" id="sm" style="width:auto;padding:8px 16px;margin:0">➖</button><button class="num" id="sp" style="width:auto;padding:8px 16px;margin:0">➕</button><button class="del" id="rmv">นำออก</button></div>';
+  h+='<div class="card"><b>ของที่ยังไม่ได้วาง ('+tray.length+')</b><div class="tray" style="margin-top:8px">'+(tray.length?tray.map(function(i){return'<button class="tr" data-p="'+esc(i.id)+'" aria-label="'+esc(i.n)+'">'+i.e+'<small style="display:block;font-size:.58rem;margin-top:3px">'+esc(i.n.replace(/^ไม้/,"").split(" ")[0].slice(0,8))+'</small></button>'}).join(""):'<small>'+(L.length?"วางของครบทุกชิ้นแล้ว":"ยังไม่มีของ ไปซื้อที่ร้านค้า > ของตกแต่ง ได้เลย")+'</small>')+'</div></div>';
+  app.innerHTML=h;RMSG="";
+  $("bk").onclick=function(){go("hub")};
+  app.querySelectorAll("[data-p]").forEach(function(b){b.onclick=function(){
+    if(me.yard.length>=cap){RMSG="สนามเต็มแล้ว อัปเกรดบ้านเพื่อวางของได้มากขึ้น";rYard();return}
+    me.yard.push({id:b.dataset.p,x:Math.round(20+Math.random()*60),y:Math.round(68+Math.random()*24),s:1});RSEL=b.dataset.p;save();rYard()}});
+  if(cur){
+    $("sm").onclick=function(){cur.s=Math.max(.5,cur.s-.25);save();rYard()};
+    $("sp").onclick=function(){cur.s=Math.min(3,cur.s+.25);save();rYard()};
+    $("rmv").onclick=function(){me.yard=me.yard.filter(function(r){return r!==cur});RSEL=null;save();rYard()};
+  }
+  app.querySelectorAll(".di").forEach(function(el){
+    var it=me.yard.filter(function(r){return r.id===el.dataset.id})[0],drag=false,moved=false;
+    el.onpointerdown=function(ev2){ev2.preventDefault();drag=true;moved=false;el.setPointerCapture(ev2.pointerId);app.querySelectorAll(".di").forEach(function(x){x.classList.toggle("sel",x===el)})};
+    el.onpointermove=function(ev2){
+      if(!drag)return;moved=true;var r=$("room").getBoundingClientRect();
+      it.x=Math.round(Math.max(4,Math.min(96,(ev2.clientX-r.left)/r.width*100))*10)/10;
+      it.y=Math.round(Math.max(6,Math.min(96,(ev2.clientY-r.top)/r.height*100))*10)/10;
+      el.style.left=it.x+"%";el.style.top=it.y+"%";
+    };
+    el.onpointerup=function(){drag=false;save();if(RSEL!==it.id||!moved){RSEL=it.id;rYard()}};
+  });
+}
+
+function decorList(){
+  var L=[];
+  if(me.wand)L.push({id:"wand",e:"🪄",n:"ไม้กายสิทธิ์ไม้ฮอลลี่"});
+  if(me.cloak)L.push({id:"cloak",e:"🧥",n:"ผ้าคลุมล่องหน"});
+  (me.inv||[]).forEach(function(k){var it=shopItem(k);if(it)L.push({id:k,e:it[1],n:it[0]})});
+  ["🦌","🦅","🐺"].forEach(function(p){if(me.own.indexOf(p)>-1)L.push({id:"pet"+p,e:p,n:"สัตว์เลี้ยง"})});
+  Object.keys(me.wands||{}).forEach(function(w){L.push({id:"g:"+w,e:"🪄",n:w})});
+  (me.dec||[]).forEach(function(id){var it=decItem(id);if(it)L.push({id:id,e:it.e,n:it.n})});
+  return L;
+}
+function rRoom(){
+  me.room=me.room||[];
+  var L=decorList(),by={};L.forEach(function(i){by[i.id]=i});
+  me.room=me.room.filter(function(r){return by[r.id]});
+  var placed=me.room.concat(me.yard||[]).map(function(r){return r.id}),tray=L.filter(function(i){return placed.indexOf(i.id)<0});
+  var cur=me.room.filter(function(r){return r.id===RSEL})[0];
+  var h='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ออกจากบ้าน</button><h1>'+shownHouse().e+' บ้านของ '+esc(me.name)+'</h1><p style="text-align:center;color:#a9b0c0">ลากของเพื่อย้ายตำแหน่ง แตะของเพื่อเลือกแล้วปรับขนาดหรือเก็บออก<br>วางแล้ว '+me.room.length+' / '+curHouse().cap+' ชิ้น</p><div class="msg">'+RMSG+'</div><div class="room'+rtClass()+'" id="room"><span class="win">🪟</span><span class="win" style="left:auto;right:10%;font-size:2.4rem">🖼️</span><div class="rug"></div>'+rtDeco();
+  me.room.forEach(function(r){h+='<span class="di'+(r.id===RSEL?" sel":"")+'" data-id="'+esc(r.id)+'" style="left:'+r.x+'%;top:'+r.y+'%;font-size:'+(2.4*r.s)+'rem">'+by[r.id].e+'</span>'});
+  h+='</div><div class="card" id="tb" style="display:'+(cur?"flex":"none")+';gap:8px;align-items:center;justify-content:center"><span>'+(cur?by[cur.id].e+" "+esc(by[cur.id].n):"")+'</span><button class="num" id="sm" style="width:auto;padding:8px 16px;margin:0">➖</button><button class="num" id="sp" style="width:auto;padding:8px 16px;margin:0">➕</button><button class="del" id="rmv">นำออก</button></div>';
+  h+='<div class="card"><b>ของที่ยังไม่ได้วาง</b><div class="tray" style="margin-top:8px">'+(tray.length?tray.map(function(i){return'<button class="tr" data-p="'+esc(i.id)+'" aria-label="'+esc(i.n)+'">'+i.e+'<small style="display:block;font-size:.58rem;margin-top:3px">'+esc(i.n.replace(/^ไม้/,"").split(" ")[0].slice(0,8))+'</small></button>'}).join(""):'<small>'+(L.length?"วางของครบทุกชิ้นแล้ว":"ยังไม่มีของ ไปซื้อที่ร้านค้าหรือหมุนกาชาปองได้เลย")+'</small>')+'</div></div>';
+  app.innerHTML=h;RMSG="";
+  $("bk").onclick=function(){go("hub")};
+  app.querySelectorAll("[data-p]").forEach(function(b){b.onclick=function(){if(me.room.length>=curHouse().cap){RMSG="บ้านเต็มแล้ว อัปเกรดบ้านเพื่อวางของได้มากขึ้น";rRoom();return}RMSG="";me.room.push({id:b.dataset.p,x:Math.round(25+Math.random()*50),y:Math.round(62+Math.random()*28),s:1});RSEL=b.dataset.p;save();rRoom()}});
+  if(cur){
+    $("sm").onclick=function(){cur.s=Math.max(.5,cur.s-.25);save();rRoom()};
+    $("sp").onclick=function(){cur.s=Math.min(3,cur.s+.25);save();rRoom()};
+    $("rmv").onclick=function(){me.room=me.room.filter(function(r){return r!==cur});RSEL=null;save();rRoom()};
+  }
+  app.querySelectorAll(".di").forEach(function(el){
+    var it=me.room.filter(function(r){return r.id===el.dataset.id})[0],drag=false,moved=false;
+    el.onpointerdown=function(ev){ev.preventDefault();drag=true;moved=false;el.setPointerCapture(ev.pointerId);
+      app.querySelectorAll(".di").forEach(function(x){x.classList.toggle("sel",x===el)})};
+    el.onpointermove=function(ev){
+      if(!drag)return;moved=true;
+      var r=$("room").getBoundingClientRect();
+      it.x=Math.round(Math.max(4,Math.min(96,(ev.clientX-r.left)/r.width*100))*10)/10;
+      it.y=Math.round(Math.max(14,Math.min(96,(ev.clientY-r.top)/r.height*100))*10)/10;
+      el.style.left=it.x+"%";el.style.top=it.y+"%";
+    };
+    el.onpointerup=function(){drag=false;save();if(RSEL!==it.id||!moved){RSEL=it.id;rRoom()}};
+  });
+}
+function profCard(){
+  var h=HOUSE[me.house];
+  return '<div class="card prof"><div class="av">'+me.av+'</div><div><div class="nm">'+esc(me.name)+'</div>'+rank(me)+' • '+h[0]+' '+h[1]+'<br>'+titleOf(me)[1]+' <b>'+titleOf(me)[2]+'</b><br>เลเวล '+lvl(me)+' ('+fmt(xpIn(me)[0])+' / '+fmt(xpIn(me)[1])+' XP)<br>💰 '+galTxt()+' แกลเลียน'+(me.wand&&outHouse("wand")?' 🪄':'')+(me.cloak&&outHouse("cloak")?' 🧥':'')+(me.inv||[]).filter(outHouse).map(function(k){var it=shopItem(k);return it?' '+it[1]:''}).join('')+(me.eq?'<br>🪄 ถือ: '+esc(me.eq):'')+'<div class="bar"><i style="width:'+Math.min(100,xpIn(me)[0]/xpIn(me)[1]*100)+'%"></i></div></div></div>';
+}
+function rHub(){
+  var h=HOUSE[me.house],hs="",st="",body="";
+  Object.keys(HOUSE).forEach(function(k){hs+='<div class="'+(k===me.house?"me":"")+'"><b>'+DB.h[k]+'</b>'+HOUSE[k][0]+' '+HOUSE[k][1]+'</div>'});
+  ST.forEach(function(s,i){st+='<button class="orange" data-i="'+i+'">🎬 ด่านที่ '+lab(i)+': '+s[0]+' ('+cnt(i)+'/'+s[2].length+')</button>'});
+  var hsc='<div class="card"><small>นาฬิกาทรายคะแนนบ้าน (บ้านของเจ้า: '+h[0]+' '+h[1]+')</small><div class="hs" style="margin-top:8px">'+hs+'</div></div>';
+  if(HT==="home")body=profCard()+hsc+plusHome()+'<button class="orange" data-go="adv">🗺️ ไปด่านผจญภัย</button><button class="green" data-go="play">🎮 ไปเล่นเกม</button><button class="purple" id="ev">📅 กิจกรรมประจำเดือน • '+EVT[new Date().getMonth()][0]+(evClaimable()?' (รับรางวัลได้ '+evClaimable()+')':'')+'</button>';
+  else if(HT==="play")body='<h2>🎮 เล่น</h2><button class="green" id="un">🃏 UNO สู้กับบอท (ชนะแล้ว '+(me.uno||0)+' ครั้ง)</button><button class="green" id="g4">🃏 เกม 24 (ชนะแล้ว '+(me.g24||0)+' ครั้ง)</button>'+plusPlay();
+  else if(HT==="adv")body='<h2>🎬 ด่านผจญภัยเนื้อเรื่องภาพยนตร์</h2><p style="text-align:center;color:#a9b0c0">เลือกด่านเพื่ออ่านเนื้อหาและตอบคำถาม 10 ข้อ</p>'+st;
+  else if(HT==="top"){
+    var a=topList();
+    body='<h2>🏆 อันดับผู้เล่น</h2><div class="card">'+a.map(function(p,i){return'<div class="row"><span>'+(["🥇","🥈","🥉"][i]||(i+1)+".")+' '+p.av+' '+esc(p.name)+'<br><small>'+HOUSE[p.house][1]+' '+HOUSE[p.house][0]+'</small></span><span>เลเวล '+lvl(p)+'<br><small>'+titleOf(p)[2]+'</small></span></div>'}).join("")+'</div><small>'+(NET.uid?'ผู้เล่นทั้งหมดในระบบ (อัปเดตทุกครั้งที่เปิดหน้านี้)':'แสดงเฉพาะผู้เล่นในเครื่องนี้')+'</small>'+hsc;
+  }else body=profScene()+houseCard()+'<button class="orange" id="rm">🚪 เข้าบ้านไปตกแต่ง</button><button class="green" id="yd">🌳 ตกแต่งภายนอกบ้าน</button>'+dnBtn()+badgesHtml()+titlesHtml()+(me.own.length>1?'<div class="card"><small>เลือกตัวละคร</small><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:1.9rem">'+me.own.map(function(a){return'<span role="button" tabindex="0" data-a="'+a+'" style="cursor:pointer;opacity:'+(a===me.av?1:.4)+'">'+a+'</span>'}).join("")+'</div></div>':'')+'<div class="card"><b>🎵 เพลงประกอบ</b><button class="orange" id="mt">🎵 เปิดเพลง</button><label class="mfl">📂 เลือกเพลงจากเครื่องของคุณ<input id="mf" type="file" accept="audio/*" hidden></label><small>เพลงในเกมเป็นทำนองที่สร้างขึ้นเองสไตล์เวทมนตร์ ไม่ใช่เพลงของหนัง ถ้าอยากฟังเพลงแฮร์รี่ พอตเตอร์ ให้เลือกไฟล์เพลงที่คุณมีอยู่ในเครื่อง</small></div><button class="purple" id="pl">👥 รายชื่อผู้เล่นที่สมัครแล้ว</button><button class="grey" id="lo">🚪 ออกจากระบบ</button>';
+  app.innerHTML='<h1>⚡ แฮร์รี่ พอตเตอร์ ด่านผจญภัย ⚡</h1>'+DEV+body;
+  app.querySelectorAll("[data-i]").forEach(function(b){b.onclick=function(){Q={s:+b.dataset.i};go("stage")}});
+  app.querySelectorAll("[data-a]").forEach(function(b){b.onclick=function(){me.av=b.dataset.a;save();render()}});
+  app.querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){HT=b.dataset.go;go("hub")}});
+  if($("g4"))$("g4").onclick=function(){newG();go("g24")};
+  if($("un"))$("un").onclick=function(){newU();go("uno")};
+  if($("pl"))$("pl").onclick=function(){go("list")};if($("ev"))$("ev").onclick=function(){go("event")};if($("rm"))$("rm").onclick=function(){RSEL=null;go("room")};if($("yd"))$("yd").onclick=function(){RSEL=null;go("yard")};if($("hu"))$("hu").onclick=upHouse;app.querySelectorAll("[data-sh]").forEach(function(b){b.onclick=function(){me.shw=b.dataset.sh;save();render()}});if($("mt")){$("mt").onclick=toggleMusic;$("mf").onchange=function(){musFile(this)};musUpd()}
+  if($("lo"))$("lo").onclick=function(){netLogout(function(){me=null;HT="home";go("login")})};
+  plusHubBind();
+}
+
+var FREE=["🧙","🧙‍♀️","🧝","🧝‍♀️","🧛","🧚","🦸","🦹","🧑‍🎓","👦","👧","👨","👩","🧑‍🏫","🦉","🐱","🐸","🐀","🐉","🦄","🐍","🦁","🦡"];
+var STORY=[
+"<p>แฮร์รี่ พอตเตอร์เติบโตในห้องใต้บันไดของบ้านเดอร์สลีย์โดยไม่รู้ความจริงว่าพ่อแม่ของเขาถูกโวลเดอมอร์สังหาร จนวันเกิดอายุ 11 ปี แฮกริดมาพบและบอกว่าเขาเป็นพ่อมด</p><p>แฮร์รี่ไปซื้อของที่ตรอกไดแอกอน ได้ไม้กายสิทธิ์จากร้านออลลิแวนเดอร์ และได้นกฮูกหิมะชื่อเฮดวิก จากนั้นขึ้นรถไฟจากชานชาลา 9¾ ไปฮอกวอตส์ ได้เป็นเพื่อนกับรอนและเฮอร์ไมโอนี่ และหมวกคัดสรรส่งเขาเข้าบ้านกริฟฟินดอร์</p><p>ตลอดปีเขาค้นพบว่ามีใครบางคนต้องการขโมยศิลาอาถรรพ์ที่ซ่อนไว้ในโรงเรียน ทั้งสามฝ่าด่านเฝ้าศิลา ทั้งสุนัขสามหัว ต้นไม้เถาพัน และหมากรุกยักษ์ ก่อนพบว่าศาสตราจารย์ควีเรลล์มีโวลเดอมอร์ซ่อนอยู่หลังศีรษะ</p>",
+"<p>ปิดเทอมที่สอง ด็อบบี้เอลเฟ้บ้านมาเตือนแฮร์รี่ไม่ให้กลับฮอกวอตส์ แต่รอนก็ขับรถบินได้ของครอบครัววีสลีย์มารับเขาไป เมื่อกลับถึงโรงเรียน ข้อความเตือนเขียนด้วยเลือดบนกำแพงว่าห้องแห่งความลับถูกเปิดแล้ว</p><p>นักเรียนเริ่มถูกสาปให้กลายเป็นหิน และแฮร์รี่ได้ยินเสียงลึกลับในกำแพงที่มีแต่เขาเท่านั้นเข้าใจ เพราะเป็นภาษางู ทำให้หลายคนสงสัยว่าเป็นเขาเองที่เป็นทายาทของสลิธีริน</p><p>เขาพบสมุดบันทึกของทอม ริดเดิ้ล ซึ่งพาเขาเข้าไปดูอดีต จนรู้ว่าสัตว์ร้ายคือบาซิลิสก์ และต้นเหตุคือจินนี่ที่ถูกควบคุม แฮร์รี่ลงไปห้องใต้ดิน ใช้ดาบกริฟฟินดอร์ที่ฟอกซ์นกฟีนิกซ์ของดัมเบิลดอร์พามา สู้กับงูยักษ์และช่วยจินนี่ไว้ได้</p>",
+"<p>ซิเรียส แบล็กหนีออกจากคุกอัซคาบัน ทุกคนเชื่อว่าเขาเป็นสมุนของโวลเดอมอร์ที่จะตามล่าแฮร์รี่ ฮอกวอตส์จึงมีดีเมนเตอร์ผู้คุมวิญญาณมาเฝ้าโรงเรียน ซึ่งทำให้แฮร์รี่เป็นลมหมดสติเมื่อพวกมันเข้าใกล้</p><p>ศาสตราจารย์ลูปินคนใหม่สอนให้แฮร์รี่ใช้คาถาเรียกผู้พิทักษ์ ส่วนเฮอร์ไมโอนี่มีเครื่องย้อนเวลาที่ช่วยให้เรียนได้หลายวิชา และแฮร์รี่ได้แผนที่ตัวป่วนที่ใช้ดูทุกคนในปราสาท</p><p>ความจริงเผยที่กระท่อมกรีดร้อง ซิเรียสเป็นพ่อทูนหัวผู้บริสุทธิ์ ลูปินเป็นมนุษย์หมาป่า และหนูสแกบเบอร์สของรอนคือปีเตอร์ เพ็ตติกรู ผู้ทรยศตัวจริง ซึ่งหนีไปได้ ก่อนที่แฮร์รี่กับเฮอร์ไมโอนี่จะย้อนเวลากลับไปช่วยซิเรียสและบัคบีคไว้</p>",
+"<p>ปีนี้เริ่มด้วยการแข่งควิดดิชเวิลด์คัพ แต่จบด้วยเครื่องหมายมารบนท้องฟ้า จากนั้นฮอกวอตส์จัดการแข่งขันไตรภาคีพ่อมด มีนักเรียนจากโบซ์บาตงและเดิร์มสแตรงมาร่วม จอกอัคนีเลือกนักแข่ง 3 คน แต่กลับพ่นชื่อแฮร์รี่ออกมาเป็นคนที่สี่</p><p>แฮร์รี่ต้องสู้กับมังกรหางหนาม ลงไปกู้ตัวประกันใต้ทะเลสาบ และเข้าเขาวงกตหนามในภารกิจสุดท้าย เขากับเซดริก ดิกกอรีไปถึงถ้วยพร้อมกันและจับพร้อมกัน</p><p>ถ้วยนั้นเป็นพอร์ตคีย์ พาทั้งสองไปสุสานที่ปีเตอร์ เพ็ตติกรูสังหารเซดริก และใช้เลือดของแฮร์รี่ชุบชีวิตโวลเดอมอร์ให้กลับมามีร่างกาย แฮร์รี่หนีกลับมาได้และบอกความจริงให้ทุกคนฟัง</p>",
+"<p>กระทรวงเวทมนตร์ปฏิเสธว่าโวลเดอมอร์กลับมา และส่งโดโลเรส อัมบริดจ์ในชุดสีชมพูมาควบคุมฮอกวอตส์ เธอออกกฎมากมายและห้ามสอนคาถาที่ใช้ได้จริง</p><p>แฮร์รี่จึงรวมเพื่อนตั้งกองทัพดัมเบิลดอร์ ฝึกคาถากันอย่างลับ ๆ ในห้องต้องประสงค์ ขณะเดียวกันเขาฝันเห็นสิ่งที่โวลเดอมอร์มองเห็นผ่านความเชื่อมโยงในแผลเป็น</p><p>เมื่อเห็นภาพซิเรียสถูกจับ แฮร์รี่กับเพื่อน ๆ บินไปกระทรวงเพื่อช่วย แต่ถูกหลอก เกิดการต่อสู้กับผู้เสพความตายที่แผนกปริศนา ซิเรียสถูกเบลลาทริกซ์สังหาร และดัมเบิลดอร์มาประลองกับโวลเดอมอร์ต่อหน้าคนทั้งกระทรวง จนทุกคนยอมรับว่าเขากลับมาจริง</p>",
+"<p>โลกเวทมนตร์ตกอยู่ในความหวาดกลัว ดัมเบิลดอร์พาแฮร์รี่ไปดูความทรงจำในเพนซีฟ เพื่อเรียนรู้อดีตของทอม ริดเดิ้ล และรู้ว่าโวลเดอมอร์แบ่งวิญญาณใส่ฮอร์ครักซ์หลายชิ้นเพื่อให้ตัวเองอมตะ</p><p>แฮร์รี่ได้ตำราปรุงยาเก่าที่เขียนโน้ตไว้โดย เจ้าชายเลือดผสม ทำให้เก่งวิชาปรุงยาขึ้นมาก เขาเอาความทรงจำสำคัญมาจากศาสตราจารย์สลักฮอร์น ซึ่งเผยว่าโวลเดอมอร์ทำฮอร์ครักซ์กี่ชิ้น</p><p>ดัมเบิลดอร์พาแฮร์รี่ไปถ้ำเพื่อตามหาฮอร์ครักซ์ แต่ต้องดื่มยาพิษจนอ่อนแรง เมื่อกลับมา ผู้เสพความตายเข้ามาในปราสาทผ่านตู้หายตัวที่ดราโกซ่อมไว้ และสเนปเป็นคนสังหารดัมเบิลดอร์บนหอคอยดาราศาสตร์</p>",
+"<p>หลังดัมเบิลดอร์จากไป กระทรวงถูกผู้เสพความตายยึดครอง แฮร์รี่ รอน และเฮอร์ไมโอนี่จึงตัดสินใจไม่กลับโรงเรียน แต่ออกเดินทางตามหาฮอร์ครักซ์ที่เหลือโดยหลบหนีการตามล่าไปเรื่อย ๆ</p><p>พวกเขาแอบอยู่ในเต็นท์ เดินทางผ่านป่า ที่พักเก่า และพบกับล็อกเก็ตฮอร์ครักซ์ที่ทำให้ทุกคนอารมณ์เสียจนรอนเดินหนีไปชั่วคราว ก่อนกลับมาช่วยทำลายด้วยดาบกริฟฟินดอร์</p><p>เซนอฟิเลียส เลิฟกู๊ดเล่านิทานเครื่องรางยมทูต สามสิ่งที่อาจทำให้ผู้ถือเป็นเจ้าแห่งความตาย ทั้งไม้เอลเดอร์ ศิลาคืนชีพ และผ้าคลุมล่องหน ทั้งสามคนถูกจับไปที่คฤหาสน์มัลฟอย ด็อบบี้มาช่วยพวกเขาไว้แต่เสียชีวิต</p>",
+"<p>ฮอร์ครักซ์ที่เหลือซ่อนอยู่ในห้องนิรภัยของเบลลาทริกซ์ที่กริงกอตส์ ทั้งสามแอบเข้าไปด้วยน้ำยาแปลงร่าง ขโมยถ้วยฮัฟเฟิลพัฟฟ์ แล้วหนีออกมาบนหลังมังกร</p><p>จากนั้นพวกเขากลับไปฮอกวอตส์ ซึ่งครูและนักเรียนเตรียมสู้กับกองทัพโวลเดอมอร์ ทุกคนร่วมกันป้องกันปราสาท แฮร์รี่ได้เห็นความทรงจำของสเนป และรู้ว่าสเนปรักแม่ของเขามาตลอดและปกป้องเขามาตลอด รวมถึงรู้ว่าตัวเขาเองเป็นฮอร์ครักซ์</p><p>แฮร์รี่เดินเข้าป่าไปให้โวลเดอมอร์สังหาร แต่ฟื้นกลับมาและต่อสู้อีกครั้ง เนวิลล์สังหารนาจินี และในที่สุดแฮร์รี่ก็เอาชนะโวลเดอมอร์ได้ ฉากสุดท้ายข้ามไป 19 ปี ที่สถานีคิงส์ครอส เมื่อลูก ๆ ของพวกเขาขึ้นรถไฟไปฮอกวอตส์</p>"
+];
+var SQ=[
+["เพื่อนสนิทเดือดร้อน คุณจะทำอะไรก่อน?",[["พุ่งเข้าไปช่วยทันที","G"],["หาทางแก้ที่ได้ผลที่สุด","S"],["หาข้อมูลก่อนว่าเกิดอะไรขึ้น","R"],["อยู่ข้างเขาและรับฟัง","H"]]],
+["วิชาไหนที่อยากเรียนที่สุด?",[["ป้องกันศาสตร์มืด","G"],["ปรุงยา","S"],["ทำนายและรูนโบราณ","R"],["สมุนไพรศาสตร์","H"]]],
+["อยากถูกจดจำเรื่องอะไรมากที่สุด?",[["ความกล้าหาญ","G"],["อำนาจและอิทธิพล","S"],["ปัญญา","R"],["ความใจดี","H"]]],
+["เจอประตูลับ คุณจะทำอย่างไร?",[["เปิดเข้าไปเลย","G"],["จดไว้ใช้ทีหลัง","S"],["ศึกษาว่าใครสร้าง","R"],["ชวนเพื่อนไปด้วย","H"]]],
+["สัตว์เลี้ยงแบบไหนที่ใช่คุณ?",[["นกฟีนิกซ์","G"],["งู","S"],["นกฮูก","R"],["แมวอ้วน ๆ","H"]]],
+["ทีมงานพลาดเดดไลน์ คุณมักเป็นคนที่...",[["ออกมารับหน้าและเสนอทางออก","G"],["จัดลำดับงานใหม่และสั่งการ","S"],["วิเคราะห์ว่าพลาดตรงไหน","R"],["ช่วยทุกคนจนงานเสร็จ","H"]]],
+["สถานที่ในปราสาทที่อยากอยู่?",[["สนามควิดดิช","G"],["ห้องใต้ดินเงียบ ๆ","S"],["ห้องสมุด","R"],["ห้องครัวอบอุ่น","H"]]],
+["ข้อไหนทำให้คุณเจ็บใจที่สุด?",[["ถูกเรียกว่าขี้ขลาด","G"],["ถูกมองว่าไม่สำคัญ","S"],["ถูกเรียกว่าโง่","R"],["ถูกเรียกว่าใจร้าย","H"]]]
+];
+var HD={G:"กล้าหาญ ตรงไปตรงมา และไม่ทิ้งเพื่อน",S:"มีเป้าหมายชัด ฉลาดวางแผน และรู้ว่าต้องการอะไร",R:"ใฝ่รู้ ช่างคิด และรักการเรียนรู้",H:"ซื่อสัตย์ ใจดี และทำงานหนักอย่างเงียบ ๆ"};
+var SS,sel;
+function next(){SS=null;return !me.av?"pick":!me.house?"sort":"hub"}
+function rPick(){
+  var h='<h1>เลือกตัวละครของคุณ</h1><p style="text-align:center;color:#a9b0c0">แตะเพื่อเลือก เปลี่ยนทีหลังได้ในหน้าหลัก</p><div class="chars">';
+  FREE.forEach(function(c){h+='<button class="ch'+(c===sel?" on":"")+'" data-c="'+c+'">'+c+'</button>'});
+  app.innerHTML=h+'</div><button class="green" id="ok"'+(sel?"":" disabled")+'>ยืนยันตัวละคร</button>';
+  app.querySelectorAll("[data-c]").forEach(function(b){b.onclick=function(){sel=b.dataset.c;rPick()}});
+  $("ok").onclick=function(){if(!sel)return;me.av=sel;sel=null;save();go(next())};
+}
+function rSort(){
+  if(!SS)SS={i:0,sc:{G:0,S:0,R:0,H:0}};
+  if(me.house&&SS.done){
+    var h=HOUSE[me.house];
+    app.innerHTML='<h1>หมวกคัดสรรตัดสินแล้ว!</h1><div class="card" style="text-align:center"><div style="font-size:3.5rem">'+h[1]+'</div><div class="nm">'+h[0]+'</div>'+HD[me.house]+'</div><button class="green" id="ok">เข้าสู่ฮอกวอตส์</button>';
+    $("ok").onclick=function(){SS=null;go("hub")};return;
+  }
+  var q=SQ[SS.i];
+  app.innerHTML='<h1>🎩 หมวกคัดสรร</h1><small>ข้อ '+(SS.i+1)+' จาก '+SQ.length+'</small><h2>'+q[0]+'</h2><div id="os"></div>';
+  shuffle(q[1]).forEach(function(a){var b=document.createElement("button");b.className="opt";b.textContent=a[0];
+    b.onclick=function(){SS.sc[a[1]]++;SS.i++;
+      if(SS.i<SQ.length)rSort();
+      else{me.house=Object.keys(SS.sc).sort(function(a,b){return SS.sc[b]-SS.sc[a]||Math.random()-.5})[0];SS.done=true;save();rSort()}};
+    $("os").appendChild(b)});
+}
+var UN;
+var UC={R:"#c0392b",Y:"#d9a21b",G:"#2ca84a",B:"#3f7de0",W:"linear-gradient(135deg,#c0392b,#e8b44a,#2ca84a,#3f7de0)"},CN={R:"แดง",Y:"เหลือง",G:"เขียว",B:"น้ำเงิน"};
+function newU(){
+  var d=[];
+  ["R","Y","G","B"].forEach(function(c){d.push({c:c,v:"0"});
+    for(var i=1;i<=9;i++)d.push({c:c,v:""+i},{c:c,v:""+i});
+    ["⛔","🔄","+2"].forEach(function(v){d.push({c:c,v:v},{c:c,v:v})})});
+  for(var i=0;i<4;i++)d.push({c:"W",v:"🌈"},{c:"W",v:"+4"});
+  d=shuffle(d);
+  while(!/^\d$/.test(d[d.length-1].v))d.unshift(d.pop());
+  var top=d.pop();
+  UN={deck:d,disc:[top],top:top,col:top.c,hand:[],bot:[],turn:"p",msg:"",over:null,pick:null,drew:false};
+  udraw(UN.hand,7);udraw(UN.bot,7);
+}
+function udraw(h,n){
+  for(var i=0;i<n;i++){
+    if(!UN.deck.length){var t=UN.disc.pop();UN.deck=shuffle(UN.disc);UN.disc=[t]}
+    if(!UN.deck.length)break;
+    h.push(UN.deck.pop());
+  }
+}
+function ucan(c){return c.c==="W"||c.c===UN.col||c.v===UN.top.v}
+function udo(who,idx,col){
+  var hand=who==="p"?UN.hand:UN.bot,oth=who==="p"?UN.bot:UN.hand,otherId=who==="p"?"b":"p";
+  var c=hand.splice(idx,1)[0],again=false;
+  UN.disc.push(c);UN.top=c;UN.col=c.c==="W"?col:c.c;UN.pick=null;
+  var nm=who==="p"?"คุณ":"บอท";
+  UN.msg=nm+"ลง "+c.v+(c.c==="W"?" เลือกสี"+CN[col]:"");
+  if(c.v==="+2"){udraw(oth,2);again=true;UN.msg+=" อีกฝ่ายจั่ว 2 ใบและโดนข้าม"}
+  else if(c.v==="+4"){udraw(oth,4);again=true;UN.msg+=" อีกฝ่ายจั่ว 4 ใบและโดนข้าม"}
+  else if(c.v==="⛔"||c.v==="🔄"){again=true;UN.msg+=" อีกฝ่ายโดนข้าม"}
+  if(!hand.length){
+    UN.over=who;
+    if(who==="p"){me.xp+=40;me.gal+=30;me.uno=(me.uno||0)+1;moAdd("uno",1);save()}
+    rUno();return;
+  }
+  UN.drew=false;UN.turn=again?who:otherId;
+  rUno();
+  if(UN.turn==="b")setTimeout(ubot,1000);
+}
+function ubot(){
+  if(!UN||UN.over||view!=="uno"||UN.turn!=="b")return;
+  var i=-1,w=-1;
+  UN.bot.forEach(function(c,k){if(ucan(c)){if(c.c==="W"){if(w<0)w=k}else if(i<0)i=k}});
+  if(i<0)i=w;
+  if(i<0){
+    udraw(UN.bot,1);var c=UN.bot[UN.bot.length-1];
+    if(c&&ucan(c))i=UN.bot.length-1;
+    else{UN.msg="บอทจั่วไพ่และผ่าน";UN.turn="p";rUno();return}
+  }
+  var cnt={R:0,Y:0,G:0,B:0};UN.bot.forEach(function(c,k){if(k!==i&&c.c!=="W")cnt[c.c]++});
+  var col=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]})[0];
+  udo("b",i,col);
+}
+function updraw(){
+  if(UN.turn!=="p"||UN.over||UN.drew||UN.pick!==null)return;
+  udraw(UN.hand,1);var c=UN.hand[UN.hand.length-1];
+  if(c&&ucan(c)){UN.drew=true;UN.msg="จั่วได้ไพ่ที่ลงได้ ลงเลยหรือกดผ่าน"}
+  else{UN.msg="จั่วแล้วลงไม่ได้ ถึงตาบอท";UN.turn="b";setTimeout(ubot,1000)}
+  rUno();
+}
+function upass(){if(UN.turn!=="p"||!UN.drew)return;UN.drew=false;UN.turn="b";UN.msg="คุณผ่าน";rUno();setTimeout(ubot,1000)}
+function upick(i){
+  if(UN.turn!=="p"||UN.over)return;
+  var c=UN.hand[i];
+  if(!ucan(c)){UN.msg="ไพ่ใบนี้ลงไม่ได้ ต้องสีหรือเลขเดียวกัน";rUno();return}
+  if(c.c==="W"){UN.pick=i;rUno();return}
+  udo("p",i);
+}
+function rUno(){
+  var G=UN,h='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button><h1>🃏 UNO</h1><div class="card" style="text-align:center">บอทเหลือ '+G.bot.length+' ใบ</div>';
+  h+='<div style="display:flex;gap:14px;align-items:center;justify-content:center;margin:10px 0"><div class="uc" style="background:'+UC[G.top.c]+'">'+G.top.v+'</div><div>สีที่ต้องลง: <b style="color:'+UC[G.col]+'">'+CN[G.col]+'</b></div></div><div class="msg">'+(G.msg||"")+'</div>';
+  if(G.over){
+    h+='<div class="card" style="text-align:center;font-size:1.2rem">'+(G.over==="p"?"🎉 คุณชนะ! +40 XP +30 แกลเลียน":"บอทชนะ ลองใหม่อีกครั้ง")+'</div><button class="green" id="again">เล่นอีกครั้ง</button>';
+  }else if(G.pick!==null){
+    h+='<p style="text-align:center">เลือกสีที่ต้องการ</p><div class="g24n">'+["R","Y","G","B"].map(function(k){return'<button class="uc" data-k="'+k+'" style="background:'+UC[k]+'">'+CN[k]+'</button>'}).join("")+'</div>';
+  }else{
+    h+='<div style="text-align:center;margin-bottom:6px">'+(G.turn==="p"?"ตาของคุณ":"ตาของบอท...")+'</div>';
+    if(G.turn==="p")h+='<button class="purple" id="dr"'+(G.drew?" disabled":"")+'>จั่วไพ่</button>'+(G.drew?'<button class="grey" id="ps">ผ่าน</button>':'');
+  }
+  h+='<div class="hand">'+G.hand.map(function(c,i){return'<button class="uc'+(G.turn==="p"&&!G.over&&ucan(c)?"":" dim")+'" data-c="'+i+'" style="background:'+UC[c.c]+'">'+c.v+'</button>'}).join("")+'</div><small>ชนะแล้ว '+(me.uno||0)+' ครั้ง</small>';
+  app.innerHTML=h;
+  $("bk").onclick=function(){go("hub")};
+  app.querySelectorAll("[data-c]").forEach(function(b){b.onclick=function(){upick(+b.dataset.c)}});
+  app.querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){udo("p",G.pick,b.dataset.k)}});
+  if($("dr"))$("dr").onclick=updraw;if($("ps"))$("ps").onclick=upass;
+  if($("again"))$("again").onclick=function(){newU();rUno()};
+}
+var g24;
+function solve(a){
+  if(a.length===1)return Math.abs(a[0][0]-24)<1e-6?a[0][1]:null;
+  for(var i=0;i<a.length;i++)for(var j=i+1;j<a.length;j++){
+    var x=a[i],y=a[j],rest=a.filter(function(_,k){return k!==i&&k!==j});
+    var c=[[x[0]+y[0],"("+x[1]+"+"+y[1]+")"],[x[0]*y[0],"("+x[1]+"×"+y[1]+")"],[x[0]-y[0],"("+x[1]+"−"+y[1]+")"],[y[0]-x[0],"("+y[1]+"−"+x[1]+")"]];
+    if(y[0]!==0)c.push([x[0]/y[0],"("+x[1]+"÷"+y[1]+")"]);
+    if(x[0]!==0)c.push([y[0]/x[0],"("+y[1]+"÷"+x[1]+")"]);
+    for(var k=0;k<c.length;k++){var r=solve(rest.concat([c[k]]));if(r)return r}
+  }
+  return null;
+}
+function calc(T){
+  var p=0;
+  function expr(){var v=term();while(T[p]==="+"||T[p]==="-"){var o=T[p++],r=term();v=o==="+"?v+r:v-r}return v}
+  function term(){var v=fac();while(T[p]==="*"||T[p]==="/"){var o=T[p++],r=fac();v=o==="*"?v*r:v/r}return v}
+  function fac(){
+    if(T[p]==="("){p++;var v=expr();if(T[p]!==")")throw 0;p++;return v}
+    if(!/^\d+$/.test(T[p]||""))throw 0;return +T[p++]}
+  var v=expr();if(p!==T.length)throw 0;return v;
+}
+function newG(){
+  var n;do{n=[0,0,0,0].map(function(){return 1+Math.floor(Math.random()*9)})}while(!solve(n.map(function(x){return[x,String(x)]})));
+  g24={n:n,u:[false,false,false,false],E:[],hint:false,won:false};
+}
+var OPS=[["+","+"],["−","-"],["×","*"],["÷","/"],["(","("],[")",")"]];
+function rG24(msg){
+  var G=g24,d=G.E.map(function(t){return t.d}).join(" ");
+  var h='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button><h1>🃏 เกม 24</h1><p style="text-align:center;color:#a9b0c0">ใช้เลขทั้ง 4 ตัว ตัวละ 1 ครั้ง ด้วย + − × ÷ และวงเล็บ ให้ได้ 24 ชนะรับ +30 XP และ +20 แกลเลียน</p><div class="g24n">';
+  G.n.forEach(function(v,i){h+='<button class="num" data-n="'+i+'"'+(G.u[i]||G.won?" disabled":"")+'>'+v+'</button>'});
+  h+='</div><div class="card" style="text-align:center;min-height:3.2em;font-size:1.3rem">'+(d||'<small>แตะตัวเลขและเครื่องหมายเพื่อสร้างสูตร</small>')+'</div><div class="g24n">';
+  OPS.forEach(function(o,i){h+='<button class="num" data-o="'+i+'"'+(G.won?" disabled":"")+'>'+o[0]+'</button>'});
+  h+='<button class="num" id="del"'+(G.won?" disabled":"")+'>⌫</button><button class="num" id="clr"'+(G.won?" disabled":"")+'>ล้าง</button></div><div class="msg">'+(msg||"")+'</div>';
+  if(G.won)h+='<button class="green" id="nx">โจทย์ต่อไป</button>';
+  else h+='<button class="green" id="ck">ตรวจคำตอบ</button><button class="purple" id="hn">ดูเฉลย (ไม่ได้รางวัล)</button><button class="grey" id="nw">เปลี่ยนโจทย์</button>';
+  h+='<small>ชนะแล้ว '+(me.g24||0)+' ครั้ง</small>';
+  app.innerHTML=h;
+  $("bk").onclick=function(){go("hub")};
+  app.querySelectorAll("[data-n]").forEach(function(b){b.onclick=function(){var i=+b.dataset.n;if(G.u[i])return;G.u[i]=true;G.E.push({d:String(G.n[i]),v:String(G.n[i]),i:i});rG24()}});
+  app.querySelectorAll("[data-o]").forEach(function(b){b.onclick=function(){var o=OPS[+b.dataset.o];G.E.push({d:o[0],v:o[1]});rG24()}});
+  if(G.won){$("nx").onclick=function(){newG();rG24()};return}
+  $("del").onclick=function(){var t=G.E.pop();if(t&&t.i!==undefined)G.u[t.i]=false;rG24()};
+  $("clr").onclick=function(){G.E=[];G.u=[false,false,false,false];rG24()};
+  $("nw").onclick=function(){newG();rG24()};
+  $("hn").onclick=function(){G.hint=true;var r=solve(G.n.map(function(x){return[x,String(x)]}));rG24("เฉลย: "+r.replace(/^\((.*)\)$/,"$1")+" = 24")};
+  $("ck").onclick=function(){
+    if(!G.u.every(Boolean)){rG24("ต้องใช้เลขให้ครบทั้ง 4 ตัว");return}
+    var v;try{v=calc(G.E.map(function(t){return t.v}))}catch(e){rG24("สูตรไม่ถูกต้อง ลองตรวจเครื่องหมายและวงเล็บ");return}
+    if(Math.abs(v-24)<1e-6){
+      G.won=true;
+      if(G.hint){rG24("ถูกต้อง! แต่ใช้เฉลยแล้ว จึงไม่ได้รางวัล")}
+      else{me.xp+=30;me.gal+=20;me.g24=(me.g24||0)+1;moAdd("g24",1);save();rG24("🎉 ถูกต้อง! +30 XP +20 แกลเลียน")}
+    }else rG24("ได้ "+(isFinite(v)?Math.round(v*100)/100:"ค่าที่ไม่ได้")+" ยังไม่ใช่ 24");
+  };
+}
+var RAR=[["สามัญ","⚪",60],["หายาก","🔵",25],["มหากาพย์","🟣",12],["ตำนาน","🟡",3]];
+var WANDS=[["ไม้โอ๊ค แกนขนยูนิคอร์น",0],["ไม้เบิร์ช แกนเส้นเอ็นมังกร",0],["ไม้สน แกนขนยูนิคอร์น",0],["ไม้วอลนัท แกนขนฟีนิกซ์",0],["ไม้เฮเซล แกนขนยูนิคอร์น",1],["ไม้แอช แกนเส้นเอ็นมังกร",1],["ไม้เมเปิล แกนขนฟีนิกซ์",1],["ไม้ฮอลลี่ แกนขนฟีนิกซ์",2],["ไม้เยว แกนขนฟีนิกซ์",2],["ไม้เถาองุ่น แกนเส้นเอ็นมังกร",2],["ไม้เอลเดอร์ (ไม้ยมทูต)",3]];
+function roll(){
+  var r=Math.random()*100,t=0,k=0;
+  for(var i=0;i<RAR.length;i++){t+=RAR[i][2];if(r<t){k=i;break}}
+  var pool=WANDS.filter(function(w){return w[1]===k});
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function spin(n,cost){
+  if(me.gal<cost){rGacha(null,"แกลเลียนไม่พอ ต้องใช้ "+cost.toLocaleString());return}
+  me.gal-=cost;moAdd("spin",n);me.wands=me.wands||{};var res=[];
+  for(var i=0;i<n;i++){var w=roll();me.wands[w[0]]=(me.wands[w[0]]||0)+1;res.push(w)}
+  save();rGacha(res);
+}
+function rGacha(res,err){
+  me.wands=me.wands||{};
+  var ks=Object.keys(me.wands).sort(function(a,b){return WANDS.filter(function(w){return w[0]===b})[0][1]-WANDS.filter(function(w){return w[0]===a})[0][1]});
+  var h=shopTabs("gacha")+'<h1>🎰 กาชาปอง หมุนไม้กายสิทธิ์</h1><div class="card">💰 '+galTxt()+' แกลเลียน</div><small>โอกาส: สามัญ 60% • หายาก 25% • มหากาพย์ 12% • ตำนาน 3%</small><button class="orange" id="g1">หมุน 1 ครั้ง • 💰 100</button><button class="purple" id="g10">หมุน 10 ครั้ง • 💰 1,000</button><div class="msg">'+(err||"")+'</div>';
+  if(res)h+='<div class="card"><b>ผลการหมุน</b>'+res.map(function(w){return'<div class="row"><span>'+RAR[w[1]][1]+' '+w[0]+'</span><small>'+RAR[w[1]][0]+'</small></div>'}).join("")+'</div>';
+  h+='<div class="card"><b>คอลเลกชัน ('+ks.length+'/'+WANDS.length+' แบบ)</b>';
+  if(!ks.length)h+='<p style="color:#a9b0c0">ยังไม่มีไม้กายสิทธิ์ ลองหมุนดู</p>';
+  ks.forEach(function(k,i){var w=WANDS.filter(function(x){return x[0]===k})[0];
+    h+='<div class="row"><span>'+RAR[w[1]][1]+' '+k+' ×'+me.wands[k]+'</span>'+(me.eq===k?'<small>กำลังถือ</small>':'<button class="price can" data-w="'+i+'">ถือ</button>')+'</div>'});
+  app.innerHTML=h+'</div>';
+  bindST();
+  $("g1").onclick=function(){spin(1,100)};$("g10").onclick=function(){spin(10,1000)};
+  app.querySelectorAll("[data-w]").forEach(function(b){b.onclick=function(){me.eq=ks[+b.dataset.w];save();rGacha()}});
+}
+function lab(i){return i<6?i+1:(i===6?"7.1":"7.2")}
+function cnt(i){var p=(me.prog||{})[i]||[];return p.filter(function(x){return x===1}).length}
+function rStage(){
+  var s=ST[Q.s],p=(me.prog=me.prog||{})[Q.s]||[],read=me.read&&me.read[Q.s],g="";
+  for(var j=0;j<s[2].length;j++)g+='<button class="num '+(p[j]===1?"ok":p[j]===2?"no":"")+'" data-j="'+j+'">'+(j+1)+'</button>';
+  app.innerHTML='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button><h1>ด่านที่ '+lab(Q.s)+': '+s[0]+'</h1><p style="text-align:center;color:'+(read?"#2ca84a":"#a9b0c0")+'">'+(read?"📖 อ่านเนื้อหาจบแล้ว +15 XP":"📖 อ่านเนื้อหาจบครั้งแรกรับ +15 XP")+'</p><button class="purple" id="rd">📖 ดูเนื้อหาด่านนี้</button><div class="nums">'+g+'</div><div class="msg">เลือกข้อที่อยากเล่น • ถูกแล้ว '+cnt(Q.s)+' จาก '+s[2].length+' ข้อ</div>';
+  $("bk").onclick=function(){go("hub")};$("rd").onclick=function(){go("story")};
+  app.querySelectorAll("[data-j]").forEach(function(b){b.onclick=function(){Q.j=+b.dataset.j;Q.o=null;go("quiz")}});
+}
+function rStory(){
+  var s=ST[Q.s],t=5;
+  app.innerHTML='<h1>🎬 '+s[0]+'</h1><div class="card story">'+STORY[Q.s]+'</div><button class="green" id="st" disabled>อ่านก่อน ('+t+')</button>';
+  var iv=setInterval(function(){
+    var b=$("st");if(!b||view!=="story"){clearInterval(iv);return}
+    t--;if(t>0)b.textContent="อ่านก่อน ("+t+")";else{clearInterval(iv);b.disabled=false;b.textContent="อ่านจบแล้ว กลับไปเลือกข้อ"}
+  },1000);
+  $("st").onclick=function(){clearInterval(iv);me.read=me.read||{};if(!me.read[Q.s]){me.read[Q.s]=1;me.xp+=15;save()}moAdd("read",1);go("stage")};
+}
+function rQuiz(){
+  var s=ST[Q.s],q=s[2][Q.j],ans=false,bs=[];
+  if(!Q.o)Q.o=shuffle(q.slice(1));
+  app.innerHTML='<small>ด่านที่ '+lab(Q.s)+' • ข้อ '+(Q.j+1)+' จาก '+s[2].length+'</small><h2>'+q[0]+'</h2><div id="os"></div>'+
+  (me.potion>0?'<button class="purple" id="pt">🧪 ใช้ยา 50:50 (เหลือ '+me.potion+')</button>':'')+'<div class="msg" id="m"></div><div id="nx"></div>';
+  Q.o.forEach(function(t){var b=document.createElement("button");b.className="opt";b.textContent=t;
+    b.onclick=function(){
+      if(ans)return;ans=true;
+      var p=(me.prog=me.prog||{})[Q.s]=me.prog[Q.s]||[];
+      bs.forEach(function(x){x.disabled=true;if(x.textContent===q[1])x.classList.add("ok")});
+      if(t===q[1]){p[Q.j]=1;me.gal+=5;me.xp+=10;DB.h[me.house]+=5;moAdd("quiz",1);var msg="ถูกต้อง! +5 แกลเลียน +10 XP";
+        me.done=me.done||{};
+        if(cnt(Q.s)===s[2].length&&!me.done[Q.s]){me.done[Q.s]=1;me.gal+=20;msg+=" • ครบทุกข้อ โบนัส +20 แกลเลียน"}
+        $("m").textContent=msg}
+      else{b.classList.add("no");if(p[Q.j]!==1)p[Q.j]=2;$("m").textContent="ยังไม่ถูก กลับไปลองใหม่ได้"}
+      save();var n=document.createElement("button");n.className="green";n.textContent="กลับไปเลือกข้อ";
+      n.onclick=function(){Q.o=null;go("stage")};$("nx").appendChild(n)};
+    $("os").appendChild(b);bs.push(b)});
+  var pt=$("pt");
+  if(pt)pt.onclick=function(){if(ans||me.potion<1)return;me.potion--;save();
+    shuffle(bs.filter(function(b){return b.textContent!==q[1]})).slice(0,2).forEach(function(b){b.disabled=true;b.classList.add("off")});pt.remove()};
+}
+function shopTabs(a){return'<div class="tabs"><button class="'+(a==="shop"?"on":"")+'" data-st="shop">🛒 ร้านค้า</button><button class="'+(a==="deco"?"on":"")+'" data-st="deco">🛋️ ของตกแต่ง</button><button class="'+(a==="gacha"?"on":"")+'" data-st="gacha">🎰 กาชาปอง</button><button class="'+(a==="theme"?"on":"")+'" data-st="theme">🎨 ธีม/สัตว์</button></div>'}
+function bindST(){app.querySelectorAll("[data-st]").forEach(function(b){b.onclick=function(){go(b.dataset.st)}})}
+var AC=null,musOn=false,musT=null,musEl=null,musStep=0,musNote=2,musMaster=null;
+var CH=[[110,164.81,220],[87.31,130.81,174.61],[130.81,196,261.63],[98,146.83,196]];
+var MEL=[440,523.25,587.33,659.25,783.99,880];
+function bell(f,t,v){
+  [[f,v],[f*2,v*.35]].forEach(function(p){
+    var o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=p[0];
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p[1],t+.02);g.gain.exponentialRampToValueAtTime(.0005,t+2.6);
+    o.connect(g);g.connect(musMaster);o.start(t);o.stop(t+2.7)});
+}
+function pad(f,t,d){
+  var o=AC.createOscillator(),g=AC.createGain();o.type="triangle";o.frequency.value=f;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.09,t+1);g.gain.linearRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(musMaster);o.start(t);o.stop(t+d+.1);
+}
+function musTick(){
+  if(!musOn||musEl)return;
+  var t=AC.currentTime+.05;
+  if(musStep%8===0){var c=CH[(musStep/8)%CH.length];c.forEach(function(f){pad(f,t,5.2)})}
+  if(Math.random()>.25){musNote=Math.max(0,Math.min(MEL.length-1,musNote+[-2,-1,-1,1,1,2][Math.floor(Math.random()*6)]));bell(MEL[musNote],t,.16)}
+  musStep++;musT=setTimeout(musTick,620);
+}
+function musStart(){
+  if(musEl){musEl.play();musOn=true;musUpd();return}
+  try{
+    if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();musMaster=AC.createGain();musMaster.gain.value=.8;musMaster.connect(AC.destination)}
+    AC.resume();
+  }catch(e){return}
+  musOn=true;musStep=0;musTick();musUpd();
+}
+function musStop(){musOn=false;clearTimeout(musT);if(musEl)musEl.pause();musUpd()}
+function toggleMusic(){musOn?musStop():musStart()}
+function musUpd(){var b=$("mus");if(b)b.textContent=musOn?"🎵":"🔇";var t=$("mt");if(t)t.textContent=musOn?"🔇 ปิดเพลง":"🎵 เปิดเพลง"}
+function musFile(inp){
+  var f=inp.files&&inp.files[0];if(!f)return;
+  musStop();if(musEl)URL.revokeObjectURL(musEl.src);
+  musEl=new Audio(URL.createObjectURL(f));musEl.loop=true;musEl.volume=.7;
+  musStart();
+}
+var NAV=[["home","🏠","บ้าน"],["play","🎮","เล่น"],["adv","🗺️","ผจญภัย"],["top","🏆","ท็อป"],["shop","🛍️","ร้านค้า"],["me","⭐","โปรไฟล์"]];
+var navOpen=true;
+try{navOpen=localStorage.getItem("hqnav")!=="0"}catch(e){}
+function hudUpd(){
+  var t=$("hudbar");if(!t)return;
+  var show=me&&me.house&&me.av&&["login","pick","sort"].indexOf(view)<0;
+  t.hidden=!show;document.body.style.paddingTop=show?"52px":"14px";
+  if(!show)return;
+  var mx=0,xi=xpIn(me),w=Math.min(100,xi[0]/xi[1]*100);
+  t.innerHTML='<span class="pill">⭐ Lv. '+lvl(me)+'</span><div class="xpw"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.7rem">'+titleOf(me)[1]+' '+titleOf(me)[2]+'</div><div class="xpb"><i style="width:'+w+'%"></i></div>'+fmt(xi[0])+" / "+fmt(xi[1])+" XP"+'</div><span class="pill">🪙 '+galTxt()+'</span>';
+}
+function navUpd(){
+  var n=$("nav"),show=me&&["hub","shop","gacha","deco","theme"].indexOf(view)>=0;
+  n.hidden=!show;
+  if(!show){document.body.style.paddingBottom="14px";return}
+  var act=view==="hub"?HT:"shop";
+  n.className=navOpen?"":"closed";
+  document.body.style.paddingBottom=navOpen?"110px":"46px";
+  n.innerHTML='<button id="navt" aria-label="เปิดหรือหุบเมนู">'+(navOpen?"▼ หุบ":"▲ เมนู")+'</button><div id="navb">'+NAV.map(function(x){return'<button data-t="'+x[0]+'" class="'+(x[0]===act?"on":"")+'"><span>'+x[1]+'</span>'+x[2]+'</button>'}).join("")+'</div>';
+  $("navt").onclick=function(){navOpen=!navOpen;try{localStorage.setItem("hqnav",navOpen?"1":"0")}catch(e){}navUpd()};
+  n.querySelectorAll("#navb button").forEach(function(b){b.onclick=function(){var k=b.dataset.t;if(k==="shop"){go("shop")}else{HT=k;go("hub")}}});
+}
+function owned(k){return k.indexOf("i:")===0?(me.inv||[]).indexOf(k)>-1:k==="wand"?me.wand:k==="cloak"?me.cloak:k==="potion"?false:me.own.indexOf(k)>-1}
+function rShop(){
+  var h=shopTabs("shop")+'<h1>🛒 ร้านค้าตรอกไดแอกอน</h1><p style="text-align:center;color:#a9b0c0">ตอบถูกข้อละ 5 แกลเลียน จบรอบรับโบนัสเพิ่ม เล่นซ้ำได้ไม่จำกัด</p><div class="card">💰 '+galTxt()+' แกลเลียน 🧪 ยา '+me.potion+' ขวด</div>';
+  SHOP.forEach(function(s,i){
+    var o=owned(s[4]);
+    h+='<div class="card item"><div class="e">'+s[1]+'</div><div class="t"><b>'+s[0]+'</b>'+s[2]+'</div><button class="price '+(!o&&me.gal>=s[3]?"can":"")+'" data-i="'+i+'">'+(o?"มีแล้ว":"💰 "+s[3])+'</button></div>'});
+  h+='<h2>🌄 สภาพแวดล้อมรอบบ้าน</h2><p style="text-align:center;color:#a9b0c0">เปลี่ยนบรรยากาศฉากหน้าบ้านในแท็บโปรไฟล์ ซื้อแล้วเลือกใช้ได้เสมอ</p>';
+  ENV.forEach(function(v,i){var own=v.p===0||(me.envs||[]).indexOf(v.id)>-1,on=(me.env||"spring")===v.id;
+    h+='<div class="card item"><div class="e">'+v.e+'</div><div class="t"><b>'+v.n+'</b>'+(v.hog?"ธีมฮอกวอตส์":"ธีมฤดูกาล")+'</div><button class="price '+(on?"":(own||me.gal>=v.p?"can":""))+'" data-e="'+i+'"'+(on?" disabled":"")+'>'+(on?"กำลังใช้":own?"ใช้":"💰 "+v.p)+'</button></div>'});
+  h+='<h2>🏡 รูปแบบบ้าน (โชว์ในฉากโปรไฟล์)</h2><p style="text-align:center;color:#a9b0c0">เปลี่ยนหน้าตาบ้านที่แสดง ไม่กระทบจำนวนของที่วางในบ้าน</p>';
+  HSK.forEach(function(v,i){var own=(me.skins||[]).indexOf(v[0])>-1,on=me.shw==="s:"+v[0];
+    h+='<div class="card item"><div class="e">'+v[1]+'</div><div class="t"><b>'+v[2]+'</b>รูปแบบบ้าน</div><button class="price '+(on?"":(own||me.gal>=v[3]?"can":""))+'" data-k="'+i+'"'+(on?" disabled":"")+'>'+(on?"กำลังใช้":own?"ใช้":"💰 "+v[3])+'</button></div>'});
+  app.innerHTML=h;bindST();bindEnv();bindSkin();
+  app.querySelectorAll("[data-i]").forEach(function(b){b.onclick=function(){
+    var s=SHOP[+b.dataset.i],k=s[4];
+    if(me.gal<s[3]||owned(k))return;
+    me.gal-=s[3];if(k==="potion")me.potion++;else if(k==="wand")me.wand=1;else if(k==="cloak")me.cloak=1;else if(k.indexOf("i:")===0){me.inv=me.inv||[];me.inv.push(k)}else me.own.push(k);
+    save();rShop()}});
+}
+function rList(di){
+  if(NET.uid)return rListNet();
+  var ks=Object.keys(DB.u).sort(function(a,b){return DB.u[b].xp-DB.u[a].xp});
+  var h='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button><h1>👥 ผู้เล่นที่สมัครแล้ว</h1><small>บัญชีที่เก็บไว้ในเครื่องนี้ (🔒 เข้าสู่ระบบก่อนจึงจะเห็นผู้เล่นทั้งหมดในระบบ)</small><div class="card">';
+  if(!ks.length)h+="ยังไม่มีผู้เล่น";
+  ks.forEach(function(k,i){var p=DB.u[k];
+    h+='<div class="row"><span>'+(i+1)+'. '+(p.av||"🧙")+' '+esc(p.name)+'<br><small>'+(p.house?HOUSE[p.house][1]+' '+HOUSE[p.house][0]:"ยังไม่ได้คัดบ้าน")+' • เลเวล '+lvl(p)+'</small></span><button class="del" data-i="'+i+'">ลบ</button></div>';
+    if(i===di)h+='<div class="card">'+(p.xp>=100?'<input id="dp" type="password" placeholder="รหัสผ่านของ '+esc(p.name)+'">':'ลบผู้เล่น '+esc(p.name)+' ?')+'<div class="msg" id="m"></div><button class="orange" id="dy">ยืนยันลบ</button><button class="grey" id="dn">ยกเลิก</button></div>'});
+  app.innerHTML=h+'</div>';
+  $("bk").onclick=function(){go(me?"hub":"login")};
+  app.querySelectorAll("[data-i]").forEach(function(b){b.onclick=function(){rList(+b.dataset.i)}});
+  if(di!==undefined&&$("dy")){
+    var k=ks[di],p=DB.u[k];
+    $("dn").onclick=function(){rList()};
+    $("dy").onclick=function(){
+      if(p.xp>=100&&hash($("dp").value)!==p.pw){$("m").textContent="รหัสผ่านไม่ถูกต้อง";return}
+      delete DB.u[k];if(me===p)me=null;save();rList()};
+  }
+}
+/* ===== PLUS MODULE A: core, daily, badges, cup, menus ===== */
+var PV={},MG={t:[],i:[]};
+function plusStop(){MG.t.forEach(clearTimeout);MG.i.forEach(clearInterval);MG.t=[];MG.i=[];document.onkeydown=null}
+function mgT(f,ms){var t=setTimeout(f,ms);MG.t.push(t);return t}
+function mgI(f,ms){var t=setInterval(f,ms);MG.i.push(t);return t}
+function dk(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function dayKey(){return dk(new Date())}
+function weekKey(){var d=new Date(),t=new Date(d.getFullYear(),d.getMonth(),d.getDate());t.setDate(t.getDate()-((t.getDay()+6)%7));return dk(t)}
+function pBack(){return'<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button>'}
+function pBindBack(to){var b=$("bk");if(b)b.onclick=function(){plusStop();go(to||"hub")}}
+function pay(n){if(me.gal<n)return false;me.gal-=n;return true}
+function gain(xp,g){me.xp+=xp;me.gal+=g;save()}
+
+/* ---- weekly house cup ---- */
+var CUPW={quiz:5,g24:8,uno:8,spin:1,read:3,mini:6,hunt:5,feed:1,visit:2,gift:3,photo:1};
+function cupGet(){
+  var wk=weekKey();DB.w=DB.w||{k:wk,p:{G:0,S:0,H:0,R:0}};
+  if(DB.w.k!==wk){var o=DB.w,best=null,bv=0;["G","S","H","R"].forEach(function(h){if((o.p[h]||0)>bv){bv=o.p[h];best=h}});DB.w={k:wk,p:{G:0,S:0,H:0,R:0},last:{k:o.k,win:best,p:o.p}}}
+  return DB.w}
+function cupClaimable(){var c=cupGet();return!!(c.last&&me.cupc!==c.last.k&&c.last.win)}
+
+/* ---- activity hook ---- */
+function plusBump(id,n){
+  if(!me)return;n=n||1;me.st=me.st||{};me.st[id]=(me.st[id]||0)+n;
+  var q=dqGet();q.p[id]=(q.p[id]||0)+n;
+  if(CUPW[id]&&me.house){var c=cupGet();c.p[me.house]=(c.p[me.house]||0)+CUPW[id]*n;var wk=weekKey();if(me.wk!==wk){me.lwk=me.wk||"";me.lwp=me.wp||0;me.wk=wk;me.wp=0}me.wp=(me.wp||0)+CUPW[id]*n}
+}
+function pAct(id,n){plusBump(id,n);save()}
+
+/* ---- daily quests ---- */
+var DQP=[
+{id:"quiz",n:"ตอบคำถามในด่านให้ถูก",t:3,xp:30,g:30},
+{id:"g24",n:"ชนะเกม 24",t:1,xp:30,g:40},
+{id:"uno",n:"ชนะ UNO",t:1,xp:30,g:40},
+{id:"spin",n:"หมุนกาชาปอง",t:1,xp:20,g:30},
+{id:"read",n:"อ่านเนื้อเรื่องด่าน",t:1,xp:20,g:20},
+{id:"mini",n:"เล่นมินิเกม",t:2,xp:40,g:50},
+{id:"hunt",n:"ล่าสมบัติในสวน",t:1,xp:25,g:30},
+{id:"feed",n:"ให้อาหารสัตว์เลี้ยง",t:1,xp:20,g:20,need:function(){return(me.pets||[]).length>0}},
+{id:"visit",n:"เยี่ยมบ้านเพื่อน",t:1,xp:25,g:25,need:function(){return others().length>0}}];
+function dqGet(){
+  var t=dayKey();
+  if(!me.dq||me.dq.d!==t){
+    var arr=DQP.filter(function(q){return!q.need||q.need()}),seed=Math.abs(hash(t+me.name))+7,out=[];
+    while(out.length<4&&arr.length){seed=(seed*1103515245+12345)%2147483647;out.push(arr.splice(seed%arr.length,1)[0].id)}
+    me.dq={d:t,q:out,p:{},c:{}}}
+  return me.dq}
+function dqClaimable(){var q=dqGet(),n=0;q.q.forEach(function(id){var d=DQP.filter(function(x){return x.id===id})[0];if(d&&(q.p[id]||0)>=d.t&&!q.c[id])n++});if(q.q.every(function(id){return q.c[id]})&&!q.c.all)n++;if(loginReady())n++;return n}
+function lsInfo(){var ls=me.ls||{last:"",n:0,best:0},y=new Date();y.setDate(y.getDate()-1);var t=dayKey();return{ls:ls,today:ls.last===t,alive:ls.last===t||ls.last===dk(y)}}
+function loginReady(){return lsInfo().today===false}
+function streakNow(){var i=lsInfo();return i.alive?i.ls.n:0}
+function PVdaily(){
+  var q=dqGet(),i=lsInfo(),n=i.alive?i.ls.n:0,next=i.today?n:n+1,h=pBack()+'<h1>📅 ภารกิจประจำวัน</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  var cells="";for(var d=1;d<=7;d++){var cur=((Math.max(n,1)-1)%7)+1,done=n>0&&d<=((n-1)%7)+1&&(i.today||d<cur||d<=cur-(i.today?0:1));
+    cells+='<div style="flex:1;text-align:center;padding:6px 0;border-radius:8px;background:'+(n>0&&d<=((n-1)%7)+1?"#14452a":"#1b2230")+';font-size:.72rem">'+(d===7?"🎁":"🪙")+'<br>วัน '+d+'</div>'}
+  h+='<div class="card"><b>🔥 ล็อกอินต่อเนื่อง '+n+' วัน</b> <small>(สูงสุด '+(i.ls.best||0)+')</small><div style="display:flex;gap:4px;margin:8px 0">'+cells+'</div>'+
+    '<button class="'+(i.today?"grey":"orange")+'" id="lg"'+(i.today?" disabled":"")+'>'+(i.today?"รับโบนัสวันนี้แล้ว ✔":"🎁 รับโบนัสวันที่ "+next+" • 💰 "+(50+Math.min(next,30)*10)+" + ⭐ "+(20+Math.min(next,30)*2)+(next%7===0?" + โบนัสวันที่ 7 💰 300":""))+'</button><small>ไม่เข้าเกมข้ามวัน ลำดับจะเริ่มนับใหม่</small></div>';
+  h+='<div class="card"><b>🎯 ภารกิจวันนี้</b><small> (รีเซ็ตทุกเที่ยงคืน)</small>';
+  q.q.forEach(function(id){var d=DQP.filter(function(x){return x.id===id})[0],p=Math.min(q.p[id]||0,d.t),dn=p>=d.t,cl=q.c[id];
+    h+='<div style="margin-top:10px"><div class="row" style="border:0;padding:0"><span><b>'+d.n+' '+d.t+' ครั้ง</b><br><small>⭐ '+d.xp+' • 💰 '+d.g+'</small></span><button class="price '+(dn&&!cl?"can":"")+'" data-q="'+id+'"'+(dn&&!cl?"":" disabled")+'>'+(cl?"รับแล้ว":dn?"รับรางวัล":p+" / "+d.t)+'</button></div><div class="bar"><i style="width:'+(p/d.t*100)+'%"></i></div></div>'});
+  var all=q.q.every(function(id){return q.c[id]});
+  h+='</div><div class="card" style="border-width:2px;text-align:center"><b>🧰 หีบรางวัลประจำวัน</b><br><small>รับรางวัลครบทุกภารกิจ → 💰 150 + ⭐ 80 + ของสุ่ม</small><button class="'+(all&&!q.c.all?"purple":"grey")+'" id="chest"'+(all&&!q.c.all?"":" disabled")+'>'+(q.c.all?"เปิดแล้ววันนี้ ✔":"เปิดหีบ")+'</button></div>';
+  app.innerHTML=h;pBindBack();
+  if($("lg"))$("lg").onclick=function(){var i2=lsInfo();if(i2.today)return;var nn=(i2.alive?i2.ls.n:0)+1;me.ls={last:dayKey(),n:nn,best:Math.max(i2.ls.best||0,nn)};
+    var g=50+Math.min(nn,30)*10+(nn%7===0?300:0),x=20+Math.min(nn,30)*2;gain(x,g);PV.msg="ล็อกอินต่อเนื่อง "+nn+" วัน! +"+g+" แกลเลียน +"+x+" XP";PVdaily()};
+  app.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){var d=DQP.filter(function(x){return x.id===b.dataset.q})[0];if((q.p[d.id]||0)<d.t||q.c[d.id])return;q.c[d.id]=1;gain(d.xp,d.g);PV.msg="ได้รับ +"+d.xp+" XP +"+d.g+" แกลเลียน";PVdaily()}});
+  if($("chest"))$("chest").onclick=function(){if(q.c.all)return;q.c.all=1;var m="หีบเปิดแล้ว! +150 แกลเลียน +80 XP",id=randDecor();if(id){var it=decItem(id);m+=" และได้ "+it.e+" "+it.n}gain(80,150);PV.msg=m;PVdaily()};
+}
+PV.daily=PVdaily;
+function randDecor(){
+  me.dec=me.dec||[];var pool=[];DECAT.forEach(function(c,ci){c.i.forEach(function(x,ii){var id="d:"+ci+"_"+ii;if(me.dec.indexOf(id)<0)pool.push(id)})});
+  if(!pool.length)return null;var id=pool[Math.floor(Math.random()*pool.length)];me.dec.push(id);return id}
+
+/* ---- achievements / badges ---- */
+function correctN(p){var n=0,pr=p.prog||{};Object.keys(pr).forEach(function(k){(pr[k]||[]).forEach(function(x){if(x===1)n++})});return n}
+function wandsN(p){var n=0,w=p.wands||{};Object.keys(w).forEach(function(k){n+=w[k]});return n}
+function stv(p,k){return(p.st&&p.st[k])||0}
+var ACH=[
+["q1","🧠","หนอนหนังสือ","ตอบคำถามถูกรวม 10 ข้อ",10,function(p){return correctN(p)},50,30],
+["q2","🎓","เกรดเต็ม","ตอบคำถามถูกรวม 50 ข้อ",50,function(p){return correctN(p)},200,100],
+["q3","🏅","ศาสตราจารย์","ตอบคำถามถูกรวม 150 ข้อ",150,function(p){return correctN(p)},600,300],
+["g1","🧮","นักคิดเลข","ชนะเกม 24 รวม 5 ครั้ง",5,function(p){return p.g24||0},100,50],
+["g2","🔢","อัจฉริยะตัวเลข","ชนะเกม 24 รวม 25 ครั้ง",25,function(p){return p.g24||0},400,200],
+["u1","🃏","นักเล่นไพ่","ชนะ UNO รวม 5 ครั้ง",5,function(p){return p.uno||0},100,50],
+["u2","👑","ราชาไพ่","ชนะ UNO รวม 25 ครั้ง",25,function(p){return p.uno||0},400,200],
+["s1","🎰","นักหมุนกาชา","หมุนกาชารวม 10 ครั้ง",10,function(p){return wandsN(p)},100,50],
+["s2","🪄","นักสะสมไม้กายสิทธิ์","หมุนกาชารวม 50 ครั้ง",50,function(p){return wandsN(p)},400,200],
+["d1","🛋️","นักตกแต่งมือใหม่","มีของตกแต่ง 10 ชิ้น",10,function(p){return(p.dec||[]).length},100,50],
+["d2","🏡","สถาปนิกสวน","มีของตกแต่ง 50 ชิ้น",50,function(p){return(p.dec||[]).length},500,250],
+["d3","🏛️","เศรษฐีของสะสม","มีของตกแต่ง 100 ชิ้น",100,function(p){return(p.dec||[]).length},1500,600],
+["l1","⭐","ดาวรุ่ง","ถึงเลเวล 10",10,function(p){return lvl(p)},100,0],
+["l2","🌟","ดาวเด่น","ถึงเลเวล 50",50,function(p){return lvl(p)},500,0],
+["l3","💫","ตำนานแห่งฮอกวอตส์","ถึงเลเวล 100",100,function(p){return lvl(p)},2000,0],
+["r1","🔥","ขยันทุกวัน","ล็อกอินต่อเนื่อง 3 วัน",3,function(p){return(p.ls&&p.ls.best)||0},100,50],
+["r2","📆","ไม่ขาดสักวัน","ล็อกอินต่อเนื่อง 7 วัน",7,function(p){return(p.ls&&p.ls.best)||0},400,150],
+["r3","🗓️","ผู้มั่นคง","ล็อกอินต่อเนื่อง 30 วัน",30,function(p){return(p.ls&&p.ls.best)||0},2000,500],
+["v1","🏠","แขกผู้มีน้ำใจ","เยี่ยมบ้านเพื่อน 3 ครั้ง",3,function(p){return stv(p,"visit")},80,40],
+["v2","🎁","ผู้ให้","ส่งของขวัญ 3 ครั้ง",3,function(p){return stv(p,"gift")},120,60],
+["m1","🎮","นักเล่นเกม","เล่นมินิเกม 10 ครั้ง",10,function(p){return stv(p,"mini")},150,80],
+["m2","🕹️","ครบทุกเกม","เล่นมินิเกมครบทั้ง 10 ชนิด",10,function(p){return Object.keys((p.st&&p.st.mgk)||{}).length},250,120],
+["h1","💎","นักล่าสมบัติ","ล่าสมบัติเจอ 5 ครั้ง",5,function(p){return stv(p,"found")},200,100],
+["p1","🐾","เพื่อนสัตว์","ให้อาหารสัตว์เลี้ยง 10 ครั้ง",10,function(p){return stv(p,"feed")},100,50],
+["p2","🐉","ผู้เลี้ยงมังกร","มีสัตว์เลี้ยง 3 ตัว",3,function(p){return(p.pets||[]).length},300,150],
+["c1","📖","นักสะสมตัวยง","สะสมครบ 1 หมวดในสมุดสะสม",1,function(p){return colDone(p)},200,100],
+["c2","📚","บรรณารักษ์สะสม","สะสมครบ 4 หมวดในสมุดสะสม",4,function(p){return colDone(p)},800,300],
+["f1","📸","ช่างภาพ","ถ่ายภาพบ้าน 3 ครั้ง",3,function(p){return stv(p,"photo")},80,40],
+["p3","🐲","เลี้ยงจนโต","มีสัตว์เลี้ยงเลเวล 10",10,function(p){return maxPetLv(p)},300,150],
+["w1","🏆","แชมป์บ้าน","รับรางวัลถ้วยบ้านรายสัปดาห์ในฐานะผู้ชนะ",1,function(p){return stv(p,"cupwin")},300,150]];
+function achVal(a,p){return Math.min(a[4],a[5](p||me))}
+function achEarned(p){return ACH.filter(function(a){return a[5](p)>=a[4]})}
+function achClaimable(){return ACH.filter(function(a){return a[5](me)>=a[4]&&!(me.ac||{})[a[0]]}).length}
+function badgesHtml(p){p=p||me;var e=achEarned(p);return'<div class="card"><b>🎖️ เหรียญตรา ('+e.length+'/'+ACH.length+')</b><div style="margin-top:6px;word-break:break-all;'+(e.length?'font-size:1.7rem':'')+'">'+(e.length?e.map(function(a){return'<span title="'+a[2]+'">'+a[1]+'</span>'}).join(" "):'<small>ยังไม่มีเหรียญตรา</small>')+'</div></div>'}
+function PVbadges(){
+  me.ac=me.ac||{};var h=pBack()+'<h1>🎖️ เหรียญตรา</h1><div class="msg">'+(PV.msg||"")+'</div><small>ครบเงื่อนไขแล้วกดรับรางวัลได้ครั้งเดียวต่อเหรียญ</small>';PV.msg="";
+  ACH.forEach(function(a){var v=a[5](me),dn=v>=a[4],cl=me.ac[a[0]];
+    h+='<div class="card" style="opacity:'+(dn?1:.65)+'"><div class="row" style="border:0;padding:0"><span style="font-size:1.05rem"><span style="font-size:1.8rem">'+a[1]+'</span> <b>'+a[2]+'</b><br><small>'+a[3]+'<br>รางวัล 💰 '+a[6]+(a[7]?' • ⭐ '+a[7]:'')+'</small></span><button class="price '+(dn&&!cl?"can":"")+'" data-a="'+a[0]+'"'+(dn&&!cl?"":" disabled")+'>'+(cl?"รับแล้ว":dn?"รับรางวัล":Math.min(v,a[4])+"/"+a[4])+'</button></div><div class="bar"><i style="width:'+Math.min(100,v/a[4]*100)+'%"></i></div></div>'});
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-a]").forEach(function(b){b.onclick=function(){var a=ACH.filter(function(x){return x[0]===b.dataset.a})[0];if(a[5](me)<a[4]||me.ac[a[0]])return;me.ac[a[0]]=1;gain(a[7],a[6]);PV.msg="ได้รับ "+a[1]+" "+a[2]+" +"+a[6]+" แกลเลียน"+(a[7]?" +"+a[7]+" XP":"");PVbadges()}});
+}
+PV.badges=PVbadges;
+
+/* ---- house cup screen ---- */
+function PVcup(){
+  var c=cupGet(),mx=1,d=new Date(),left=8-(d.getDay()||7);["G","S","H","R"].forEach(function(k){mx=Math.max(mx,c.p[k]||0)});
+  var h=pBack()+'<h1>🏆 ศึกชิงถ้วยบ้านประจำสัปดาห์</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="card"><small>ทุกกิจกรรมที่คุณทำ (ตอบคำถาม เกม มินิเกม ล่าสมบัติ ฯลฯ) จะเก็บคะแนนให้บ้านของคุณ รีเซ็ตทุกวันจันทร์ • เหลืออีก '+left+' วัน</small></div>';
+  var ks=Object.keys(HOUSE).sort(function(a,b){return(c.p[b]||0)-(c.p[a]||0)});
+  h+='<div class="card">'+ks.map(function(k,i){var v=c.p[k]||0;return'<div style="margin:8px 0"><div class="row" style="border:0;padding:0"><span>'+(["🥇","🥈","🥉","4."][i])+' '+HOUSE[k][1]+' '+HOUSE[k][0]+(k===me.house?' <small>(บ้านคุณ)</small>':'')+'</span><b>'+fmt(v)+'</b></div><div class="bar"><i style="width:'+(v/mx*100)+'%"></i></div></div>'}).join("")+'</div>';
+  var l=c.last;
+  if(l){var win=l.win,can=cupClaimable();
+    h+='<div class="card" style="text-align:center;border-width:2px"><b>สัปดาห์ที่แล้ว</b><br>'+(win?'ผู้ชนะ: '+HOUSE[win][1]+' '+HOUSE[win][0]:'ไม่มีผู้ชนะ')+'<br><small>บ้านชนะ: 💰 500 + ⭐ 200 • บ้านอื่น: 💰 50</small><button class="'+(can?"orange":"grey")+'" id="cl"'+(can?"":" disabled")+'>'+(!win?"ไม่มีรางวัล":me.cupc===l.k?"รับแล้ว ✔":(win===me.house?"🏆 รับรางวัลผู้ชนะ":"รับรางวัลปลอบใจ"))+'</button></div>'}
+  else h+='<div class="card" style="text-align:center"><small>ยังไม่มีผลของสัปดาห์ที่แล้ว</small></div>';
+  app.innerHTML=h;pBindBack();
+  if($("cl"))$("cl").onclick=function(){if(!cupClaimable())return;var w=c.last.win===me.house;me.cupc=c.last.k;if(w){me.st=me.st||{};me.st.cupwin=(me.st.cupwin||0)+1;gain(200,500);PV.msg="🏆 บ้านของคุณชนะ! +500 แกลเลียน +200 XP"}else{gain(0,50);PV.msg="ได้รับรางวัลปลอบใจ +50 แกลเลียน"}PVcup()};
+}
+PV.cup=PVcup;
+
+/* ---- hub menus ---- */
+function plusHome0(){
+  var inbox=(me.inbox||[]),h='';
+  if(inbox.length)h+='<div class="card" style="border-width:2px"><b>📬 ของขวัญจากเพื่อน ('+inbox.length+')</b>'+inbox.slice(-5).map(function(x){return'<div class="row"><span>'+esc(x.f)+' ส่ง '+x.s+'</span></div>'}).join("")+'<button class="green" id="ib">รับทราบ</button></div>';
+  var b=function(id,e,t,n){return'<button class="pbtn" data-pv="'+id+'">'+e+'<br>'+t+(n?'<span class="dot">'+n+'</span>':'')+'</button>'};
+  h+='<div class="card"><b>🌟 กิจกรรมและสิ่งสะสม</b><div class="pgrid">'+b("daily","📅","ภารกิจประจำวัน",dqClaimable())+b("badges","🎖️","เหรียญตรา",achClaimable())+b("book","📖","สมุดสะสม",colClaimable())+b("pet","🐾","สัตว์เลี้ยง",0)+b("visit","🏘️","เยี่ยมบ้านเพื่อน",0)+b("cup","🏆","ศึกชิงถ้วยบ้าน",cupClaimable()?1:0)+b("hunt","💎","ล่าสมบัติในสวน",huntLeft())+b("photo","📸","ถ่ายภาพบ้าน",0)+'</div></div>';
+  return h}
+function plusPlay(){
+  var b=function(id,e,t,d){return'<button class="pbtn wide" data-pv="'+id+'">'+e+' '+t+'<br><small>'+d+'</small></button>'};
+  return'<div class="card"><b>✨ มินิเกมเวทมนตร์ (10 เกม)</b><small> — ทุกเกมมีวิธีเล่นก่อนเริ่ม</small><div class="pgrid" style="grid-template-columns:1fr">'+
+  b("mgspell","🪄","ร่ายคาถาตามจังหวะ","กดตอนตัวเลื่อนอยู่กลางเป้า • มีโหมดซ้อม")+b("mgpotion","🧪","ปรุงยาตามสูตร","จำลำดับส่วนผสมแล้วกดตาม")+b("mgquid","🧹","ควิดดิชเก็บลูกบอล","เก็บลูกทอง หลบลูกดำ 30 วินาที")+b("mgmatch","🃏","จับคู่ความจำ","เปิดการ์ดหาคู่ให้ครบ")+b("mgguess","📜","ทายคาถา","เดาชื่อคาถาจากคำอธิบาย")+
+  b("mgduel","⚡","ดวลเวทมนตร์","ทดสอบปฏิกิริยา แตะตอนจอเป็นสีเขียว")+b("mgbroom","🧹","บินหลบหอคอย","แตะให้ไม้กวาดบินผ่านช่องว่าง")+b("mgmaze","🗝️","เขาวงกตปราสาท","พาพ่อมดไปถึงถ้วยรางวัล")+b("mgmath","🧮","คิดเลขเร็ว","บวก ลบ คูณ ภายใน 45 วินาที")+b("mgspeed","⚡","ควิซสายฟ้า","ตอบคำถามเนื้อเรื่องภายใน 12 วินาทีต่อข้อ")+'</div></div>'}
+function plusHubBind(){
+  app.querySelectorAll("[data-pv]").forEach(function(b){b.onclick=function(){go(b.dataset.pv)}});
+  if($("ib"))$("ib").onclick=function(){me.inbox=[];save();render()};
+  if($("dn"))$("dn").onclick=function(){var o=["auto","day","night"],i=o.indexOf(me.dn||"auto");me.dn=o[(i+1)%3];save();render()};
+}
+
+/* ===== PLUS MODULE B: visit friends, minigames, treasure hunt ===== */
+function sceneOf(p){var real=me,s="";me=p;try{s=profScene()}finally{me=real}return s}
+var VK=null,VMSG="";
+function PVvisit(){
+  var ks=others(),net=!!NET.uid,h=pBack()+'<h1>🏘️ เยี่ยมบ้านเพื่อน</h1><small>'+(net?'ผู้เล่นทุกคนที่สมัครในระบบ เยี่ยมข้ามเครื่องได้ • ของขวัญจะถึงเมื่อเพื่อนเข้าเกมครั้งถัดไป':'📴 โหมดออฟไลน์: แสดงเฉพาะเพื่อนที่สมัครในเครื่องนี้')+'</small><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  if(net)h+='<button class="grey" id="rf" style="width:auto;padding:6px 14px;margin:6px 0">🔄 รีเฟรชรายชื่อ'+(NET.busy?" ...":"")+'</button>'+(NET.lerr?'<div class="msg">โหลดรายชื่อไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div>':'');
+  if(!ks.length)h+='<div class="card" style="text-align:center">'+(net?(NET.busy?'⏳ กำลังโหลดรายชื่อ...':'ยังไม่มีเพื่อนคนอื่นในระบบ<br><small>ชวนเพื่อนสมัครแล้วกดรีเฟรช</small>'):'ยังไม่มีเพื่อนในเครื่องนี้<br><small>ให้เพื่อนสมัครสมาชิกในเครื่องเดียวกัน แล้วกลับมาเยี่ยมกันได้</small>')+'</div>';
+  ks.forEach(function(k){var p=pOf(k);if(!p||!p.house||!HOUSE[p.house])return;h+='<div class="row"><span>'+(p.av||"🧙")+' <b>'+esc(p.name)+'</b><br><small>'+HOUSE[p.house][1]+' '+HOUSE[p.house][0]+' • Lv '+lvl(p)+' • '+titleOf(p)[2]+' • ❤️ '+(p.likes||0)+'</small></span><button class="price can" data-k="'+esc(k)+'">เยี่ยมบ้าน</button></div>'});
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){VK=b.dataset.k;VMSG="";go("friend")}});
+  if($("rf"))$("rf").onclick=function(){netPlayers(function(){if(view==="visit")PVvisit()},true);PVvisit()};
+  if(net&&!NET.busy&&Date.now()-NET.lt>30000)netPlayers(function(){if(view==="visit")PVvisit()});
+}
+PV.visit=PVvisit;
+function PVfriend(){
+  var p=pOf(VK);if(!p){go("visit");return}
+  me.lk=me.lk||{};var liked=me.lk[VK]===dayKey(),t=(me.dec||[]).filter(function(id){return(me.room||[]).concat(me.yard||[]).map(function(r){return r.id}).indexOf(id)<0});
+  var h=pBack()+'<h1>🏡 บ้านของ '+esc(p.name)+'</h1><div class="msg">'+VMSG+'</div>'+sceneOf(p)+
+  '<div class="card"><b>'+(p.av||"🧙")+' '+esc(p.name)+'</b> • Lv '+lvl(p)+' • '+titleOf(p)[1]+' '+titleOf(p)[2]+'<br><small>❤️ ได้รับ '+(p.likes||0)+' ไลก์ • ของตกแต่ง '+((p.dec||[]).length)+' ชิ้น</small></div>'+
+  badgesHtml(p)+
+  '<button class="'+(liked?"grey":"orange")+'" id="lk"'+(liked?" disabled":"")+'>'+(liked?"❤️ ไลก์วันนี้แล้ว":"❤️ กดไลก์บ้านเพื่อน (+20 แกลเลียน)")+'</button>'+
+  '<div class="card"><b>🎁 ส่งของขวัญ</b><small> (แกลเลียนของคุณมี '+galTxt()+')</small><div style="display:flex;gap:6px;margin-top:8px"><button class="green" data-g="100">💰 100</button><button class="green" data-g="500">💰 500</button><button class="green" data-g="1000">💰 1,000</button></div>'+
+  '<div style="margin-top:10px"><small>หรือส่งของตกแต่งที่ยังไม่ได้วาง ('+t.filter(function(i){return i.indexOf("d:")===0}).length+' ชิ้น)</small><div class="tray" style="margin-top:6px">'+t.filter(function(i){return i.indexOf("d:")===0}).slice(0,60).map(function(i){var it=decItem(i);return it?'<button class="tr" data-i="'+i+'">'+it.e+'</button>':''}).join("")+'</div></div></div>';
+  app.innerHTML=h;
+  $("bk").onclick=function(){go("visit")};
+  me.vd=me.vd||{};if(me.vd[VK]!==dayKey()){me.vd[VK]=dayKey();pAct("visit",1)}
+  /* send: online -> gift document; offline -> write directly into the local friend */
+  var send=function(g,ok,fail){
+    if(NET.sending)return;
+    if(!NET.uid){applyGift(p,g,me.name);ok();return}
+    NET.sending=1;
+    netGift(VK,g).then(function(r){NET.sending=0;if(r)ok();else fail()})};
+  var bad=function(){VMSG="ส่งไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่";PVfriend()};
+  if($("lk"))$("lk").onclick=function(){if(me.lk[VK]===dayKey())return;send({type:"like"},function(){me.lk[VK]=dayKey();if(NET.uid)p.likes=(p.likes||0)+1;gain(5,20);VMSG="ขอบคุณที่แวะมา! +20 แกลเลียน +5 XP";PVfriend()},bad)};
+  app.querySelectorAll("[data-g]").forEach(function(b){b.onclick=function(){var v=+b.dataset.g;if(!pay(v)){VMSG="แกลเลียนไม่พอ";PVfriend();return}send({type:"gal",amt:v},function(){pAct("gift",1);VMSG="ส่งของขวัญ 💰 "+fmt(v)+" ให้ "+esc(p.name)+" แล้ว";PVfriend()},function(){me.gal+=v;bad()})}});
+  app.querySelectorAll("[data-i]").forEach(function(b){b.onclick=function(){var id=b.dataset.i,ix=me.dec.indexOf(id);if(ix<0)return;var it=decItem(id);me.dec.splice(ix,1);send({type:"dec",id:id},function(){pAct("gift",1);VMSG="ส่ง "+it.e+" "+it.n+" ให้ "+esc(p.name)+" แล้ว";PVfriend()},function(){me.dec.push(id);bad()})}});
+}
+PV.friend=PVfriend;
+function rListNet(){
+  var L=NET.list.slice().sort(function(a,b){return b.xp-a.xp});
+  var h='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button><h1>👥 ผู้เล่นในระบบ ('+L.length+')</h1><small>ผู้เล่นทุกคนที่สมัครผ่านอินเทอร์เน็ต</small><button class="grey" id="rf" style="width:auto;padding:6px 14px;margin:6px 0">🔄 รีเฟรช'+(NET.busy?" ...":"")+'</button><div class="card">';
+  if(!L.length)h+=NET.busy?"⏳ กำลังโหลด...":"ยังไม่มีผู้เล่น";
+  L.forEach(function(p,i){h+='<div class="row"><span>'+(i+1)+'. '+(p.av||"🧙")+' '+esc(p.name)+(p.uid===NET.uid?' <small>(คุณ)</small>':'')+'<br><small>'+(p.house&&HOUSE[p.house]?HOUSE[p.house][1]+' '+HOUSE[p.house][0]:"ยังไม่ได้คัดบ้าน")+' • เลเวล '+lvl(p)+'</small></span></div>'});
+  app.innerHTML=h+'</div>';
+  $("bk").onclick=function(){go("hub")};
+  $("rf").onclick=function(){netPlayers(function(){if(view==="list")rListNet()},true);rListNet()};
+  if(!NET.busy&&Date.now()-NET.lt>30000)netPlayers(function(){if(view==="list")rListNet()});
+}
+
+
+/* ---- mini game common ---- */
+function mgShell(title,steps,extra){return pBack()+'<h1>'+title+'</h1><div class="card"><b>📖 วิธีเล่น</b><ol style="margin:8px 0 12px 20px;padding:0;line-height:1.7">'+steps.map(function(t){return'<li>'+t+'</li>'}).join("")+'</ol>'+(extra||"")+'<button class="orange" id="go">เริ่มเล่น</button></div>'}
+function mgEnd(id,name,ratio,detail,again){
+  plusStop();ratio=Math.max(0,Math.min(1,ratio));var xp=Math.round(8+ratio*32),g=Math.round(10+ratio*50),stars=ratio>=.85?3:ratio>=.55?2:ratio>=.25?1:0;
+  me.st=me.st||{};me.st.mgk=me.st.mgk||{};me.st.mgk[id]=1;DB.h[me.house]+=Math.round(ratio*10);
+  plusBump("mini",1);gain(xp,g);
+  app.innerHTML=pBack()+'<h1>'+name+'</h1><div class="card" style="text-align:center"><div style="font-size:2.4rem">'+["😅","⭐","⭐⭐","⭐⭐⭐"][stars]+'</div><b>'+detail+'</b><br>รางวัล: ⭐ '+xp+' XP • 💰 '+g+'</div><button class="orange" id="ag">เล่นอีกครั้ง</button>';
+  pBindBack();$("ag").onclick=again;
+}
+function rr(n){return Math.floor(Math.random()*n)}
+
+/* 1. potion memory */
+var INGR=["🍄","🌿","🧪","🕷️","🪶","🦎"];
+function PVmgpotion(){app.innerHTML=mgShell("🧪 ปรุงยาตามสูตร",["ดู <b>ส่วนผสมที่เรืองแสง</b> ทีละชิ้น (จะสว่างเป็นสีทองและขยายขึ้น) แล้วจำลำดับให้ได้","พอขึ้นข้อความว่า \"ตาคุณแล้ว\" ให้กดส่วนผสมตามลำดับเดิม","ผ่านแต่ละรอบ ลำดับจะยาวขึ้น 1 ชิ้น สูงสุด 8 รอบ","กดผิดลำดับเกมจบทันที ได้คะแนนตามจำนวนรอบที่ผ่าน"]);pBindBack();$("go").onclick=potionStart}
+PV.mgpotion=PVmgpotion;
+function potionStart(){var S={seq:[],round:0,ix:0,inp:false};potionRound(S)}
+function potionRound(S){
+  plusStop();S.seq.push(rr(6));if(S.seq.length<3)S.seq.push(rr(6));S.round=S.seq.length-2;S.ix=0;S.inp=false;
+  app.innerHTML=pBack()+'<h1>🧪 ปรุงยาตามสูตร</h1><div class="card" style="text-align:center"><b>รอบที่ '+S.round+' / 8</b><div class="msg" id="pm">ดูให้ดี...</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'+INGR.map(function(e,i){return'<button class="tr" id="pi'+i+'" data-i="'+i+'" style="width:100%;font-size:2.4rem;padding:16px 0;transition:.15s">'+e+'</button>'}).join("")+'</div></div>';
+  pBindBack();
+  S.seq.forEach(function(v,k){mgT(function(){var b=$("pi"+v);if(b){b.style.background="#c9a85c";b.style.transform="scale(1.12)"}},500+k*750);mgT(function(){var b=$("pi"+v);if(b){b.style.background="";b.style.transform=""}},500+k*750+450)});
+  mgT(function(){S.inp=true;var m=$("pm");if(m)m.textContent="ตาคุณแล้ว! กดตามลำดับ"},500+S.seq.length*750);
+  app.querySelectorAll("[data-i]").forEach(function(b){b.onclick=function(){
+    if(!S.inp)return;var v=+b.dataset.i;
+    if(v!==S.seq[S.ix]){var r=S.round-1;mgEnd("potion","🧪 ปรุงยาตามสูตร",r/8,"ผิดลำดับ! ผ่านมา "+r+" รอบ",potionStart);return}
+    S.ix++;if(S.ix>=S.seq.length){S.inp=false;if(S.round>=8){mgEnd("potion","🧪 ปรุงยาตามสูตร",1,"ปรุงสำเร็จครบ 8 รอบ!",potionStart)}else{$("pm").textContent="ถูกต้อง! ไปรอบต่อไป";mgT(function(){potionRound(S)},700)}}}});
+}
+
+/* 2. spell rhythm (with tutorial + practice) */
+function spellBar(demo){
+  return'<div style="position:relative;padding-top:26px"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:.8rem;font-weight:700;color:#ff8533;white-space:nowrap">⬇️ กดตอนตัวเลื่อนมาตรงนี้</div>'+
+  '<div id="bar" style="position:relative;height:46px;background:#1b2230;border-radius:12px;overflow:hidden">'+
+  '<div style="position:absolute;left:32%;width:36%;top:0;bottom:0;background:rgba(201,168,92,.18)"></div>'+
+  '<div style="position:absolute;left:40%;width:20%;top:0;bottom:0;background:rgba(201,168,92,.45)"></div>'+
+  '<div style="position:absolute;left:46%;width:8%;top:0;bottom:0;background:#ff8533"></div>'+
+  '<div id="mk" style="position:absolute;top:4px;font-size:2rem;line-height:1;transform:translateX(-50%);left:'+(demo?'0':'50')+'%'+(demo?';animation:demo 2.6s linear infinite alternate':'')+'">✨</div></div>'+
+  '<div style="display:flex;justify-content:space-between;font-size:.72rem;color:#a9b0c0;margin-top:4px"><span>⬅️ ขอบซ้าย</span><span>ขอบขวา ➡️</span></div></div>'}
+var SPL='<div style="text-align:left;font-size:.88rem;line-height:1.8;margin:10px 0"><div>🟧 <b>แถบส้มตรงกลาง</b> = เพอร์เฟกต์ <b>3</b> คะแนน</div><div>🟨 <b>แถบทองสองข้างของส้ม</b> = ดี <b>2</b> คะแนน</div><div>🟫 <b>แถบจางด้านนอกสุด</b> = พอใช้ <b>1</b> คะแนน</div><div>⬛ <b>นอกแถบทั้งหมด</b> = พลาด 0 คะแนน</div></div>';
+function PVmgspell(){
+  app.innerHTML=mgShell("🪄 ร่ายคาถาตามจังหวะ",[
+    "✨ <b>ตัวเลื่อน</b> จะวิ่ง <b>ซ้าย ↔ ขวา</b> ไปมาบนแถบ และเด้งกลับเมื่อชนขอบ (ดูตัวอย่างด้านล่างที่กำลังขยับอยู่)",
+    "ให้กดปุ่ม <b>🪄 ร่ายคาถา</b> (หรือแตะที่แถบก็ได้) ตอนที่ ✨ อยู่เหนือ <b>แถบสีส้มตรงกลาง</b>",
+    "ร่ายทั้งหมด <b>8 ครั้ง</b> และทุกครั้งตัวเลื่อนจะ <b>เร็วขึ้น</b> เรื่อยๆ",
+    "ถ้ากดพลาด เกมจะบอกว่า <b>เร็วไป</b> หรือ <b>ช้าไป</b> เพื่อให้ปรับจังหวะ"],
+    '<div style="margin:6px 0 4px;text-align:center"><small>ตัวอย่างการขยับของตัวเลื่อน</small></div>'+spellBar(true)+SPL+'<button class="purple" id="pr">🎓 ซ้อมก่อน (ไม่นับรางวัล)</button>');
+  pBindBack();$("go").onclick=function(){spellRun(false)};$("pr").onclick=function(){spellRun(true,1.6)};
+}
+PV.mgspell=PVmgspell;
+function spellStart(){spellRun(false)}
+function spellRun(prac,spd){
+  plusStop();var S={pos:0,dir:1,n:0,pts:0,res:[],sp:spd||1.6},cur=function(){return prac?S.sp:1.5+S.n*.35},nm=function(){var s=cur();return s<2.2?"ช้า":s<3.2?"กลาง":s<4.2?"เร็ว":"เร็วมาก"};
+  app.innerHTML=pBack()+'<h1>🪄 '+(prac?'ซ้อมร่ายคาถา':'ร่ายคาถาตามจังหวะ')+'</h1><div class="card" style="text-align:center"><b id="sc"></b><br><small id="spd"></small>'+spellBar(false)+'<div id="fb" style="min-height:2.4rem;font-size:1.05rem;margin:8px 0"></div><div id="rs" style="font-size:1.3rem;min-height:1.6rem"></div><button class="purple" id="cast" style="font-size:1.2rem;padding:18px">🪄 ร่ายคาถา!</button>'+
+  (prac?'<small>เลือกความเร็วที่อยากซ้อม</small><div style="display:flex;gap:6px"><button class="grey" data-s="1.6">ช้า</button><button class="grey" data-s="2.8">กลาง</button><button class="grey" data-s="4.2">เร็ว</button></div><button class="orange" id="real">เริ่มเล่นจริง</button>':'')+'</div>';
+  pBindBack();var mk=$("mk");
+  var upd=function(){$("sc").textContent=prac?"โหมดซ้อม • ร่ายไม่จำกัดครั้ง • ได้ "+S.pts+" คะแนน":"ครั้งที่ "+Math.min(S.n+1,8)+" / 8";$("spd").textContent="ความเร็วตัวเลื่อน: "+nm()};upd();
+  mgI(function(){S.pos+=S.dir*cur();if(S.pos>=100){S.pos=100;S.dir=-1}if(S.pos<=0){S.pos=0;S.dir=1}mk.style.left=S.pos+"%"},20);
+  var cast=function(){
+    var d=Math.abs(S.pos-50),p=d<4?3:d<10?2:d<18?1:0,early=S.dir>0?S.pos<50:S.pos>50;
+    S.pts+=p;S.res.push(["💨","🙂","😀","🌟"][p]);S.n++;
+    $("fb").innerHTML=p===3?"🌟 เพอร์เฟกต์! +3":p===2?"😀 ดีมาก +2":p===1?"🙂 พอใช้ +1 ใกล้แล้ว":(early?"💨 พลาด — <b>เร็วไป</b> รอให้ ✨ มาถึงแถบส้มก่อน":"💨 พลาด — <b>ช้าไป</b> ✨ เลยแถบส้มไปแล้ว");
+    $("rs").textContent=S.res.slice(-8).join(" ");
+    if(!prac&&S.n>=8){mgEnd("spell","🪄 ร่ายคาถาตามจังหวะ",S.pts/24,"คะแนน "+S.pts+" / 24<br>"+S.res.join(" "),spellStart)}else upd()};
+  $("cast").onclick=cast;$("bar").onpointerdown=function(e){e.preventDefault();cast()};
+  if(prac){app.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){S.sp=+b.dataset.s;upd()}});$("real").onclick=function(){spellRun(false)}}
+}
+
+/* 3. quidditch */
+function PVmgquid(){app.innerHTML=mgShell("🧹 ควิดดิชเก็บลูกบอล",["แตะลูกทอง 🟡 ที่โผล่ขึ้นมา ได้ +1 คะแนน","หลบลูกบลัดเจอร์ ⚫ ถ้าแตะโดนจะ −2 คะแนน","ลูกบอลแต่ละลูกอยู่แค่ประมาณ 1 วินาทีแล้วหายไป","มีเวลาทั้งหมด 30 วินาที"]);pBindBack();$("go").onclick=quidStart}
+PV.mgquid=PVmgquid;
+function quidStart(){
+  plusStop();var S={sc:0,t:30,gold:0,bad:0};
+  app.innerHTML=pBack()+'<h1>🧹 ควิดดิชเก็บลูกบอล</h1><div class="card" style="text-align:center"><b>⏱️ <span id="tm">30</span> วิ • คะแนน <span id="qs">0</span></b></div><div id="fd" style="position:relative;height:340px;border-radius:16px;overflow:hidden;background:linear-gradient(#5fc3ff,#bfe9ff 70%,#86c94a 70%);border:2px solid #c9a85c;touch-action:manipulation"></div>';
+  pBindBack();var fd=$("fd");
+  mgI(function(){
+    var bad=Math.random()<.28,b=document.createElement("button");b.textContent=bad?"⚫":"🟡";
+    b.style.cssText="position:absolute;width:52px;height:52px;margin:0;padding:0;border-radius:50%;font-size:1.9rem;background:rgba(255,255,255,.35);left:"+(rr(80)+2)+"%;top:"+(rr(78)+2)+"%";
+    b.onclick=function(){if(bad){S.sc=Math.max(0,S.sc-2);S.bad++}else{S.sc++;S.gold++}$("qs").textContent=S.sc;b.remove()};
+    fd.appendChild(b);mgT(function(){if(b.parentNode)b.remove()},1100)},620);
+  mgI(function(){S.t-=.5;var t=$("tm");if(t)t.textContent=Math.ceil(S.t);if(S.t<=0)mgEnd("quid","🧹 ควิดดิชเก็บลูกบอล",S.sc/28,"เก็บลูกทอง "+S.gold+" ลูก • โดนลูกดำ "+S.bad+" ครั้ง<br>คะแนน "+S.sc,quidStart)},500);
+}
+
+/* 4. memory match */
+var MPOOL=["🦉","🐍","🦁","🦡","🦅","🧹","🪄","⚡","🔮","📜","🍯","🕯️"];
+function PVmgmatch(){app.innerHTML=mgShell("🃏 จับคู่ความจำ",["มีการ์ดคว่ำอยู่ 16 ใบ (8 คู่)","แตะเปิดทีละ 2 ใบ ถ้าเหมือนกันจะค้างไว้เป็นสีเขียว ถ้าไม่เหมือนจะคว่ำกลับ","จำตำแหน่งให้ได้ แล้วเปิดให้ครบทุกคู่","ใช้จำนวนครั้งน้อยยิ่งได้รางวัลมาก (8 ครั้งคือเต็ม)"]);pBindBack();$("go").onclick=matchStart}
+PV.mgmatch=PVmgmatch;
+function matchStart(){
+  plusStop();var pool=shuffle(MPOOL).slice(0,8),cards=shuffle(pool.concat(pool)),S={open:[],found:0,moves:0,lock:false};
+  app.innerHTML=pBack()+'<h1>🃏 จับคู่ความจำ</h1><div class="card" style="text-align:center"><b>จำนวนครั้ง: <span id="mv">0</span> • เจอแล้ว <span id="fd2">0</span>/8</b><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px">'+cards.map(function(c,i){return'<button class="tr" data-c="'+i+'" style="width:100%;font-size:2rem;padding:14px 0;margin:0;background:#2b3542">❓</button>'}).join("")+'</div></div>';
+  pBindBack();var bs=app.querySelectorAll("[data-c]");
+  bs.forEach(function(b){b.onclick=function(){
+    var i=+b.dataset.c;if(S.lock||S.open.indexOf(i)>-1||b.dataset.done)return;
+    b.textContent=cards[i];b.style.background="#c9a85c";S.open.push(i);
+    if(S.open.length===2){S.moves++;$("mv").textContent=S.moves;var a=S.open[0],c=S.open[1];S.lock=true;
+      if(cards[a]===cards[c]){bs[a].dataset.done=1;bs[c].dataset.done=1;bs[a].style.background=bs[c].style.background="#14452a";S.found++;$("fd2").textContent=S.found;S.open=[];S.lock=false;
+        if(S.found>=8)mgT(function(){mgEnd("match","🃏 จับคู่ความจำ",(24-S.moves)/16,"เจอครบ 8 คู่ ใช้ "+S.moves+" ครั้ง",matchStart)},500)}
+      else mgT(function(){bs[a].textContent="❓";bs[c].textContent="❓";bs[a].style.background=bs[c].style.background="#2b3542";S.open=[];S.lock=false},800)}}});
+}
+
+/* 5. spell guess */
+var SPELLS=[["Lumos","ทำให้ปลายไม้กายสิทธิ์เปล่งแสงสว่าง"],["Nox","ดับแสงที่ปลายไม้กายสิทธิ์"],["Accio","เรียกสิ่งของให้ลอยมาหาผู้ร่าย"],["Wingardium Leviosa","ทำให้สิ่งของลอยขึ้นกลางอากาศ"],["Expelliarmus","ปลดอาวุธของคู่ต่อสู้"],["Stupefy","ทำให้เป้าหมายสลบไป"],["Alohomora","เปิดประตูหรือกุญแจที่ล็อกอยู่"],["Reparo","ซ่อมของที่แตกหักให้กลับเป็นเหมือนเดิม"],["Incendio","ก่อให้เกิดเปลวไฟ"],["Aguamenti","เสกน้ำพุ่งออกจากปลายไม้กายสิทธิ์"],["Protego","สร้างโล่เวทมนตร์ป้องกันตัว"],["Riddikulus","เปลี่ยนสิ่งที่น่ากลัวให้กลายเป็นเรื่องตลก"],["Expecto Patronum","เรียกผู้พิทักษ์เรืองแสงมาปกป้อง"],["Petrificus Totalus","ทำให้ร่างกายแข็งทื่อขยับไม่ได้"],["Obliviate","ลบความทรงจำของเป้าหมาย"],["Sonorus","ทำให้เสียงดังกังวานขึ้น"]];
+function PVmgguess(){app.innerHTML=mgShell("📜 ทายคาถา",["อ่านคำอธิบายพลังของคาถา","เลือกชื่อคาถาที่ถูกต้องจาก 4 ตัวเลือก","ทั้งหมด 8 ข้อ ตอบเสร็จแล้วกดไปข้อต่อไป"]);pBindBack();$("go").onclick=guessStart}
+PV.mgguess=PVmgguess;
+function guessStart(){var S={q:shuffle(SPELLS).slice(0,8),i:0,ok:0};guessQ(S)}
+function guessQ(S){
+  if(S.i>=8){mgEnd("guess","📜 ทายคาถา",S.ok/8,"ตอบถูก "+S.ok+" / 8 ข้อ",guessStart);return}
+  var q=S.q[S.i],opts=shuffle([q[0]].concat(shuffle(SPELLS.filter(function(x){return x[0]!==q[0]})).slice(0,3).map(function(x){return x[0]}))),done=false;
+  app.innerHTML=pBack()+'<h1>📜 ทายคาถา</h1><small>ข้อ '+(S.i+1)+' / 8</small><div class="card" style="text-align:center;font-size:1.1rem">✨ '+q[1]+'</div><div id="os"></div><div class="msg" id="m"></div><div id="nx"></div>';
+  pBindBack();var bs=[];
+  opts.forEach(function(t){var b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=function(){if(done)return;done=true;bs.forEach(function(x){x.disabled=true;if(x.textContent===q[0])x.classList.add("ok")});
+    if(t===q[0]){S.ok++;$("m").textContent="ถูกต้อง!"}else{b.classList.add("no");$("m").textContent="คำตอบคือ "+q[0]}
+    var n=document.createElement("button");n.className="green";n.textContent=S.i>=7?"ดูผล":"ข้อต่อไป";n.onclick=function(){S.i++;guessQ(S)};$("nx").appendChild(n)};$("os").appendChild(b);bs.push(b)});
+}
+
+/* ===== extra minigames ===== */
+/* 6. reaction duel */
+function PVmgduel(){app.innerHTML=mgShell("⚡ ดวลเวทมนตร์",["หน้าจอจะเป็นสี <b style='color:#e0334a'>แดง</b> = อย่าเพิ่งกด!","พอเปลี่ยนเป็นสี <b style='color:#2ca84a'>เขียว</b> ให้แตะให้เร็วที่สุด","ดวล 5 รอบ ยิ่งเร็วยิ่งได้คะแนน (ต่ำกว่า 0.3 วินาทีได้ 3 คะแนน)","ถ้ากดตอนสีแดง ถือว่าเร็วเกินไป รอบนั้นได้ 0 คะแนน"]);pBindBack();$("go").onclick=duelStart}
+PV.mgduel=PVmgduel;
+function duelStart(){
+  plusStop();var S={r:0,pts:0,res:[],st:"wait",t0:0,h:null};
+  app.innerHTML=pBack()+'<h1>⚡ ดวลเวทมนตร์</h1><div class="card" style="text-align:center"><b id="dr">รอบที่ 1 / 5</b><div id="dz" style="height:200px;border-radius:16px;margin:10px 0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;touch-action:manipulation;user-select:none"></div><div id="dl" style="text-align:left;font-size:.9rem;line-height:1.7"></div></div>';
+  pBindBack();var dz=$("dz");
+  function show(){$("dl").innerHTML=S.res.map(function(r,i){return"รอบ "+(i+1)+": "+r}).join("<br>")}
+  function round(){
+    if(S.r>=5){mgEnd("duel","⚡ ดวลเวทมนตร์",S.pts/15,"คะแนน "+S.pts+" / 15<br><small>"+S.res.join(" • ")+"</small>",duelStart);return}
+    S.st="wait";dz.style.background="#a8283a";dz.textContent="🔴 เตรียมพร้อม... อย่าเพิ่งกด!";$("dr").textContent="รอบที่ "+(S.r+1)+" / 5";
+    S.h=mgT(function(){S.st="go";S.t0=performance.now();dz.style.background="#2ca84a";dz.textContent="🟢 ร่ายเดี๋ยวนี้! ⚡"},1200+rr(2400))}
+  dz.onpointerdown=function(e){
+    e.preventDefault();
+    if(S.st==="wait"){clearTimeout(S.h);S.res.push("❌ เร็วเกินไป (0)");S.r++;S.st="done";dz.style.background="#4a525c";dz.textContent="เร็วเกินไป!";show();mgT(round,1000)}
+    else if(S.st==="go"){var ms=Math.round(performance.now()-S.t0),p=ms<300?3:ms<450?2:ms<700?1:0;S.pts+=p;S.res.push(ms+" ms ("+p+")");S.r++;S.st="done";dz.style.background="#4a525c";dz.textContent="⚡ "+ms+" มิลลิวินาที (+"+p+")";show();mgT(round,1000)}};
+  round();
+}
+/* 7. broom flying */
+function PVmgbroom(){app.innerHTML=mgShell("🧹 บินหลบหอคอย",["แตะที่หน้าจอ (หรือกดปุ่ม <b>⬆️ บินขึ้น</b>) เพื่อให้ไม้กวาดบินขึ้น","ถ้าไม่แตะ ไม้กวาดจะค่อยๆ ตกลงเอง","บินผ่านช่องว่างระหว่างหอคอยให้ได้มากที่สุด","ชนหอคอย พื้น หรือเพดาน เกมจบทันที"]);pBindBack();$("go").onclick=broomStart}
+PV.mgbroom=PVmgbroom;
+function broomStart(){
+  plusStop();var W=320,H=400;
+  app.innerHTML=pBack()+'<h1>🧹 บินหลบหอคอย</h1><div class="card" style="text-align:center"><b>ผ่านแล้ว <span id="bs">0</span> ช่อง</b><canvas id="cv" width="'+W+'" height="'+H+'" style="display:block;margin:8px auto;width:100%;max-width:340px;border-radius:12px;border:2px solid #c9a85c;touch-action:none"></canvas><button class="purple" id="fl">⬆️ บินขึ้น</button></div>';
+  pBindBack();var cv=$("cv"),x=cv.getContext("2d"),S={y:H/2,v:0,ps:[],t:0,sc:0,on:false},EM='"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif';
+  function flap(){S.on=true;S.v=-5.4}
+  cv.addEventListener("pointerdown",function(e){e.preventDefault();flap()});$("fl").onclick=flap;
+  function over(){mgEnd("broom","🧹 บินหลบหอคอย",S.sc/15,"บินผ่านได้ "+S.sc+" ช่อง",broomStart)}
+  mgI(function(){
+    var sp=Math.min(4.2,2.3+S.sc*.07);
+    if(S.on){S.v+=.3;S.y+=S.v;S.t++;
+      if(S.t%82===1)S.ps.push({x:W+30,c:130+rr(H-260),p:false});
+      for(var i=S.ps.length-1;i>=0;i--){var q=S.ps[i];q.x-=sp;if(!q.p&&q.x+24<56){q.p=true;S.sc++;$("bs").textContent=S.sc}if(q.x<-40)S.ps.splice(i,1)}
+      var dead=S.y<14||S.y>H-14;
+      S.ps.forEach(function(q){if(Math.abs(q.x-70)<24+12&&(S.y<q.c-62+8||S.y>q.c+62-8))dead=true});
+      if(dead){over();return}}
+    var g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#5fc3ff");g.addColorStop(1,"#bfe9ff");x.fillStyle=g;x.fillRect(0,0,W,H);
+    S.ps.forEach(function(q){x.fillStyle="#6b6258";x.fillRect(q.x-24,0,48,q.c-62);x.fillRect(q.x-24,q.c+62,48,H);x.fillStyle="#4d463f";x.fillRect(q.x-28,q.c-62-12,56,12);x.fillRect(q.x-28,q.c+62,56,12)});
+    x.font="30px "+EM;x.textAlign="center";x.textBaseline="middle";x.fillText("🧹",70,S.y);
+    if(!S.on){x.font="bold 18px sans-serif";x.fillStyle="#2b2b3a";x.fillText("แตะเพื่อเริ่มบิน",W/2,H/2-60)}
+  },16);
+}
+/* 8. maze */
+function mazeGen(n){
+  var c=[],i,j;for(i=0;i<n;i++){c[i]=[];for(j=0;j<n;j++)c[i][j]={w:15,v:false}}
+  var st=[[0,0]];c[0][0].v=true;
+  while(st.length){var cu=st[st.length-1],r=cu[0],q=cu[1],nb=[];
+    [[-1,0,1,4],[0,1,2,8],[1,0,4,1],[0,-1,8,2]].forEach(function(d){var a=r+d[0],b=q+d[1];if(a>=0&&b>=0&&a<n&&b<n&&!c[a][b].v)nb.push([a,b,d[2],d[3]])});
+    if(!nb.length){st.pop();continue}
+    var m=nb[rr(nb.length)];c[r][q].w&=~m[2];c[m[0]][m[1]].w&=~m[3];c[m[0]][m[1]].v=true;st.push([m[0],m[1]])}
+  return c}
+function PVmgmaze(){app.innerHTML=mgShell("🗝️ เขาวงกตปราสาท",["พาพ่อมด 🧙 ไปยังถ้วยรางวัล 🏆 ที่มุมขวาล่าง","เดินด้วยปุ่มลูกศร (หรือปัดนิ้วบนเขาวงกต / ใช้ลูกศรบนคีย์บอร์ด)","เดินทะลุกำแพงไม่ได้ ถ้าติดให้ถอยกลับแล้วหาทางใหม่","ยิ่งถึงเร็วยิ่งได้รางวัลมาก (ภายใน 30 วินาทีได้เต็ม)"]);pBindBack();$("go").onclick=mazeStart}
+PV.mgmaze=PVmgmaze;
+function mazeStart(){
+  plusStop();var N=8,M=mazeGen(N),S={r:0,c:0,mv:0,t0:Date.now()},B=[1,2,4,8],D=[[-1,0],[0,1],[1,0],[0,-1]];
+  app.innerHTML=pBack()+'<h1>🗝️ เขาวงกตปราสาท</h1><div class="card" style="text-align:center"><b>⏱️ <span id="mt">0</span> วิ • ก้าว <span id="mm">0</span></b><div id="mz" style="display:grid;grid-template-columns:repeat('+N+',1fr);margin:10px auto;width:100%;max-width:330px;border:3px solid #c9a85c;touch-action:none"></div>'+
+  '<div style="display:grid;grid-template-columns:repeat(3,64px);gap:6px;justify-content:center"><span></span><button class="num" data-d="0" style="margin:0">⬆️</button><span></span><button class="num" data-d="3" style="margin:0">⬅️</button><button class="num" data-d="2" style="margin:0">⬇️</button><button class="num" data-d="1" style="margin:0">➡️</button></div></div>';
+  pBindBack();
+  function draw(){var h="";for(var i=0;i<N;i++)for(var j=0;j<N;j++){var w=M[i][j].w,me2=(i===S.r&&j===S.c),goal=(i===N-1&&j===N-1);
+    h+='<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:1.3rem;line-height:1;background:'+(goal?"#2d3a1c":me2?"#1f2c44":"#10161e")+';border-top:2px solid '+(w&1?"#c9a85c":"transparent")+';border-right:2px solid '+(w&2?"#c9a85c":"transparent")+';border-bottom:2px solid '+(w&4?"#c9a85c":"transparent")+';border-left:2px solid '+(w&8?"#c9a85c":"transparent")+'">'+(me2?"🧙":goal?"🏆":"")+'</div>'}
+    $("mz").innerHTML=h;$("mm").textContent=S.mv}
+  function mv(d){var w=M[S.r][S.c].w;if(w&B[d])return;S.r+=D[d][0];S.c+=D[d][1];S.mv++;draw();
+    if(S.r===N-1&&S.c===N-1){var sec=Math.round((Date.now()-S.t0)/1000);mgEnd("maze","🗝️ เขาวงกตปราสาท",(90-sec)/60,"ถึงเป้าหมายใน "+sec+" วินาที ("+S.mv+" ก้าว)",mazeStart)}}
+  draw();
+  app.querySelectorAll("[data-d]").forEach(function(b){b.onclick=function(){mv(+b.dataset.d)}});
+  document.onkeydown=function(e){var k={ArrowUp:0,ArrowRight:1,ArrowDown:2,ArrowLeft:3}[e.key];if(k!==undefined){e.preventDefault();mv(k)}};
+  var sx=0,sy=0,mz=$("mz");mz.onpointerdown=function(e){sx=e.clientX;sy=e.clientY};
+  mz.onpointerup=function(e){var dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<24)return;if(Math.abs(dx)>Math.abs(dy))mv(dx>0?1:3);else mv(dy>0?2:0)};
+  mgI(function(){$("mt").textContent=Math.round((Date.now()-S.t0)/1000)},500);
+}
+/* 9. speed math */
+function PVmgmath(){app.innerHTML=mgShell("🧮 คิดเลขเร็ว (แต้มบ้าน)",["มีเวลา <b>45 วินาที</b> ตอบโจทย์บวก ลบ คูณ ให้ได้มากที่สุด","แต่ละข้อมี 4 ตัวเลือก กดคำตอบที่ถูก","ตอบถูก +1 คะแนน ตอบผิด −1 คะแนน (ไม่ติดลบ)"]);pBindBack();$("go").onclick=mathStart}
+PV.mgmath=PVmgmath;
+function mathStart(){
+  plusStop();var S={t:45,sc:0,ok:0,no:0};
+  function nq(){var op=rr(3),a,b,ans,s;
+    if(op===0){a=rr(40)+10;b=rr(40)+10;ans=a+b;s=a+" + "+b}else if(op===1){a=rr(40)+20;b=rr(a-5)+2;ans=a-b;s=a+" − "+b}else{a=rr(11)+2;b=rr(11)+2;ans=a*b;s=a+" × "+b}
+    var o=[ans];while(o.length<4){var d=ans+(rr(2)?1:-1)*(rr(9)+1);if(d>=0&&o.indexOf(d)<0)o.push(d)}return{s:s,a:ans,o:shuffle(o)}}
+  app.innerHTML=pBack()+'<h1>🧮 คิดเลขเร็ว</h1><div class="card" style="text-align:center"><b>⏱️ <span id="tm">45</span> วิ • คะแนน <span id="ms">0</span></b><div id="qq" style="font-size:2.2rem;font-weight:700;margin:14px 0"></div><div id="oo" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div><div class="msg" id="fb"></div></div>';
+  pBindBack();
+  function ask(){var q=nq();$("qq").textContent=q.s+" = ?";$("oo").innerHTML="";q.o.forEach(function(v){var b=document.createElement("button");b.className="opt";b.style.cssText="text-align:center;font-size:1.3rem;margin:0";b.textContent=v;b.onclick=function(){if(v===q.a){S.sc++;S.ok++;$("fb").textContent="✔️ ถูก!"}else{S.sc=Math.max(0,S.sc-1);S.no++;$("fb").textContent="✖️ ผิด (คำตอบ "+q.a+")"}$("ms").textContent=S.sc;ask()};$("oo").appendChild(b)})}
+  ask();
+  mgI(function(){S.t-=.5;$("tm").textContent=Math.ceil(S.t);if(S.t<=0)mgEnd("math","🧮 คิดเลขเร็ว",S.sc/18,"ตอบถูก "+S.ok+" • ผิด "+S.no+"<br>คะแนน "+S.sc,mathStart)},500);
+}
+/* 10. lightning quiz from the story questions */
+function PVmgspeed(){app.innerHTML=mgShell("⚡ ควิซสายฟ้า",["สุ่มคำถามจากด่านเนื้อเรื่อง 10 ข้อ","แต่ละข้อมีเวลา <b>12 วินาที</b> (แถบสีด้านบนจะหดลง)","ตอบถูกได้คะแนน หมดเวลานับว่าผิด","ตอบถูกในเกมนี้ไม่นับเป็นความคืบหน้าของด่าน เป็นแค่เกมซ้อมความจำ"]);pBindBack();$("go").onclick=speedStart}
+PV.mgspeed=PVmgspeed;
+function speedStart(){var all=[];ST.forEach(function(s){s[2].forEach(function(q){all.push(q)})});speedQ({i:0,ok:0},shuffle(all).slice(0,10))}
+function speedQ(S,qs){
+  plusStop();if(S.i>=10){mgEnd("speed","⚡ ควิซสายฟ้า",S.ok/10,"ตอบถูก "+S.ok+" / 10 ข้อ",speedStart);return}
+  var q=qs[S.i],opts=shuffle(q.slice(1)),done=false,t=12;
+  app.innerHTML=pBack()+'<h1>⚡ ควิซสายฟ้า</h1><small>ข้อ '+(S.i+1)+' / 10 • ถูก '+S.ok+'</small><div class="bar" style="height:10px"><i id="tb" style="width:100%;background:#e0334a;transition:width .1s linear"></i></div><h2>'+q[0]+'</h2><div id="os"></div><div class="msg" id="m"></div>';
+  pBindBack();var bs=[];
+  function next(){mgT(function(){S.i++;speedQ(S,qs)},900)}
+  opts.forEach(function(tx){var b=document.createElement("button");b.className="opt";b.textContent=tx;b.onclick=function(){if(done)return;done=true;bs.forEach(function(x){x.disabled=true;if(x.textContent===q[1])x.classList.add("ok")});if(tx===q[1]){S.ok++;$("m").textContent="ถูกต้อง!"}else{b.classList.add("no");$("m").textContent="ยังไม่ถูก"}next()};$("os").appendChild(b);bs.push(b)});
+  mgI(function(){if(done)return;t-=.1;$("tb").style.width=Math.max(0,t/12*100)+"%";if(t<=0){done=true;bs.forEach(function(x){x.disabled=true;if(x.textContent===q[1])x.classList.add("ok")});$("m").textContent="หมดเวลา!";next()}},100);
+}
+
+/* ---- treasure hunt ---- */
+var HSP=["🌳","🪨","🌷","📦","🌿","🍄","🪵","🌼","🏺","🌻","🪴","🧺"];
+function huntGet(){var t=dayKey();if(!me.hunt||me.hunt.d!==t)me.hunt={d:t,t:rr(12),tries:3,open:{},found:false,bumped:false};return me.hunt}
+function huntLeft(){var h=huntGet();return(h.found||h.tries<=0)?0:h.tries}
+function PVhunt(){
+  var H=huntGet(),h=pBack()+'<h1>💎 ล่าสมบัติในสวน</h1><div class="card" style="text-align:center"><small>วันนี้มีสมบัติซ่อนอยู่ 1 จุด ค้นได้ '+(H.found?"เสร็จแล้ว":H.tries+" ครั้ง")+' • รีเซ็ตทุกเที่ยงคืน</small><div class="msg">'+(PV.msg||"")+'</div></div>';PV.msg="";
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;border-radius:16px;background:linear-gradient(#86c94a,#5ea32d);border:2px solid #c9a85c">'+HSP.map(function(e,i){var o=H.open[i];return'<button class="tr" data-s="'+i+'" style="width:100%;margin:0;padding:16px 0;font-size:2.2rem;background:'+(o?(o==="gem"?"#c9a85c":"#3d6b2a"):"rgba(255,255,255,.25)")+'"'+(o||H.found||H.tries<=0?" disabled":"")+'>'+(o==="gem"?"💎":o?"💨":e)+'</button>'}).join("")+'</div>';
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){
+    var i=+b.dataset.s;if(H.open[i]||H.found||H.tries<=0)return;H.tries--;
+    if(i===H.t){H.open[i]="gem";H.found=true;var g=100+rr(301),m="เจอสมบัติ! +"+g+" แกลเลียน +40 XP",id=Math.random()<.5?randDecor():null;if(id){var it=decItem(id);m+=" และได้ "+it.e+" "+it.n}gain(40,g);pAct("found",1);PV.msg=m}
+    else{H.open[i]="no";var d=Math.abs((i%4)-(H.t%4))+Math.abs(Math.floor(i/4)-Math.floor(H.t/4));PV.msg=d<=1?"🔥 ใกล้มากแล้ว!":d<=2?"🙂 เริ่มอุ่นๆ":"❄️ ยังไกลอยู่"}
+    if((H.found||H.tries<=0)&&!H.bumped){H.bumped=true;pAct("hunt",1)}save();PVhunt()}});
+}
+PV.hunt=PVhunt;
+
+/* ===== PLUS MODULE C: collection, pets, themes, photo, day/night ===== */
+var PETS=[["🐱","แมวส้มเวทมนตร์",300,"fish"],["🐶","ลูกสุนัขจิ๋ว",300,"meat"],["🐸","กบวิเศษ",400,"bug"],["🦉","นกฮูกน้อย",500,"meat"],["🐍","งูน้อยแสนรู้",600,"fish"],["🐉","มังกรจิ๋ว",2000,"cake"],["🦄","ยูนิคอร์นน้อย",3000,"apple"],["🔥","ฟีนิกซ์เด็ก",5000,"honey"]];
+var ROOMT=[["gry","🦁","ห้องกริฟฟินดอร์",600,"linear-gradient(#e8b4a0 0 58%,#7a2a2a 58%)","#d4a017"],["sly","🐍","ห้องสลิธีริน",600,"linear-gradient(#bfe0c8 0 58%,#2f5d46 58%)","#9aa3a8"],["huf","🦡","ห้องฮัฟเฟิลพัฟ",600,"linear-gradient(#f7e08a 0 58%,#6b5a2a 58%)","#222"],["rav","🦅","ห้องเรเวนคลอ",600,"linear-gradient(#b9c9ee 0 58%,#3b4a7a 58%)","#b08d57"]];
+
+/* ---- collection book ---- */
+function colInfo(p){
+  var L=[],own=p.dec||[];
+  DECAT.forEach(function(c,ci){var items=c.i.map(function(x,ii){return{e:x[0],o:own.indexOf("d:"+ci+"_"+ii)>-1}});L.push({id:"dc"+ci,n:c.e+" "+c.n,items:items,r:[300,150]})});
+  var wn=Object.keys(p.wands||{}).length;L.push({id:"wand",n:"🪄 ไม้กายสิทธิ์จากกาชา",have:wn,total:WANDS.length,r:[600,300]});
+  L.push({id:"skin",n:"🏘️ บ้านพิเศษ",items:HSK.map(function(x){return{e:x[1],o:(p.skins||[]).indexOf(x[0])>-1}}),r:[400,200]});
+  L.push({id:"env",n:"🌦️ สภาพแวดล้อม",items:ENV.map(function(x){return{e:x.e,o:x.p===0||(p.envs||[]).indexOf(x.id)>-1}}),r:[500,250]});
+  var ev={};(p.inv||[]).forEach(function(k){if(k.indexOf("i:ev")===0)ev[k.slice(-2)]=1});
+  L.push({id:"evt",n:"📅 ของสะสมกิจกรรมรายเดือน",items:EVT.map(function(x,i){return{e:x[3],o:!!ev[("0"+(i+1)).slice(-2)]}}),r:[800,400]});
+  L.push({id:"pet",n:"🐾 สัตว์เลี้ยงเวทมนตร์",items:PETS.map(function(x){return{e:x[0],o:(p.pets||[]).indexOf(x[0])>-1}}),r:[500,250]});
+  L.push({id:"rt",n:"🎨 ธีมห้อง",items:ROOMT.map(function(x){return{e:x[1],o:(p.rts||[]).indexOf(x[0])>-1}}),r:[400,200]});
+  L.forEach(function(c){if(c.items){c.have=c.items.filter(function(i){return i.o}).length;c.total=c.items.length}});
+  return L}
+function colDone(p){return colInfo(p).filter(function(c){return c.have>=c.total}).length}
+function colClaimable(){me.cc=me.cc||{};return colInfo(me).filter(function(c){return c.have>=c.total&&!me.cc[c.id]}).length}
+function PVbook(){
+  me.cc=me.cc||{};var L=colInfo(me),h=pBack()+'<h1>📖 สมุดสะสม</h1><div class="msg">'+(PV.msg||"")+'</div><div class="card">สะสมครบแล้ว '+L.filter(function(c){return c.have>=c.total}).length+' / '+L.length+' หมวด<br><small>เก็บของในหมวดให้ครบ แล้วกดรับรางวัล</small></div>';PV.msg="";
+  L.forEach(function(c){var dn=c.have>=c.total,cl=me.cc[c.id];
+    h+='<div class="card"><div class="row" style="border:0;padding:0"><span><b>'+c.n+'</b><br><small>'+c.have+' / '+c.total+' • รางวัล 💰 '+c.r[0]+' ⭐ '+c.r[1]+'</small></span><button class="price '+(dn&&!cl?"can":"")+'" data-c="'+c.id+'"'+(dn&&!cl?"":" disabled")+'>'+(cl?"รับแล้ว":dn?"รับรางวัล":"ยังไม่ครบ")+'</button></div>'+
+    (c.items?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;font-size:1.5rem">'+c.items.map(function(i){return'<span style="'+(i.o?"":"filter:grayscale(1);opacity:.3")+'">'+i.e+'</span>'}).join("")+'</div>':'')+'<div class="bar"><i style="width:'+(c.have/c.total*100)+'%"></i></div></div>'});
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-c]").forEach(function(b){b.onclick=function(){var c=L.filter(function(x){return x.id===b.dataset.c})[0];if(c.have<c.total||me.cc[c.id])return;me.cc[c.id]=1;gain(c.r[1],c.r[0]);PV.msg="สะสมครบหมวด! +"+c.r[0]+" แกลเลียน +"+c.r[1]+" XP";PVbook()}});
+}
+PV.book=PVbook;
+
+/* ---- pets (levels + foods) ---- */
+var PFOOD=[["meat","🥩","เนื้อย่าง",10,10,25],["apple","🍎","แอปเปิล",8,8,20],["fish","🐟","ปลาอบ",30,20,30],["bug","🦟","แมลงวิเศษ",20,15,20],["honey","🍯","น้ำผึ้งวิเศษ",100,60,35],["cake","🍰","เค้กอัญมณี",300,150,50]];
+function pxp(l){var n=l-1;return 30*n+5*n*(n-1)}
+function pCost(l){return 30+10*(l-1)}
+function pLv(x){x=Math.max(0,x||0);var n=Math.max(0,Math.floor((-25+Math.sqrt(625+20*x))/10));while(pxp(n+2)<=x)n++;while(n>0&&pxp(n+1)>x)n--;return n+1}
+function petStage(L){return L>=15?["ตำนาน",1.9,"✨"]:L>=8?["โตเต็มวัย",1.6,""]:L>=3?["วัยรุ่น",1.3,""]:["ลูกน้อย",1,""]}
+function petX(s){return s&&s.x!==undefined?s.x:((s&&s.f)||0)*10}
+function petInfo(e){me.pp=me.pp||{};var s=me.pp[e]||(me.pp[e]={f:0,t:0});if(s.x===undefined)s.x=(s.f||0)*10;if(s.fl===undefined)s.fl=0;return s}
+function petFull(s){if(!s||!s.t)return 0;return Math.max(0,(s.fl||0)-(Date.now()-s.t)/3600000*12)}
+function maxPetLv(p){var m=0;Object.keys(p.pp||{}).forEach(function(k){m=Math.max(m,pLv(petX(p.pp[k])))});return m}
+function petHtml(p){
+  p=p||me;var e=p.ap;if(!e||(p.pets||[]).indexOf(e)<0)return"";var s=(p.pp&&p.pp[e])||{},st=petStage(pLv(petX(s)));
+  return'<span class="e petw" style="bottom:5%;font-size:'+(1.7*st[1])+'rem">'+e+(petFull(s)<30?'<small style="font-size:.9rem;position:absolute;top:-10px;right:-8px">💭</small>':'')+'</span>'}
+function PVpet(){
+  me.pets=me.pets||[];var h=pBack()+'<h1>🐾 สัตว์เลี้ยงเวทมนตร์</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  if(!me.pets.length){h+='<div class="card" style="text-align:center">ยังไม่มีสัตว์เลี้ยง<br><small>ไปรับเลี้ยงได้ที่ ร้านค้า > 🎨 ธีม/สัตว์</small><button class="orange" id="gs">ไปร้านค้า</button></div>';app.innerHTML=h;pBindBack();$("gs").onclick=function(){go("theme")};return}
+  if(!me.fs){me.fs=1;me.food=me.food||{};me.food.meat=(me.food.meat||0)+3;save()}me.food=me.food||{};
+  if(!me.ap||me.pets.indexOf(me.ap)<0)me.ap=me.pets[0];
+  var e=me.ap,s=petInfo(e),x=s.x,L=pLv(x),st=petStage(L),pt=PETS.filter(function(v){return v[0]===e})[0],fu=Math.round(petFull(s)),base=pxp(L),need=pCost(L),fav=PFOOD.filter(function(f){return f[0]===pt[3]})[0];
+  var nx=[3,8,15].filter(function(v){return v>L})[0];
+  h+='<div class="card" style="text-align:center"><div style="font-size:'+(4*st[1])+'rem;line-height:1.2;animation:bob 2s infinite">'+e+(st[2]||"")+'</div><b>'+pt[1]+'</b> • <b>Lv. '+L+'</b><br><small>ระยะ: '+st[0]+(nx?' • โตขึ้นเมื่อถึง Lv. '+nx:' • โตเต็มที่แล้ว!')+'</small>'+
+  '<div style="margin:10px 0 4px;text-align:left"><small>⭐ ค่าประสบการณ์ '+fmt(x-base)+' / '+fmt(need)+' XP (ให้อาหารเพื่อเพิ่ม)</small><div class="bar"><i style="width:'+Math.min(100,(x-base)/need*100)+'%;background:#a64ce0"></i></div></div>'+
+  '<div style="margin:8px 0;text-align:left"><small>🍽️ ความอิ่ม '+fu+'% '+(fu<30?"😿 หิวมาก":fu<70?"🙂 เริ่มหิว":fu<100?"😸 อิ่มดี":"😻 อิ่มเต็มที่")+' (ลดลงประมาณ 12% ต่อชั่วโมง)</small><div class="bar"><i style="width:'+fu+'%;background:'+(fu<30?"#c0392b":"#2ca84a")+'"></i></div></div>'+
+  '<small>❤️ ชอบกิน: '+fav[1]+' '+fav[2]+' (ได้ XP เป็น 2 เท่า)</small></div>';
+  h+='<div class="card"><b>🍖 เลือกอาหารที่จะให้</b><div class="pgrid" style="grid-template-columns:1fr 1fr 1fr">'+PFOOD.map(function(f){var c=(me.food[f[0]]||0);return'<button class="pbtn" data-f="'+f[0]+'" style="'+(c?"":"opacity:.45")+';'+(f[0]===pt[3]?"border-color:#ff8533":"")+'"><span style="font-size:1.6rem">'+f[1]+'</span><br><small>'+f[2]+'<br>มี '+c+' • +'+f[4]+' XP'+(f[0]===pt[3]?" ❤️":"")+'</small></button>'}).join("")+'</div><small>อาหาร 1 ชิ้นเพิ่มความอิ่ม และได้ XP ตามชนิด (ของโปรดได้เป็น 2 เท่า)</small><button class="orange" id="by">🛒 ซื้ออาหารเพิ่ม</button></div>';
+  h+='<div class="card"><b>สัตว์เลี้ยงของคุณ (กดเพื่อเลือก)</b><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">'+me.pets.map(function(v){return'<button class="tr" data-p="'+v+'" style="'+(v===e?"background:#c9a85c;color:#1b1500":"")+'">'+v+'<small style="display:block;font-size:.62rem;margin-top:2px">Lv '+pLv(petInfo(v).x)+'</small></button>'}).join("")+'</div><small>สัตว์เลี้ยงที่เลือกจะเดินเล่นในสวนหน้าบ้านของคุณ</small></div>';
+  app.innerHTML=h;pBindBack();$("by").onclick=function(){go("theme")};
+  app.querySelectorAll("[data-f]").forEach(function(b){b.onclick=function(){
+    var f=PFOOD.filter(function(v){return v[0]===b.dataset.f})[0];
+    if((me.food[f[0]]||0)<1){PV.msg="ไม่มี "+f[1]+" "+f[2]+" แล้ว ซื้อเพิ่มได้ที่ร้านค้า";PVpet();return}
+    if(petFull(s)>=99){PV.msg=pt[0]+" อิ่มเต็มที่แล้ว ไว้ให้อาหารใหม่ภายหลัง";PVpet();return}
+    var l0=pLv(s.x),g=f[4]*(f[0]===pt[3]?2:1);me.food[f[0]]--;s.fl=Math.min(100,petFull(s)+f[5]);s.t=Date.now();s.x+=g;s.f=(s.f||0)+1;
+    var l1=pLv(s.x);pAct("feed",1);
+    PV.msg=(f[0]===pt[3]?"❤️ ชอบมาก! ":"")+pt[0]+" กิน "+f[1]+" +"+g+" XP"+(l1>l0?" • 🎉 เลเวลอัปเป็น Lv. "+l1+"! (รับ 💰 "+(10*l1)+")":"");
+    if(l1>l0)gain(0,10*l1);PVpet()}});
+  app.querySelectorAll("[data-p]").forEach(function(b){b.onclick=function(){me.ap=b.dataset.p;save();PVpet()}});
+}
+PV.pet=PVpet;
+
+/* ---- theme & pet shop tab ---- */
+function PVtheme(){
+  me.rts=me.rts||[];me.pets=me.pets||[];
+  var h=shopTabs("theme")+'<h1>🎨 ธีมห้องและสัตว์เลี้ยง</h1><div class="card">💰 '+galTxt()+' แกลเลียน</div><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<h2>🏠 ธีมห้องในบ้าน</h2>';
+  h+='<div class="card item"><div class="e">🛖</div><div class="t"><b>ห้องมาตรฐาน</b>ธีมเริ่มต้น</div><button class="price '+(!me.rt?"":"can")+'" data-t="">'+(!me.rt?"ใช้อยู่":"ใช้")+'</button></div>';
+  ROOMT.forEach(function(r){var own=me.rts.indexOf(r[0])>-1;h+='<div class="card item"><div class="e">'+r[1]+'</div><div class="t"><b>'+r[2]+'</b>สีและลวดลายประจำบ้าน</div><button class="price '+(own||isVip(me)||me.gal>=r[3]?"can":"")+'" data-t="'+r[0]+'">'+(me.rt===r[0]?"ใช้อยู่":own?"ใช้":"💰 "+r[3])+'</button></div>'});
+  h+='<h2>🐾 รับเลี้ยงสัตว์เวทมนตร์</h2>';
+  PETS.forEach(function(x){var own=me.pets.indexOf(x[0])>-1;h+='<div class="card item"><div class="e">'+x[0]+'</div><div class="t"><b>'+x[1]+'</b>เดินเล่นในสวน โตตามการให้อาหาร</div><button class="price '+(!own&&(isVip(me)||me.gal>=x[2])?"can":"")+'" data-a="'+x[0]+'"'+(own?" disabled":"")+'>'+(own?"มีแล้ว":"💰 "+x[2].toLocaleString())+'</button></div>'});
+  me.food=me.food||{};h+='<h2>🍖 อาหารสัตว์เลี้ยง</h2><div class="card"><small>ให้อาหารสัตว์เลี้ยงเพื่อเพิ่มเลเวล อาหารแต่ละชนิดให้ XP ต่างกัน และสัตว์แต่ละตัวมีของโปรด (ได้ XP ×2) ดูของโปรดได้ที่หน้า "สัตว์เลี้ยง"</small></div>'+PFOOD.map(function(f){return'<div class="card item"><div class="e">'+f[1]+'</div><div class="t"><b>'+f[2]+'</b>+'+f[4]+' XP • อิ่ม +'+f[5]+'% • มีอยู่ '+(me.food[f[0]]||0)+'</div><div style="display:flex;flex-direction:column;gap:4px"><button class="price '+(isVip(me)||me.gal>=f[3]?"can":"")+'" data-f1="'+f[0]+'">💰 '+f[3]+'</button><button class="price '+(isVip(me)||me.gal>=Math.round(f[3]*4.5)?"can":"")+'" data-f5="'+f[0]+'">×5 • 💰 '+Math.round(f[3]*4.5)+'</button></div></div>'}).join("");
+  app.innerHTML=h;bindST();
+  app.querySelectorAll("[data-t]").forEach(function(b){b.onclick=function(){var id=b.dataset.t;if(!id){me.rt="";save();PVtheme();return}var r=ROOMT.filter(function(x){return x[0]===id})[0];if(me.rts.indexOf(id)<0){if(!pay(r[3])){PV.msg="แกลเลียนไม่พอ";PVtheme();return}me.rts.push(id)}me.rt=id;save();PV.msg="เปลี่ยนเป็น "+r[2]+" แล้ว เข้าไปดูในบ้านได้เลย";PVtheme()}});
+  app.querySelectorAll("[data-a]").forEach(function(b){b.onclick=function(){var x=PETS.filter(function(v){return v[0]===b.dataset.a})[0];if(me.pets.indexOf(x[0])>-1)return;if(!pay(x[2])){PV.msg="แกลเลียนไม่พอ";PVtheme();return}me.pets.push(x[0]);if(!me.ap)me.ap=x[0];save();PV.msg="รับเลี้ยง "+x[0]+" "+x[1]+" แล้ว! ไปให้อาหารได้ที่หน้าหลัก > สัตว์เลี้ยง";PVtheme()}});
+  var buyF=function(id,n,price){var f=PFOOD.filter(function(v){return v[0]===id})[0];if(!pay(price)){PV.msg="แกลเลียนไม่พอ";PVtheme();return}me.food[id]=(me.food[id]||0)+n;save();PV.msg="ซื้อ "+f[1]+" "+f[2]+" ×"+n+" แล้ว";PVtheme()};
+  app.querySelectorAll("[data-f1]").forEach(function(b){b.onclick=function(){var f=PFOOD.filter(function(v){return v[0]===b.dataset.f1})[0];buyF(f[0],1,f[3])}});
+  app.querySelectorAll("[data-f5]").forEach(function(b){b.onclick=function(){var f=PFOOD.filter(function(v){return v[0]===b.dataset.f5})[0];buyF(f[0],5,Math.round(f[3]*4.5))}});
+}
+PV.theme=PVtheme;
+function rtClass(){return me.rt&&ROOMT.some(function(r){return r[0]===me.rt})?" rt-"+me.rt:""}
+function rtDeco(){var r=ROOMT.filter(function(x){return x[0]===me.rt})[0];return r?'<span class="win" style="left:42%;font-size:2.6rem;top:6%">'+r[1]+'</span>':""}
+
+/* ---- day / night ---- */
+function isNight(){var m=me.dn||"auto";if(m==="night")return true;if(m==="day")return false;var h=new Date().getHours();return h<6||h>=18}
+function nightHtml(){
+  if(!isNight())return"";var s='<div class="nightov"></div>';
+  for(var i=0;i<14;i++)s+='<span class="e" style="left:'+(rnd(3,96)).toFixed(1)+'%;top:'+(rnd(2,34)).toFixed(1)+'%;font-size:'+rnd(.5,.9).toFixed(2)+'rem;animation:twk '+rnd(1.6,3.4).toFixed(1)+'s '+rnd(0,2).toFixed(1)+'s infinite">✨</span>';
+  s+='<span class="e" style="right:8%;top:5%;font-size:2.2rem">🌙</span>';
+  for(var j=0;j<8;j++)s+='<span class="e" style="left:'+rnd(6,92).toFixed(1)+'%;bottom:'+rnd(8,34).toFixed(1)+'%;font-size:.5rem;--dx:'+rnd(-18,18).toFixed(0)+'px;animation:floaty '+rnd(2.2,4.2).toFixed(1)+'s '+rnd(0,2).toFixed(1)+'s infinite alternate">💛</span>';
+  return s}
+function dnBtn(){var o={auto:"อัตโนมัติ ("+(isNight()?"ตอนนี้กลางคืน":"ตอนนี้กลางวัน")+")",day:"กลางวันเสมอ",night:"กลางคืนเสมอ"};return'<button class="purple" id="dn">🌗 เวลาในสวน: '+o[me.dn||"auto"]+'</button>'}
+
+/* ---- photo ---- */
+function PVphoto(){
+  var h=pBack()+'<h1>📸 ถ่ายภาพบ้าน</h1><div class="card" style="text-align:center"><small>บันทึกภาพบ้านและสวนของคุณเป็นรูปภาพ ส่งต่อให้เพื่อนได้</small><button class="orange" id="sn">📸 ถ่ายภาพ</button><div id="out"></div></div>';
+  app.innerHTML=h;pBindBack();
+  $("sn").onclick=function(){
+    var W=720,H=520,c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d"),ev=curEnv(),k=W/360,sh=shownHouse();
+    var col=function(s){return(s.match(/#[0-9a-fA-F]{3,6}/g)||["#87ceeb"])};
+    var g=x.createLinearGradient(0,0,0,H*.7),sc=col(ev.sky);sc.forEach(function(v,i){g.addColorStop(sc.length>1?i/(sc.length-1):0,v)});x.fillStyle=g;x.fillRect(0,0,W,H);
+    var gc=col(ev.gr),g2=x.createLinearGradient(0,H*.68,0,H);gc.forEach(function(v,i){g2.addColorStop(gc.length>1?i/(gc.length-1):0,v)});x.fillStyle=g2;x.fillRect(0,H*.68,W,H*.32);
+    var f=function(e,px,py,sz){x.font=(sz*16*k)+'px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif';x.textAlign="center";x.textBaseline="middle";x.fillText(e,px,py)};
+    f(HOUSE[me.house][1],W*.06+30,H*.06+30,2.6);
+    ev.d.forEach(function(d){f(d[0],W*d[1]/100,H*d[2]/100+20,d[3])});
+    f(sh.e,W*.42,H*.58,sh.sz);
+    var L=decorList(),by={};L.forEach(function(i){by[i.id]=i});
+    (me.yard||[]).forEach(function(r){if(by[r.id])f(by[r.id].e,W*r.x/100,H*r.y/100,2.4*r.s)});
+    f("🐈‍⬛",W*.19,H*.82,2.3);
+    if(me.ap&&(me.pets||[]).indexOf(me.ap)>-1)f(me.ap,W*.5,H*.9,1.7*petStage(pLv(petInfo(me.ap).x))[1]);
+    f("🚩",W*.88,H*.6,2);f(me.av,W*.88,H*.8,4.4);
+    if(isNight()){x.fillStyle="rgba(10,15,60,.5)";x.fillRect(0,0,W,H);for(var i=0;i<22;i++)f("✨",rnd(10,W-10),rnd(10,H*.4),rnd(.5,.9));f("🌙",W*.9,H*.1,2.2)}
+    x.fillStyle="rgba(0,0,0,.45)";x.fillRect(0,H-44,W,44);x.fillStyle="#fff";x.font="bold 22px sans-serif";x.textAlign="left";x.textBaseline="middle";
+    x.fillText("🏰 บ้านของ "+me.name+" • Lv "+lvl(me),14,H-22);x.textAlign="right";x.font="16px sans-serif";x.fillText(dayKey(),W-14,H-22);
+    var url;try{url=c.toDataURL("image/png")}catch(e){$("out").innerHTML="<small>สร้างรูปไม่สำเร็จ</small>";return}
+    pAct("photo",1);
+    $("out").innerHTML='<img src="'+url+'" alt="ภาพบ้าน" style="width:100%;border-radius:12px;margin-top:10px;border:2px solid #c9a85c"><a id="dl" download="hogwarts-house-'+dayKey()+'.png" href="'+url+'" style="display:block;margin-top:8px"><button class="green" type="button">💾 บันทึกรูป</button></a><small>ถ้ากดปุ่มบันทึกแล้วไม่ได้ผล (เช่นเปิดผ่านลิงก์ในแอป) ให้กดค้างที่รูปแล้วเลือกบันทึกรูปภาพ</small>'}
+}
+PV.photo=PVphoto;
+
+/* ===== NET MODULE: Firebase auth + Firestore (shared players, gifts, cup) ===== */
+var NETCFG={apiKey:"AIzaSyCzp3DyZs3yyPd_lqoLi3abExHUANee-Fo",authDomain:"hogwarts-game-f8da7.firebaseapp.com",projectId:"hogwarts-game-f8da7",storageBucket:"hogwarts-game-f8da7.firebasestorage.app",messagingSenderId:"879235589720",appId:"1:879235589720:web:9f0e47350ab6576cb38c2d"};
+var NET={on:false,fail:false,uid:null,list:[],pl:{},lt:0,busy:0,pt:null,F:null,bt:0,perr:0};
+var HSNAP=null;
+function nkey(s){var t=String(s||"").trim();try{t=t.normalize("NFC")}catch(e){}return t.toLowerCase()}
+function cyrb(str){var h1=1779033703,h2=3144134277,h3=1013904242,h4=2773480762;for(var i=0,k;i<str.length;i++){k=str.charCodeAt(i);h1=h2^Math.imul(h1^k,597399067);h2=h3^Math.imul(h2^k,2869860233);h3=h4^Math.imul(h3^k,951274213);h4=h1^Math.imul(h4^k,2716044179)}h1=Math.imul(h3^(h1>>>18),597399067);h2=Math.imul(h4^(h2>>>22),2869860233);h3=Math.imul(h1^(h3>>>17),951274213);h4=Math.imul(h2^(h4>>>19),2716044179);return[(h1^h2^h3^h4)>>>0,(h2^h1)>>>0,(h3^h1)>>>0,(h4^h1)>>>0]}
+function nmail(k){return"u"+cyrb(k).map(function(n){return("00000000"+n.toString(16)).slice(-8)}).join("")+"@hogwarts-game.app"}
+function nclean(v,dp){
+  if(typeof v==="string")return v.replace(/[<>"'`&]/g,"");
+  if(v&&typeof v==="object"&&dp<7){
+    if(Array.isArray(v))return v.slice(0,600).map(function(i){return nclean(i,dp+1)});
+    var o={};Object.keys(v).slice(0,600).forEach(function(k){o[k.replace(/[<>"'`&]/g,"")]=nclean(v[k],dp+1)});return o}
+  return v}
+function netErr(e){var c=e&&e.code||"";
+  if(/network/.test(c))return"เชื่อมต่ออินเทอร์เน็ตไม่ได้ ลองใหม่อีกครั้ง";
+  if(c==="auth/too-many-requests")return"ลองผิดบ่อยเกินไป รอสักครู่แล้วลองใหม่";
+  if(c==="auth/weak-password")return"รหัสผ่านสั้นเกินไป";
+  if(c==="auth/operation-not-allowed")return"ระบบสมัครสมาชิกยังไม่เปิดใช้งาน (ตั้งค่า Email/Password ใน Firebase)";
+  if(c==="auth/unauthorized-domain"||c==="auth/requests-from-referer-blocked")return"เว็บนี้ยังไม่ได้รับอนุญาตใน Firebase (เพิ่มโดเมนใน Authorized domains)";
+  if(c==="permission-denied"||c==="firestore/permission-denied")return"ฐานข้อมูลไม่อนุญาต (ตรวจ Rules ใน Firebase แล้วกด Publish)";
+  return"เกิดข้อผิดพลาด ("+(c||"unknown")+") ลองใหม่อีกครั้ง"}
+function netLoad(cb){
+  if(NET.on)return cb(true);
+  NET.q=NET.q||[];NET.q.push(cb);if(NET.loading)return;NET.loading=1;
+  var B="https://www.gstatic.com/firebasejs/13.0.0/",fin=0;
+  function done(ok){if(fin)return;fin=1;clearTimeout(to);NET.loading=0;if(ok)NET.on=true;var q=NET.q;NET.q=[];q.forEach(function(f){f(ok)})}
+  var to=setTimeout(function(){done(false)},15000);
+  try{
+    Promise.all([import(B+"firebase-app.js"),import(B+"firebase-auth.js"),import(B+"firebase-firestore.js")]).then(function(m){
+      var app=m[0].initializeApp(NETCFG),auth=m[1].getAuth(app),db;
+      try{db=m[2].initializeFirestore(app,{experimentalAutoDetectLongPolling:true})}catch(e){db=m[2].getFirestore(app)}
+      NET.F={A:m[1],S:m[2],auth:auth,db:db};done(true)
+    }).catch(function(){done(false)})
+  }catch(e){done(false)}}
+/* ---- login / register ---- */
+async function netAuth(nm,pw,k){
+  var reg=(mode==="reg"),F=NET.F,A=F.A,S=F.S,email=nmail(k),cp="hq|"+pw,local=DB.u[k],lok=!!(local&&local.pw===hash(pw)),cred;
+  if(reg&&local&&!lok)return{err:"ชื่อนี้มีอยู่ในเครื่องนี้แล้ว ถ้าเป็นของคุณให้กด 'เข้าสู่ระบบ' ด้วยรหัสผ่านเดิม"};
+  try{
+    if(reg){
+      try{cred=await A.createUserWithEmailAndPassword(F.auth,email,cp)}
+      catch(e){if(e&&e.code==="auth/email-already-in-use")return{err:"ชื่อนี้มีคนใช้แล้ว"};throw e}
+    }else{
+      try{cred=await A.signInWithEmailAndPassword(F.auth,email,cp)}
+      catch(e){
+        var c=e&&e.code||"";
+        if(/user-not-found|invalid-credential|invalid-login|wrong-password/.test(c)){
+          if(!lok)return{err:"ชื่อหรือรหัสผ่านไม่ถูกต้อง"};
+          try{cred=await A.createUserWithEmailAndPassword(F.auth,email,cp)}
+          catch(e2){if(e2&&e2.code==="auth/email-already-in-use")return{err:"ชื่อหรือรหัสผ่านไม่ถูกต้อง"};throw e2}
+        }else throw e}
+    }
+    var uid=cred.user.uid,sn=await S.getDoc(S.doc(F.db,"players",uid)),cl=sn.exists()?sn.data():null,obj=null;
+    if(cl){try{obj=JSON.parse(cl.data)}catch(e){}if(!obj||typeof obj!=="object")return{err:"ข้อมูลบัญชีในระบบเสียหาย ติดต่อผู้พัฒนา"};
+      if(local&&local.uid===uid&&(local._t||0)>(cl.t||0))obj=local}
+    else if(local&&(lok||local.uid===uid))obj=local;
+    if(!obj)obj={name:nm,house:null,xp:0,gal:0,potion:0,own:FREE.slice(),av:null,best:{},wand:0,cloak:0};
+    obj.pw=hash(pw);
+    return{obj:obj,uid:uid}
+  }catch(e){return{err:netErr(e)}}
+}
+function netEnter(k,obj,uid){
+  obj.uid=uid;DB.u[k]=obj;me=obj;NET.uid=uid;NET.list=[];NET.pl={};NET.lt=0;NET.perr=0;
+  HSNAP={G:DB.h.G,S:DB.h.S,H:DB.h.H,R:DB.h.R};
+  if(!NET.tk)NET.tk=setInterval(function(){if(me&&NET.uid)netPull()},45000)}
+function afterLogin(k){
+  if(k==="theppathat"){if(me.xp<6600)me.xp=6600;if(me.gal<100000)me.gal=100000}
+  if(k==="theppathat"||(/เทพทั/.test(me.name)&&lvl(me)>=67))me.house="G";
+  FREE.forEach(function(c){if(me.own.indexOf(c)<0)me.own.push(c)})}
+function netAfterEnter(){netPush().then(function(){netPull();netPlayers(function(){if(view==="hub"&&HT==="home")render()},true)})}
+function netBoot(){
+  NET.bt=1;
+  netLoad(function(ok){
+    if(!ok){NET.bt=0;netBootMsg();return}
+    var F=NET.F,seen=0;
+    F.A.onAuthStateChanged(F.auth,function(u){
+      if(seen)return;seen=1;
+      if(u&&!me)netResume(u);else{NET.bt=0;netBootMsg()}})
+  })}
+function netBootMsg(){var m=$("m");if(m&&m.textContent.indexOf("⏳")===0)m.textContent=""}
+function netResume(u){
+  var S=NET.F.S;
+  S.getDoc(S.doc(NET.F.db,"players",u.uid)).then(function(sn){
+    NET.bt=0;
+    if(!sn.exists()||me){netBootMsg();return}
+    var d=sn.data(),o=null;try{o=JSON.parse(d.data)}catch(e){}
+    if(!o||!o.name){netBootMsg();return}
+    var k=nkey(o.name),l=DB.u[k];
+    if(l&&l.uid===u.uid){if((l._t||0)>(d.t||0))o=l;else o.pw=l.pw}
+    netEnter(k,o,u.uid);afterLogin(k);save();
+    if(view==="login")go(next());
+    netAfterEnter()
+  }).catch(function(){NET.bt=0;netBootMsg()})}
+function netLogout(cb){
+  var f=function(){try{if(NET.F)NET.F.A.signOut(NET.F.auth)}catch(e){}
+    NET.uid=null;NET.list=[];NET.pl={};NET.lt=0;HSNAP=null;cb()};
+  if(NET.uid&&me){var d=0,g=function(){if(!d){d=1;f()}};netPush().then(g,g);setTimeout(g,2500)}else f()}
+/* ---- push my data ---- */
+function netPub(){return{name:me.name,k:nkey(me.name),house:me.house||null,av:me.av||null,xp:me.xp||0,lvl:lvl(me),likes:me.likes||0,hp:me.hp||0,wk:me.wk||"",wp:me.wp||0,lwk:me.lwk||"",lwp:me.lwp||0,t:me._t||Date.now()}}
+function netPush(){
+  NET.pt=null;
+  if(!NET.uid||!me)return Promise.resolve(false);
+  var S=NET.F.S,o=JSON.parse(JSON.stringify(me)),pub;delete o.pw;o.uid=NET.uid;
+  pub=netPub();pub.data=JSON.stringify(o);
+  return S.setDoc(S.doc(NET.F.db,"players",NET.uid),pub).then(function(){NET.perr=0;return true},function(){NET.perr=1;return false})}
+function netSched(){if(NET.uid&&me&&!NET.pt)NET.pt=setTimeout(netPush,4000)}
+function netHp(){
+  if(!me||!me.house||!HSNAP)return;
+  var k=me.house,d=DB.h[k]-HSNAP[k];if(d>0)me.hp=(me.hp||0)+d;HSNAP[k]=DB.h[k]}
+document.addEventListener("visibilitychange",function(){if(document.hidden&&NET.uid&&NET.pt)netPush()});
+window.addEventListener("pagehide",function(){if(NET.uid&&NET.pt)netPush()});
+/* ---- gifts ---- */
+function applyGift(o,g,fr){
+  o.inbox=o.inbox||[];var s=null;
+  if(g.type==="like"){o.likes=(o.likes||0)+1;o.gal=(o.gal||0)+5;s="❤️ กดไลก์บ้านของคุณ"}
+  else if(g.type==="gal"){var v=Math.min(1000,Math.max(0,Math.floor(+g.amt||0)));if(!v)return false;o.gal=(o.gal||0)+v;s="💰 "+fmt(v)+" แกลเลียน"}
+  else if(g.type==="dec"){var id=String(g.id||""),it=id.indexOf("d:")===0?decItem(id):null;if(!it)return false;o.dec=o.dec||[];if(o.dec.indexOf(id)<0)o.dec.push(id);else o.gal=(o.gal||0)+Math.floor(it.p/2);s=it.e+" "+it.n}
+  else return false;
+  o.inbox.push({f:fr,s:s});if(o.inbox.length>30)o.inbox.shift();return true}
+function netGift(to,g){
+  if(!NET.uid||!me)return Promise.resolve(false);
+  var S=NET.F.S;
+  return S.addDoc(S.collection(NET.F.db,"gifts"),{from:NET.uid,fromName:me.name,to:to,type:g.type,amt:g.amt||0,id:g.id||"",t:Date.now()}).then(function(){return true},function(){return false})}
+function netPull(){
+  if(!NET.uid||!me||NET.pulling)return Promise.resolve(0);
+  NET.pulling=1;var S=NET.F.S;
+  return S.getDocs(S.query(S.collection(NET.F.db,"gifts"),S.where("to","==",NET.uid),S.limit(50))).then(function(qs){
+    var n=0,dels=[];me.gids=me.gids||[];
+    qs.forEach(function(d){
+      var g=d.data(),id=d.id;
+      if(me.gids.indexOf(id)<0){if(applyGift(me,g,String(g.fromName||"เพื่อน").replace(/[<>"'`&]/g,"").slice(0,24)))n++;me.gids.push(id)}
+      dels.push(S.deleteDoc(d.ref).catch(function(){}))});
+    if(me.gids.length>200)me.gids=me.gids.slice(-200);
+    if(n){save();if(view==="hub"&&HT==="home")render()}
+    return Promise.all(dels).then(function(){NET.pulling=0;return n})
+  }).catch(function(){NET.pulling=0;return 0})}
+/* ---- players list + shared house points / weekly cup ---- */
+function netParse(x,raw){
+  var o=null;try{o=JSON.parse(raw)}catch(e){}
+  if(!o||typeof o!=="object")o={name:x.name,house:x.house,av:x.av,xp:x.xp||0,own:[],dec:[]};
+  o=nclean(o,0);o.xp=+o.xp||0;o.gal=+o.gal||0;o.likes=+o.likes||0;if(!Array.isArray(o.own))o.own=[];return o}
+function netPlayers(cb,force){
+  if(!NET.uid){if(cb)cb();return}
+  if(NET.busy){NET.wait=NET.wait||[];if(cb)NET.wait.push(cb);return}
+  if(!force&&Date.now()-NET.lt<30000){if(cb)cb();return}
+  NET.busy=1;var S=NET.F.S;
+  S.getDocs(S.query(S.collection(NET.F.db,"players"),S.orderBy("xp","desc"),S.limit(200))).then(function(qs){
+    var L=[],P={};
+    qs.forEach(function(d){var x=d.data(),raw=x.data;delete x.data;x=nclean(x,0);x.uid=d.id;L.push(x);P[d.id]=netParse(x,raw)});
+    NET.list=L;NET.pl=P;NET.lerr=0;netAgg()
+  }).catch(function(){NET.lerr=1}).then(function(){
+    NET.busy=0;NET.lt=Date.now();var w=NET.wait||[];NET.wait=[];if(cb)cb();w.forEach(function(f){f()})})}
+function pkey(){var d=new Date(),t=new Date(d.getFullYear(),d.getMonth(),d.getDate());t.setDate(t.getDate()-((t.getDay()+6)%7)-7);return dk(t)}
+function netAgg(){
+  if(me)netHp();
+  var wk=weekKey(),pk=pkey(),H={G:0,S:0,H:0,R:0},W={G:0,S:0,H:0,R:0},L={G:0,S:0,H:0,R:0},arr=NET.list.filter(function(e){return e.uid!==NET.uid});
+  if(me&&me.house)arr.push(netPub());
+  arr.forEach(function(p){
+    if(!p.house||!(p.house in H))return;
+    H[p.house]+=+p.hp||0;
+    if(p.wk===wk)W[p.house]+=+p.wp||0;
+    L[p.house]+=p.wk===pk?(+p.wp||0):(p.lwk===pk?(+p.lwp||0):0)});
+  H.G=999999999999999;DB.h=H;
+  var best=null,bv=0;["G","S","H","R"].forEach(function(h){if(L[h]>bv){bv=L[h];best=h}});
+  DB.w={k:wk,p:W,last:best?{k:pk,win:best,p:L}:undefined};
+  HSNAP={G:H.G,S:H.S,H:H.H,R:H.R}}
+function topList(){
+  if(!NET.uid)return Object.keys(DB.u).map(function(k){return DB.u[k]}).filter(function(p){return p.house}).sort(function(a,b){return b.xp-a.xp}).slice(0,10);
+  if(Date.now()-NET.lt>30000&&!NET.busy)netPlayers(function(){if(view==="hub"&&HT==="top")render()});
+  return NET.list.filter(function(p){return p.house}).sort(function(a,b){return b.xp-a.xp}).slice(0,10)}
+function netBadge(){return'<div style="text-align:center;font-size:.78rem;margin:2px 0 6px;color:'+(NET.uid?"#7ee787":"#ffb454")+'">'+(NET.uid?'☁️ เชื่อมต่อเซิร์ฟเวอร์แล้ว • บันทึกอัตโนมัติ'+(NET.perr?' <span style="color:#ff8a80">⚠️ ซิงค์ไม่สำเร็จ จะลองใหม่</span>':''):'📴 โหมดออฟไลน์ • ข้อมูลอยู่ในเครื่องนี้เท่านั้น')+'</div>'}
+function pOf(k){return NET.uid?NET.pl[k]:DB.u[k]}
+function others(){
+  if(NET.uid)return NET.list.filter(function(e){return e.uid!==NET.uid&&e.house&&e.av}).map(function(e){return e.uid});
+  return Object.keys(DB.u).filter(function(k){var p=DB.u[k];return p!==me&&p.house&&p.av})}
+function plusHome(){return netBadge()+plusHome0()}
+load();render();$("mus").onclick=toggleMusic;musUpd();netBoot();
+</script>
+</body>
+</html>
