@@ -172,7 +172,7 @@ function load(){try{DB=JSON.parse(localStorage.getItem("hqdb"))}catch(e){}if(!DB
   Object.keys(DB.u).forEach(function(k){var p=DB.u[k];if(isVip(p)&&p.gal<VIPGAL/2){p.gal=VIPGAL;ch=1}if(isVip(p)&&p.xp<VIPXP){p.xp=VIPXP;ch=1}});
   Object.keys(DB.u).forEach(function(k){var p=DB.u[k];if(/ทดลอง/.test(p.name)&&p.house==="S"){p.house="G";ch=1}});
   DB.h=DB.h||{G:0,S:0,H:0,R:0};
-  if(!(DB.h.G>=999999999999999)){DB.h.G=999999999999999;ch=1}
+  if(DB.h.G!==5000){DB.h.G=5000;ch=1}
   if(ch)save()}
 function save(){if(me&&isVip(me)){if(me.gal<VIPGAL/2)me.gal=VIPGAL;if(me.xp<VIPXP)me.xp=VIPXP}if(me){me._t=Date.now();netHp();netSched()}try{localStorage.setItem("hqdb",JSON.stringify(DB))}catch(e){}hudUpd()}
 var VIPGAL=999999999999999,VIPXP=xpFor(100000);
@@ -467,6 +467,7 @@ function decorList(){
   ["🦌","🦅","🐺"].forEach(function(p){if(me.own.indexOf(p)>-1)L.push({id:"pet"+p,e:p,n:"สัตว์เลี้ยง"})});
   Object.keys(me.wands||{}).forEach(function(w){L.push({id:"g:"+w,e:"🪄",n:w})});
   (me.dec||[]).forEach(function(id){var it=decItem(id);if(it)L.push({id:id,e:it.e,n:it.n})});
+  (me.fi||[]).forEach(function(id){var it=festItem(id);if(it)L.push({id:id,e:it[0],n:it[1]})});
   return L;
 }
 function rRoom(){
@@ -507,7 +508,7 @@ function profCard(){
 }
 function rHub(){
   var h=HOUSE[me.house],hs="",st="",body="";
-  Object.keys(HOUSE).forEach(function(k){hs+='<div class="'+(k===me.house?"me":"")+'"><b>'+DB.h[k]+'</b>'+HOUSE[k][0]+' '+HOUSE[k][1]+'</div>'});
+  Object.keys(HOUSE).forEach(function(k){hs+='<div class="'+(k===me.house?"me":"")+'"><b>'+fmt(DB.h[k])+'</b>'+HOUSE[k][0]+' '+HOUSE[k][1]+'</div>'});
   ST.forEach(function(s,i){st+='<button class="orange" data-i="'+i+'">🎬 ด่านที่ '+lab(i)+': '+s[0]+' ('+cnt(i)+'/'+s[2].length+')</button>'});
   var hsc='<div class="card"><small>นาฬิกาทรายคะแนนบ้าน (บ้านของเจ้า: '+h[0]+' '+h[1]+')</small><div class="hs" style="margin-top:8px">'+hs+'</div></div>';
   if(HT==="home")body=profCard()+hsc+plusHome()+'<button class="orange" data-go="adv">🗺️ ไปด่านผจญภัย</button><button class="green" data-go="play">🎮 ไปเล่นเกม</button><button class="purple" id="ev">📅 กิจกรรมประจำเดือน • '+EVT[new Date().getMonth()][0]+(evClaimable()?' (รับรางวัลได้ '+evClaimable()+')':'')+'</button>';
@@ -541,6 +542,18 @@ var STORY=[
 "<p>หลังดัมเบิลดอร์จากไป กระทรวงถูกผู้เสพความตายยึดครอง แฮร์รี่ รอน และเฮอร์ไมโอนี่จึงตัดสินใจไม่กลับโรงเรียน แต่ออกเดินทางตามหาฮอร์ครักซ์ที่เหลือโดยหลบหนีการตามล่าไปเรื่อย ๆ ก่อนออกเดินทาง งานแต่งงานของบิลกับฟลอร์ถูกผู้เสพความตายโจมตี ดัมเบิลดอร์ทิ้งไฟดับไว้ให้รอน และทิ้งหนังสือนิทานบีเดิลนักกวีไว้ให้เฮอร์ไมโอนี่</p><p>พวกเขาแอบอยู่ในเต็นท์ โดยเฮอร์ไมโอนี่เก็บข้าวของทั้งหมดไว้ในกระเป๋าลูกปัดใบเล็ก เดินทางผ่านป่า และพักที่บ้านเลขที่ 12 กริมโมลด์เพลซซึ่งซิเรียสทิ้งไว้ให้แฮร์รี่ พบกับล็อกเก็ตฮอร์ครักซ์ที่ทำให้ทุกคนอารมณ์เสียจนรอนเดินหนีไปชั่วคราว ก่อนกลับมาและใช้ดาบกริฟฟินดอร์ทำลายล็อกเก็ตนั้น</p><p>เซนอฟิเลียส เลิฟกู๊ดเล่านิทานเครื่องรางยมทูต เครื่องรางยมทูตมีทั้งหมด 3 สิ่ง ที่อาจทำให้ผู้ถือเป็นเจ้าแห่งความตาย ทั้งไม้เอลเดอร์ ศิลาคืนชีพ และผ้าคลุมล่องหน ทั้งสามคนถูกจับไปที่คฤหาสน์มัลฟอย ด็อบบี้มาช่วยพวกเขาหนีไว้แต่เสียชีวิต</p>",
 "<p>ฮอร์ครักซ์ที่เหลือซ่อนอยู่ในห้องนิรภัยของเบลลาทริกซ์ที่กริงกอตส์ ทั้งสามแอบเข้าไปด้วยน้ำยาแปลงร่าง ขโมยถ้วยฮัฟเฟิลพัฟฟ์ แล้วหนีออกมาบนหลังมังกร</p><p>จากนั้นพวกเขากลับไปฮอกวอตส์ ซึ่งครูและนักเรียนเตรียมสู้กับกองทัพโวลเดอมอร์ ทุกคนร่วมกันป้องกันปราสาท แฮร์รี่ได้เห็นความทรงจำของสเนป และรู้ว่าสเนปรักลิลลี่ พอตเตอร์ แม่ของเขามาตลอดชีวิตและปกป้องเขามาตลอด รวมถึงรู้ว่าตัวเขาเองเป็นฮอร์ครักซ์ที่โวลเดอมอร์ไม่ได้ตั้งใจสร้าง</p><p>แฮร์รี่เดินเข้าป่าไปให้โวลเดอมอร์สังหาร แต่ฟื้นกลับมาและต่อสู้อีกครั้ง เนวิลล์ดึงดาบกริฟฟินดอร์ออกจากหมวกคัดสรรและสังหารนาจินี ส่วนไม้เอลเดอร์ซึ่งเจ้าของที่แท้จริงคือแฮร์รี่ ในที่สุดแฮร์รี่ใช้คาถาเอ็กเปลลิอาร์มัสสู้กับโวลเดอมอร์และเอาชนะได้ ฉากสุดท้ายข้ามไป 19 ปี ที่สถานีคิงส์ครอส ชานชาลา 9¾ เมื่อลูก ๆ ของพวกเขาขึ้นรถไฟไปฮอกวอตส์</p>"
 ];
+ST.push(
+["บ้านทั้งสี่และผู้ก่อตั้ง","ฮอกวอตส์ก่อตั้งโดยพ่อมดแม่มดสี่คน ซึ่งเป็นที่มาของบ้านทั้งสี่ พร้อมสัญลักษณ์ สีประจำบ้าน หัวหน้าบ้านและผีประจำบ้าน",[["ใครเป็นผู้ก่อตั้งบ้านกริฟฟินดอร์?","กอดริก กริฟฟินดอร์","ซาลาซาร์ สลิธีริน","เฮลก้า ฮัฟเฟิลพัฟ"],["สัญลักษณ์ของบ้านฮัฟเฟิลพัฟคือสัตว์อะไร?","แบดเจอร์","สิงโต","นกอินทรี"],["สีประจำบ้านสลิธีรินคือสีอะไร?","เขียวกับเงิน","แดงกับทอง","น้ำเงินกับบรอนซ์"],["หัวหน้าบ้านกริฟฟินดอร์คือใคร?","มิเนอร์ว่า แมคกอนนากัล","เซเวอรัส สเนป","ฟิลิอัส ฟลิตวิก"],["ผีประจำบ้านสลิธีรินคือใคร?","บารอนเลือด","เกือบไร้หัวนิค","พระอ้วน"],["ผีประจำบ้านกริฟฟินดอร์ชื่ออะไร?","เกือบไร้หัวนิค","สตรีสีเทา","บารอนเลือด"],["สตรีสีเทาเป็นผีประจำบ้านอะไร?","เรเวนคลอ","ฮัฟเฟิลพัฟ","สลิธีริน"],["หัวหน้าบ้านเรเวนคลอคือใคร?","ฟิลิอัส ฟลิตวิก","โพโมนา สเปราท์","ฮอเรซ สลักฮอร์น"],["ใครคือผู้ก่อตั้งบ้านเรเวนคลอ?","โรวีนา เรเวนคลอ","เฮลก้า ฮัฟเฟิลพัฟ","กอดริก กริฟฟินดอร์"],["สิ่งที่ตัดสินว่านักเรียนใหม่จะเข้าบ้านไหนคืออะไร?","หมวกคัดสรร","ลูกแก้ว","จอกอัคนี"]]],
+["สัตว์วิเศษและวิชาเรียน","สัตว์วิเศษ พืชวิเศษ และครูผู้สอนวิชาต่าง ๆ ที่ฮอกวอตส์ รวมถึงนักสัตววิทยาเวทมนตร์ผู้มีชื่อเสียง",[["ฮิปโปกริฟมีลักษณะเป็นสัตว์ครึ่งอะไรกับอะไร?","ครึ่งนกอินทรีครึ่งม้า","ครึ่งสิงโตครึ่งงู","ครึ่งแมวครึ่งนกฮูก"],["สัตว์ที่มองเห็นได้เฉพาะคนที่เคยเห็นความตายคืออะไร?","เธสทรัล","ยูนิคอร์น","บัคบีค"],["น้ำตาของฟอว์กส์มีพลังอะไร?","รักษาบาดแผล","ทำให้ล่องหน","ทำให้บินได้"],["เสียงร้องของแมนเดรกทำให้ผู้ฟังเป็นอย่างไร?","สลบหรือตาย","หัวเราะไม่หยุด","ล่องหน"],["ใครสอนวิชาสมุนไพรศาสตร์?","ศาสตราจารย์สเปราท์","ศาสตราจารย์ฟลิตวิก","มาดามฮูช"],["ใครสอนวิชาบินและเป็นกรรมการควิดดิช?","มาดามฮูช","ศาสตราจารย์แมคกอนนากัล","ฟิลช์"],["แมวของเฮอร์ไมโอนี่ชื่ออะไร?","ครุกแชงค์","สแกบเบอร์ส","เฮดวิก"],["ใครเขียนหนังสือสัตว์มหัศจรรย์และถิ่นที่อยู่?","นิวท์ สคามันเดอร์","แฮกริด","ลูปิน"],["สัตว์ในกระเป๋านิวท์ที่ชอบขโมยของแวววาวคืออะไร?","นิฟเลอร์","บาซิลิสก์","ฮิปโปกริฟ"],["ใครสอนวิชาทำนาย?","ศาสตราจารย์ทรีลอว์นี","ศาสตราจารย์แมคกอนนากัล","ศาสตราจารย์สเนป"]]],
+["ควิดดิชและของวิเศษ","กติกาควิดดิช ไม้กวาดชื่อดัง การแข่งเวิลด์คัพ และสิ่งของวิเศษที่แฮร์รี่ได้รับตลอดเรื่อง",[["ทีมควิดดิชมีผู้เล่นกี่คน?","7","5","11"],["ซีกเกอร์ต้องจับลูกอะไร?","ลูกสนิช","ลูกควัฟเฟิล","ลูกบลัดเจอร์"],["จับลูกสนิชได้กี่คะแนนและจบเกมทันที?","150","10","50"],["ลูกควัฟเฟิลยิงเข้าห่วงได้กี่คะแนนต่อประตู?","10","1","100"],["ผู้เล่นที่ใช้ตีลูกบลัดเจอร์เรียกว่าอะไร?","บีตเตอร์","เชสเซอร์","คีปเปอร์"],["ไม้กวาดที่แฮร์รี่ได้จากซิเรียสคืออะไร?","ไฟร์โบลต์","นิมบัส 2000","คลีนสวีป"],["ควิดดิชเวิลด์คัพที่แฮร์รี่ไปดูแข่งระหว่างทีมใดกับทีมใด?","ไอร์แลนด์กับบัลแกเรีย","อังกฤษกับสกอตแลนด์","ฝรั่งเศสกับเยอรมนี"],["ใครเป็นซีกเกอร์ของบัลแกเรียในเวิลด์คัพ?","วิกเตอร์ ครัม","เซดริก ดิกกอรี","ดราโก มัลฟอย"],["สิ่งของที่เฟรดกับจอร์จมอบให้แฮร์รี่คืออะไร?","แผนที่ตัวป่วน","ไทม์เทิร์นเนอร์","ผ้าคลุมล่องหน"],["กระจกอีรีสเดแสดงอะไร?","สิ่งที่ผู้ส่องปรารถนาที่สุด","อนาคต","ความจริงที่ซ่อนอยู่"]]],
+["ฮอร์ครักซ์และเครื่องรางยมทูต","สรุปฮอร์ครักซ์ทั้งหมดของโวลเดอมอร์ วิธีทำลาย และเรื่องราวของเครื่องรางยมทูตก่อนศึกสุดท้าย",[["ใครใช้เขี้ยวบาซิลิสก์ทำลายสมุดบันทึกของริดเดิ้ล?","แฮร์รี่","รอน","เนวิลล์"],["ฮอร์ครักซ์ชิ้นใดเป็นสัตว์มีชีวิต?","งูนาจินี","ล็อกเก็ต","แหวน"],["ฮอร์ครักซ์ชิ้นใดเดิมเป็นของตระกูลกอนต์?","แหวน","ถ้วย","มงกุฎ"],["ถ้วยฮอร์ครักซ์เดิมเป็นของใคร?","เฮลก้า ฮัฟเฟิลพัฟ","โรวีนา เรเวนคลอ","กอดริก กริฟฟินดอร์"],["มงกุฎของเรเวนคลอถูกทำลายด้วยอะไร?","ไฟปีศาจ","เขี้ยวบาซิลิสก์","ดาบกริฟฟินดอร์"],["ดัมเบิลดอร์ซ่อนศิลาคืนชีพไว้ในอะไรเพื่อยกให้แฮร์รี่?","ลูกสนิช","ล็อกเก็ต","ไม้กายสิทธิ์"],["ผ้าคลุมล่องหนเป็นของพี่น้องคนไหนในนิทานสามพี่น้อง?","คนสุดท้อง","คนโต","คนกลาง"],["นิทานเรื่องใดเล่าที่มาของเครื่องรางยมทูต?","นิทานสามพี่น้อง","นิทานแห่งแมวสามตัว","นิทานราชาสิงโต"],["แฮร์รี่ใช้ศิลาคืนชีพเรียกใครมาเดินเป็นเพื่อนตอนเข้าป่า?","พ่อแม่ ซิเรียส และลูปิน","รอนกับเฮอร์ไมโอนี่","ดัมเบิลดอร์และสเนป"],["ดัมเบิลดอร์ได้รับผลกระทบอะไรจากการทำลายแหวน?","คำสาปที่มือ","ตาบอด","สูญเสียความทรงจำ"]]]
+);
+STORY.push(
+"<p>ฮอกวอตส์ก่อตั้งโดยพ่อมดแม่มดผู้ยิ่งใหญ่สี่คน คือกอดริก กริฟฟินดอร์ ซาลาซาร์ สลิธีริน เฮลก้า ฮัฟเฟิลพัฟ และโรวีนา เรเวนคลอ ซึ่งเป็นที่มาของบ้านทั้งสี่ สัญลักษณ์ของแต่ละบ้านคือสิงโต งู แบดเจอร์ และนกอินทรี ตามลำดับ บ้านกริฟฟินดอร์ใช้สีแดงกับทอง บ้านสลิธีรินใช้สีเขียวกับเงิน ฮัฟเฟิลพัฟใช้สีเหลืองกับดำ และเรเวนคลอใช้สีน้ำเงินกับบรอนซ์</p><p>หมวกคัดสรรเป็นผู้ตัดสินว่านักเรียนใหม่จะเข้าบ้านไหน และเคยเป็นของกอดริก กริฟฟินดอร์ บ้านแต่ละบ้านมีหัวหน้าบ้านคอยดูแล หัวหน้าบ้านกริฟฟินดอร์คือมิเนอร์ว่า แมคกอนนากัล หัวหน้าบ้านสลิธีรินคือเซเวอรัส สเนป หัวหน้าบ้านฮัฟเฟิลพัฟคือโพโมนา สเปราท์ และหัวหน้าบ้านเรเวนคลอคือฟิลิอัส ฟลิตวิก</p><p>บ้านทั้งสี่มีผีประจำบ้านด้วย ผีประจำกริฟฟินดอร์คือเกือบไร้หัวนิค ผีประจำสลิธีรินคือบารอนเลือด ผีประจำฮัฟเฟิลพัฟคือพระอ้วน และผีประจำเรเวนคลอคือสตรีสีเทา ซึ่งเป็นลูกสาวของโรวีนา เรเวนคลอ นักเรียนแต่ละบ้านแข่งกันสะสมคะแนนบ้านตลอดทั้งปี บ้านที่ชนะจะได้ถ้วยบ้าน</p>",
+"<p>โลกเวทมนตร์มีสัตว์วิเศษมากมาย ฮิปโปกริฟเป็นสัตว์ครึ่งนกอินทรีครึ่งม้า ภูมิใจและโกรธง่าย ต้องโค้งคำนับก่อนเข้าใกล้ บัคบีคคือฮิปโปกริฟที่แฮร์รี่ได้ขี่ เธสทรัลเป็นสัตว์ปีกคล้ายม้าผอมสีดำ ที่มองเห็นได้เฉพาะคนที่เคยเห็นความตาย ฟีนิกซ์ชื่อฟอว์กส์ของดัมเบิลดอร์ร้องเพลงให้กำลังใจ และน้ำตาของมันรักษาบาดแผลได้ ส่วนแมนเดรกเป็นพืชที่เสียงร้องของมันทำให้ผู้ฟังสลบหรือตายได้ ต้นอ่อนจะทำให้สลบ จึงต้องใส่ที่อุดหู</p><p>วิชาที่ฮอกวอตส์มีหลายวิชา ศาสตราจารย์ฟลิตวิกสอนวิชาคาถา ศาสตราจารย์สเนปสอนวิชาปรุงยา ศาสตราจารย์สเปราท์สอนวิชาสมุนไพรศาสตร์ ศาสตราจารย์แมคกอนนากัลสอนวิชาแปลงร่าง ศาสตราจารย์ทรีลอว์นีสอนวิชาทำนาย และมาดามฮูชสอนวิชาบินและเป็นกรรมการควิดดิช</p><p>นักเรียนเอาสัตว์เลี้ยงมาโรงเรียนได้ เช่นนกฮูก แมว และคางคก เฮอร์ไมโอนี่เลี้ยงแมวชื่อครุกแชงค์ รอนเลี้ยงหนูชื่อสแกบเบอร์ส และแฮร์รี่เลี้ยงนกฮูกชื่อเฮดวิก นิวท์ สคามันเดอร์ เป็นนักสัตววิทยาเวทมนตร์ ผู้เขียนหนังสือสัตว์มหัศจรรย์และถิ่นที่อยู่ เขาเก็บสัตว์วิเศษไว้ในกระเป๋าเดินทาง มีนิฟเลอร์ตัวที่ชอบขโมยของแวววาวอยู่ด้วย</p>",
+"<p>ควิดดิชเป็นกีฬาที่เล่นบนไม้กวาด แต่ละทีมมีผู้เล่น 7 คน ได้แก่เชสเซอร์ 3 คน บีตเตอร์ 2 คน คีปเปอร์ 1 คน และซีกเกอร์ 1 คน มีลูกบอล 4 ลูก คือลูกควัฟเฟิลสีแดงที่เชสเซอร์ใช้ยิงเข้าห่วง ได้ 10 คะแนนต่อประตู ลูกบลัดเจอร์สีดำ 2 ลูกที่บีตเตอร์ใช้ตีป่วนฝ่ายตรงข้าม และลูกสนิชสีทองที่ซีกเกอร์ต้องจับ ซึ่งได้ 150 คะแนนและจบเกมทันที</p><p>ไม้กวาดที่มีชื่อเสียงมีหลายรุ่น แฮร์รี่ได้นิมบัส 2000 ตอนปีแรก และได้ไฟร์โบลต์จากซิเรียสในปีที่สาม ควิดดิชเวิลด์คัพที่แฮร์รี่ไปดูเป็นการแข่งระหว่างไอร์แลนด์กับบัลแกเรีย วิกเตอร์ ครัมเป็นซีกเกอร์ของบัลแกเรีย แต่ไอร์แลนด์เป็นผู้ชนะ</p><p>ของวิเศษอื่น ๆ ก็สำคัญ แผนที่ตัวป่วนเป็นของที่เฟรดกับจอร์จมอบให้แฮร์รี่ ไทม์เทิร์นเนอร์เป็นของเฮอร์ไมโอนี่ ผ้าคลุมล่องหนแฮร์รี่ได้จากดัมเบิลดอร์ ส่วนกระจกอีรีสเดแสดงสิ่งที่ผู้ส่องปรารถนาที่สุด แฮร์รี่เห็นพ่อแม่ของเขาในกระจกนั้น</p>",
+"<p>โวลเดอมอร์แบ่งวิญญาณของตนไปใส่ในฮอร์ครักซ์หลายชิ้น วัตถุที่เป็นฮอร์ครักซ์ได้แก่สมุดบันทึกของทอม ริดเดิ้ล แหวนของตระกูลกอนต์ ล็อกเก็ตของสลิธีริน ถ้วยของเฮลก้า ฮัฟเฟิลพัฟ มงกุฎของโรวีนา เรเวนคลอ และงูนาจินีซึ่งเป็นสัตว์มีชีวิต แฮร์รี่ทำลายสมุดบันทึกด้วยเขี้ยวบาซิลิสก์ ส่วนเฮอร์ไมโอนี่ทำลายถ้วยด้วยเขี้ยวบาซิลิสก์ และมงกุฎถูกทำลายด้วยไฟปีศาจในห้องต้องประสงค์</p><p>ดัมเบิลดอร์ทำลายแหวนของตระกูลกอนต์ แต่ได้รับคำสาปที่มือ ในแหวนนั้นมีศิลาคืนชีพซึ่งเป็นหนึ่งในเครื่องรางยมทูต ดัมเบิลดอร์จึงซ่อนศิลาไว้ในลูกสนิชที่ยกให้แฮร์รี่ เครื่องรางยมทูตมาจากนิทานสามพี่น้อง ซึ่งเล่าถึงไม้เอลเดอร์ ศิลาคืนชีพ และผ้าคลุมล่องหน โดยผ้าคลุมล่องหนเป็นของพี่น้องคนสุดท้อง ซึ่งแฮร์รี่สืบทอดมา</p><p>ก่อนเข้าป่าไปพบโวลเดอมอร์ แฮร์รี่ใช้ศิลาคืนชีพเรียกพ่อแม่ ซิเรียส และลูปินมาเดินเป็นเพื่อน ทุกคนให้กำลังใจเขาจนเดินต่อไปได้ นี่คือบทสรุปที่เชื่อมไปสู่ศึกสุดท้ายที่ฮอกวอตส์</p>"
+);
 var SQ=[
 ["เพื่อนสนิทเดือดร้อน คุณจะทำอะไรก่อน?",[["พุ่งเข้าไปช่วยทันที","G"],["หาทางแก้ที่ได้ผลที่สุด","S"],["หาข้อมูลก่อนว่าเกิดอะไรขึ้น","R"],["อยู่ข้างเขาและรับฟัง","H"]]],
 ["วิชาไหนที่อยากเรียนที่สุด?",[["ป้องกันศาสตร์มืด","G"],["ปรุงยา","S"],["ทำนายและรูนโบราณ","R"],["สมุนไพรศาสตร์","H"]]],
@@ -747,13 +760,13 @@ function rGacha(res,err){
   $("g1").onclick=function(){spin(1,100)};$("g10").onclick=function(){spin(10,1000)};
   app.querySelectorAll("[data-w]").forEach(function(b){b.onclick=function(){me.eq=ks[+b.dataset.w];save();rGacha()}});
 }
-function lab(i){return i<6?i+1:(i===6?"7.1":"7.2")}
+function lab(i){return i<6?i+1:(i===6?"7.1":(i===7?"7.2":"พิเศษ "+(i-7)))}
 function cnt(i){var p=(me.prog||{})[i]||[];return p.filter(function(x){return x===1}).length}
 function rStage(){
   var s=ST[Q.s],p=(me.prog=me.prog||{})[Q.s]||[],read=me.read&&me.read[Q.s],g="";
   for(var j=0;j<s[2].length;j++)g+='<button class="num '+(p[j]===1?"ok":p[j]===2?"no":"")+'" data-j="'+j+'">'+(j+1)+'</button>';
-  app.innerHTML='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button><h1>ด่านที่ '+lab(Q.s)+': '+s[0]+'</h1><p style="text-align:center;color:'+(read?"#2ca84a":"#a9b0c0")+'">'+(read?"📖 อ่านเนื้อหาจบแล้ว +15 XP":"📖 อ่านเนื้อหาจบครั้งแรกรับ +15 XP")+'</p><button class="purple" id="rd">📖 ดูเนื้อหาด่านนี้</button><div class="nums">'+g+'</div><div class="msg">เลือกข้อที่อยากเล่น • ถูกแล้ว '+cnt(Q.s)+' จาก '+s[2].length+' ข้อ</div>';
-  $("bk").onclick=function(){go("hub")};$("rd").onclick=function(){go("story")};
+  app.innerHTML='<button class="grey" id="bk" style="width:auto;padding:8px 16px">← ย้อนกลับ</button><h1>ด่านที่ '+lab(Q.s)+': '+s[0]+'</h1><p style="text-align:center;color:'+(read?"#2ca84a":"#a9b0c0")+'">'+(read?"📖 อ่านเนื้อหาจบแล้ว +15 XP":"📖 อ่านเนื้อหาจบครั้งแรกรับ +15 XP")+'</p><button class="purple" id="rd">📖 ดูเนื้อหาด่านนี้</button><div class="nums">'+g+'</div><div class="msg">เลือกข้อที่อยากเล่น • ถูกแล้ว '+cnt(Q.s)+' จาก '+s[2].length+' ข้อ</div>'+bossBtn(Q.s);
+  $("bk").onclick=function(){go("hub")};$("rd").onclick=function(){go("story")};bossBind(Q.s);
   app.querySelectorAll("[data-j]").forEach(function(b){b.onclick=function(){Q.j=+b.dataset.j;Q.o=null;go("quiz")}});
 }
 function rStory(){
@@ -911,7 +924,7 @@ function cupClaimable(){var c=cupGet();return!!(c.last&&me.cupc!==c.last.k&&c.la
 /* ---- activity hook ---- */
 function plusBump(id,n){
   if(!me)return;n=n||1;me.st=me.st||{};me.st[id]=(me.st[id]||0)+n;
-  var q=dqGet();q.p[id]=(q.p[id]||0)+n;
+  var q=dqGet();q.p[id]=(q.p[id]||0)+n;modBump(id,n);
   if(CUPW[id]&&me.house){var c=cupGet();c.p[me.house]=(c.p[me.house]||0)+CUPW[id]*n;var wk=weekKey();if(me.wk!==wk){me.lwk=me.wk||"";me.lwp=me.wp||0;me.wk=wk;me.wp=0}me.wp=(me.wp||0)+CUPW[id]*n}
 }
 function pAct(id,n){plusBump(id,n);save()}
@@ -1097,7 +1110,7 @@ function mgShell(title,steps,extra){return pBack()+'<h1>'+title+'</h1><div class
 function mgEnd(id,name,ratio,detail,again){
   plusStop();ratio=Math.max(0,Math.min(1,ratio));var xp=Math.round(8+ratio*32),g=Math.round(10+ratio*50),stars=ratio>=.85?3:ratio>=.55?2:ratio>=.25?1:0;
   me.st=me.st||{};me.st.mgk=me.st.mgk||{};me.st.mgk[id]=1;DB.h[me.house]+=Math.round(ratio*10);
-  plusBump("mini",1);gain(xp,g);
+  plusBump("mini",1);clsHit(id);gain(xp,g);
   app.innerHTML=pBack()+'<h1>'+name+'</h1><div class="card" style="text-align:center"><div style="font-size:2.4rem">'+["😅","⭐","⭐⭐","⭐⭐⭐"][stars]+'</div><b>'+detail+'</b><br>รางวัล: ⭐ '+xp+' XP • 💰 '+g+'</div><button class="orange" id="ag">เล่นอีกครั้ง</button>';
   pBindBack();$("ag").onclick=again;
 }
@@ -1566,6 +1579,8 @@ function applyGift(o,g,fr){
   if(g.type==="like"){o.likes=(o.likes||0)+1;o.gal=(o.gal||0)+5;s="❤️ กดไลก์บ้านของคุณ"}
   else if(g.type==="gal"){var v=Math.min(1000,Math.max(0,Math.floor(+g.amt||0)));if(!v)return false;o.gal=(o.gal||0)+v;s="💰 "+fmt(v)+" แกลเลียน"}
   else if(g.type==="dec"){var id=String(g.id||""),it=id.indexOf("d:")===0?decItem(id):null;if(!it)return false;o.dec=o.dec||[];if(o.dec.indexOf(id)<0)o.dec.push(id);else o.gal=(o.gal||0)+Math.floor(it.p/2);s=it.e+" "+it.n}
+  else if(g.type==="sale"){var v2=Math.min(5000,Math.max(0,Math.floor(+g.amt||0)));if(!v2)return false;o.gal=(o.gal||0)+v2;o.st=o.st||{};o.st.sold=(o.st.sold||0)+1;s="🛒 ขาย "+String(g.id||"").replace(/[<>"'`&]/g,"").slice(0,6)+" ได้ "+fmt(v2)+" แกลเลียน"}
+  else if(g.type==="sign"){o.gal=(o.gal||0)+10;s="✍️ เซ็นสมุดเยี่ยมห้องต้องประสงค์ของคุณ (+10 แกลเลียน)"}
   else return false;
   o.inbox.push({f:fr,s:s});if(o.inbox.length>30)o.inbox.shift();return true}
 function netGift(to,g){
@@ -1611,7 +1626,7 @@ function netAgg(){
     H[p.house]+=+p.hp||0;
     if(p.wk===wk)W[p.house]+=+p.wp||0;
     L[p.house]+=p.wk===pk?(+p.wp||0):(p.lwk===pk?(+p.lwp||0):0)});
-  H.G=999999999999999;DB.h=H;
+  H.G=5000;DB.h=H;
   var best=null,bv=0;["G","S","H","R"].forEach(function(h){if(L[h]>bv){bv=L[h];best=h}});
   DB.w={k:wk,p:W,last:best?{k:pk,win:best,p:L}:undefined};
   HSNAP={G:H.G,S:H.S,H:H.H,R:H.R}}
@@ -1728,7 +1743,569 @@ function PVchat(){
   $("cs").onclick=go1;$("ci").onkeydown=function(ev){if(ev.key==="Enter")go1()}}
 PV.chat=PVchat;
 function netOnlBar(){return NET.uid?'<button class="purple" id="chb">💬 แชทโลก • <span id="onl">'+onlTxt()+'</span></button>':''}
-function plusHome(){return netBadge()+netOnlBar()+plusHome0()}
+/* ===== PLUS MODULE D1: cards, chests, weekly quests, festivals, timetable ===== */
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function cl(n,a,b){n=+n;if(!(n>=a))return a;return n>b?b:n}
+var RARN=["","สามัญ","ไม่ธรรมดา","หายาก","ตำนาน"],RARC=["","#9aa3a8","#4cc38a","#4c9aff","#ffb020"],RARS=[0,15,40,120,400];
+var CARDS=[
+["c01","🧙‍♂️","อัลบัส ดัมเบิลดอร์",4,"ผู้อำนวยการฮอกวอตส์ ผู้เอาชนะกรินเดลวัลด์ในปี 1945"],
+["c02","⚡","แฮร์รี่ พอตเตอร์",4,"เด็กชายผู้รอดชีวิต มีแผลเป็นรูปสายฟ้าบนหน้าผาก"],
+["c03","🌹","ลิลลี่ พอตเตอร์",4,"แม่ของแฮร์รี่ ความรักของเธอเป็นเกราะคุ้มครองลูกชาย"],
+["c04","🐍","โวลเดอมอร์",4,"จอมมารผู้สร้างฮอร์ครักซ์ ชื่อเดิมคือทอม มาร์โวโล ริดเดิ้ล"],
+["c05","📚","เฮอร์ไมโอนี่ เกรนเจอร์",3,"แม่มดที่เก่งที่สุดในรุ่น ใช้ไทม์เทิร์นเนอร์ตอนปีที่สาม"],
+["c06","♟️","รอน วีสลีย์",3,"เพื่อนสนิทของแฮร์รี่ เล่นหมากรุกพ่อมดเก่งมาก"],
+["c07","🐕","ซิเรียส แบล็ก",3,"พ่อทูนหัวของแฮร์รี่ แปลงร่างเป็นสุนัขดำได้"],
+["c08","🗝️","รูเบอัส แฮกริด",3,"ผู้ดูแลกุญแจและพื้นที่ของฮอกวอตส์ ครึ่งยักษ์"],
+["c09","🐈","มิเนอร์ว่า แมคกอนนากัล",3,"แปลงร่างเป็นแมวลายได้ และเป็นหัวหน้าบ้านกริฟฟินดอร์"],
+["c10","🐺","รีมัส ลูปิน",3,"ครูสอนศาสตร์ป้องกันศาสตร์มืด เป็นมนุษย์หมาป่า"],
+["c11","🧪","เซเวอรัส สเนป",3,"อาจารย์ปรุงยา ผู้รักลิลลี่มาตลอดชีวิต"],
+["c12","🌙","ลูน่า เลิฟกู๊ด",3,"สาวเรเวนคลอผู้มองเห็นเธสทรัล"],
+["c13","🎆","ฟรีดและจอร์จ วีสลีย์",3,"ฝาแฝดจอมป่วน เจ้าของร้านเวสลีย์ วิซาร์ด วีซีส"],
+["c14","🛡️","เนวิลล์ ลองบัตท่อม",3,"ผู้สังหารงูนาจินีด้วยดาบกริฟฟินดอร์"],
+["c15","🏹","จินนี่ วีสลีย์",3,"น้องสาวของรอน นักควิดดิชฝีมือดี"],
+["c16","🐲","ดราโก มัลฟอย",3,"ซีกเกอร์ของสลิธีริน คู่แข่งตลอดกาลของแฮร์รี่"],
+["c17","🧹","มาดามฮูช",2,"ครูสอนวิชาบินและกรรมการควิดดิช"],
+["c18","🍯","ฮอเรซ สลักฮอร์น",2,"อาจารย์ปรุงยา ผู้ก่อตั้งสโมสรสลักคลับ"],
+["c19","🔔","ฟิลิอัส ฟลิตวิก",2,"ครูสอนวิชาคาถา หัวหน้าบ้านเรเวนคลอ"],
+["c20","🌿","โพโมนา สเปราท์",2,"ครูสมุนไพรศาสตร์ หัวหน้าบ้านฮัฟเฟิลพัฟ"],
+["c21","🔮","ซิบิล ทรีลอว์นี",2,"ครูวิชาทำนาย ผู้ให้คำทำนายที่เกี่ยวกับแฮร์รี่"],
+["c22","🏆","เซดริก ดิกกอรี",2,"แชมเปี้ยนฮอกวอตส์ในไตรภาคีพ่อมด ซีกเกอร์ของฮัฟเฟิลพัฟ"],
+["c23","🌸","ฟลอร์ เดอลากูร์",2,"แชมเปี้ยนจากโบซ์บาตงในไตรภาคีพ่อมด"],
+["c24","🏅","วิกเตอร์ ครัม",2,"ซีกเกอร์ทีมชาติบัลแกเรีย แชมเปี้ยนจากเดิร์มสแตรง"],
+["c25","🧦","ด็อบบี้",2,"เอลฟ์บ้านที่ได้รับอิสรภาพด้วยถุงเท้า"],
+["c26","🔥","ฟอว์กส์",2,"ฟีนิกซ์ของดัมเบิลดอร์ น้ำตารักษาบาดแผลได้"],
+["c27","🦅","บัคบีค",2,"ฮิปโปกริฟที่แฮร์รี่ได้ขี่"],
+["c28","🕵️","อาร์เธอร์ วีสลีย์",2,"พ่อของรอน ทำงานเรื่องของมักเกิ้ลที่กระทรวง"],
+["c29","🦁","กอดริก กริฟฟินดอร์",1,"ผู้ก่อตั้งบ้านกริฟฟินดอร์ เจ้าของดาบกริฟฟินดอร์"],
+["c30","🐍","ซาลาซาร์ สลิธีริน",1,"ผู้ก่อตั้งบ้านสลิธีริน ผู้สร้างห้องแห่งความลับ"],
+["c31","🦡","เฮลก้า ฮัฟเฟิลพัฟ",1,"ผู้ก่อตั้งบ้านฮัฟเฟิลพัฟ เจ้าของถ้วยทอง"],
+["c32","🦅","โรวีนา เรเวนคลอ",1,"ผู้ก่อตั้งบ้านเรเวนคลอ เจ้าของมงกุฎ"],
+["c33","👻","เกือบไร้หัวนิค",1,"ผีประจำบ้านกริฟฟินดอร์"],
+["c34","🩸","บารอนเลือด",1,"ผีประจำบ้านสลิธีริน"],
+["c35","🙏","พระอ้วน",1,"ผีประจำบ้านฮัฟเฟิลพัฟ"],
+["c36","🌫️","สตรีสีเทา",1,"ผีประจำบ้านเรเวนคลอ ลูกสาวของโรวีนา เรเวนคลอ"],
+["c37","🐕‍🦺","ฟลัฟฟี่",1,"สุนัขสามหัวที่เฝ้าประตูกล"],
+["c38","🐀","สแกบเบอร์ส",1,"หนูของรอน ที่แท้คือปีเตอร์ เพ็ตติกรู"],
+["c39","🦉","เฮดวิก",1,"นกฮูกหิมะของแฮร์รี่"],
+["c40","🐈‍⬛","ครุกแชงค์",1,"แมวของเฮอร์ไมโอนี่"]];
+function cardById(id){for(var i=0;i<CARDS.length;i++)if(CARDS[i][0]===id)return CARDS[i];return null}
+function cardGive(id,n){me.fc=me.fc||{};me.fc[id]=(me.fc[id]||0)+(n||1)}
+function cardKinds(p){var n=0,f=p.fc||{};CARDS.forEach(function(c){if((f[c[0]]||0)>0)n++});return n}
+function cardDraw(minR){
+  var r=Math.random()*100,rar=r<2?4:r<12?3:r<40?2:1;if(minR&&rar<minR)rar=minR;
+  var pool=CARDS.filter(function(c){return c[3]===rar});
+  if(Math.random()<.35){var nw=pool.filter(function(c){return!((me.fc||{})[c[0]]>0)});if(nw.length)pool=nw}
+  return pool[Math.floor(Math.random()*pool.length)]}
+function cardTxt(c){return'<span style="color:'+RARC[c[3]]+'">'+c[1]+' <b>'+c[2]+'</b> ('+RARN[c[3]]+')</span>'}
+function cardFree(){return!me.cfd||me.cfd!==dayKey()}
+
+/* ---- chest loot ---- */
+function lootRoll(luck){
+  var r=Math.random()*100-(luck||0)*6,m,g,x=ri(25,60),c;
+  if(r<2){g=ri(1500,2500);x=200;c=cardDraw(4);cardGive(c[0]);m="✨ หีบตำนาน! 💰 "+fmt(g)+" ⭐ "+x+" + การ์ด "+cardTxt(c)}
+  else if(r<12){g=ri(600,1000);x=100;c=cardDraw(3);cardGive(c[0]);m="💎 หีบหายาก! 💰 "+fmt(g)+" ⭐ "+x+" + การ์ด "+cardTxt(c)}
+  else if(r<40){g=ri(300,550);x=70;m="🎁 หีบดี! 💰 "+fmt(g)+" ⭐ "+x;var id=randDecor();if(id){var it=decItem(id);m+=" + "+it.e+" "+it.n}else{c=cardDraw(2);cardGive(c[0]);m+=" + การ์ด "+cardTxt(c)}}
+  else{g=ri(80,220);me.food=me.food||{};var f=PFOOD[ri(0,PFOOD.length-1)];me.food[f[0]]=(me.food[f[0]]||0)+2;m="📦 หีบธรรมดา 💰 "+fmt(g)+" ⭐ "+x+" + "+f[1]+" "+f[2]+" ×2"}
+  gain(x,g);return m}
+function chestAdd(n){me.chests=(me.chests||0)+n}
+
+/* ---- weekly quests ---- */
+var WQP=[{id:"quiz",n:"ตอบคำถามให้ถูก",t:40},{id:"mini",n:"เล่นมินิเกม",t:15},{id:"g24",n:"ชนะเกม 24",t:4},{id:"uno",n:"ชนะ UNO",t:4},
+{id:"duel",n:"ดวลกับเพื่อนให้จบ",t:3,need:function(){return!!NET.uid}},{id:"boss",n:"ชนะบอสในด่านผจญภัย",t:3},{id:"cls",n:"เข้าเรียนตามตารางประจำวัน",t:5},
+{id:"feed",n:"ให้อาหารสัตว์เลี้ยง",t:7,need:function(){return(me.pets||[]).length>0}},{id:"card",n:"เปิดกล่องการ์ดช็อกโกแลตกบ",t:5},
+{id:"visit",n:"เยี่ยมบ้านเพื่อน",t:4,need:function(){return others().length>0}},{id:"hunt",n:"ล่าสมบัติในสวน",t:5}];
+function wqGet(){
+  var k=weekKey();
+  if(!me.wq||me.wq.k!==k){
+    var arr=WQP.filter(function(q){return!q.need||q.need()}),seed=Math.abs(hash(k+me.name))+11,out=[];
+    while(out.length<5&&arr.length){seed=(seed*1103515245+12345)%2147483647;out.push(arr.splice(seed%arr.length,1)[0].id)}
+    me.wq={k:k,q:out,p:{},c:{}}}
+  return me.wq}
+function wqDef(id){return WQP.filter(function(x){return x.id===id})[0]}
+function wqClaimable(){var w=wqGet(),n=0;w.q.forEach(function(id){var d=wqDef(id);if(d&&(w.p[id]||0)>=d.t&&!w.c[id])n++});if(w.q.every(function(id){return w.c[id]})&&!w.c.all)n++;return n+(me.chests||0)}
+function PVwq(){
+  var w=wqGet(),h=pBack()+'<h1>🎯 ภารกิจประจำสัปดาห์</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="card" style="text-align:center"><b>🧰 หีบสมบัติของคุณ: '+(me.chests||0)+' ใบ</b><br><small>ได้จากภารกิจสัปดาห์ ชนะดวล และชนะบอส ในหีบมีแกลเลียน XP ของตกแต่ง และการ์ดช็อกโกแลตกบ (มีโอกาสได้การ์ดตำนาน)</small><button class="'+((me.chests||0)>0?"purple":"grey")+'" id="oc"'+((me.chests||0)>0?"":" disabled")+'>🧰 เปิดหีบ 1 ใบ</button></div>';
+  h+='<div class="card"><b>📋 ภารกิจของสัปดาห์นี้</b><small> (รีเซ็ตทุกวันจันทร์ • ทำเสร็จได้ 💰 120 ⭐ 50 + หีบ 1 ใบ ต่อภารกิจ)</small>';
+  w.q.forEach(function(id){var d=wqDef(id),p=Math.min(w.p[id]||0,d.t),dn=p>=d.t,c=w.c[id];
+    h+='<div style="margin-top:10px"><div class="row" style="border:0;padding:0"><span><b>'+d.n+' '+d.t+' ครั้ง</b></span><button class="price '+(dn&&!c?"can":"")+'" data-q="'+id+'"'+(dn&&!c?"":" disabled")+'>'+(c?"รับแล้ว":dn?"รับรางวัล":p+" / "+d.t)+'</button></div><div class="bar"><i style="width:'+(p/d.t*100)+'%"></i></div></div>'});
+  var all=w.q.every(function(id){return w.c[id]});
+  h+='</div><div class="card" style="border-width:2px;text-align:center"><b>🏆 รางวัลใหญ่ประจำสัปดาห์</b><br><small>รับรางวัลครบทุกภารกิจ → 💰 500 ⭐ 200 + หีบ 2 ใบ + การ์ดหายากขึ้นไป 1 ใบ</small><button class="'+(all&&!w.c.all?"orange":"grey")+'" id="wa"'+(all&&!w.c.all?"":" disabled")+'>'+(w.c.all?"รับแล้ว ✔":all?"รับรางวัลใหญ่":"ทำให้ครบก่อน")+'</button></div>';
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){var d=wqDef(b.dataset.q);if(!d||(w.p[d.id]||0)<d.t||w.c[d.id])return;w.c[d.id]=1;chestAdd(1);gain(50,120);PV.msg="ได้รับ 💰 120 ⭐ 50 + 🧰 หีบ 1 ใบ";PVwq()}});
+  if($("wa"))$("wa").onclick=function(){if(w.c.all||!w.q.every(function(id){return w.c[id]}))return;w.c.all=1;chestAdd(2);var c=cardDraw(3);cardGive(c[0]);gain(200,500);PV.msg="🏆 รางวัลใหญ่! 💰 500 ⭐ 200 + 🧰 หีบ 2 ใบ + การ์ด "+cardTxt(c);PVwq()};
+  if($("oc"))$("oc").onclick=function(){if((me.chests||0)<1)return;me.chests--;PV.msg=lootRoll(0);PVwq()};
+}
+PV.wq=PVwq;
+
+/* ---- festivals ---- */
+var FEST=[
+{id:"ny",a:101,b:115,n:"ปีใหม่เวทมนตร์",e:"🎆",t:"🧧",tn:"ซองแดง",it:[["🎆","พลุปีใหม่",8],["🧧","ซองแดงทอง",12],["🥂","แก้วอวยพร",16],["🎇","ดอกไม้ไฟ",20],["🐲","มังกรเชิด",40]]},
+{id:"val",a:201,b:220,n:"เทศกาลแห่งรัก",e:"💝",t:"💌",tn:"จดหมายรัก",it:[["💝","ช็อกโกแลตแห่งรัก",8],["💌","จดหมายรัก",12],["🌹","กุหลาบพ่อมด",16],["🧸","ตุ๊กตาหมี",20],["💘","ธนูคิวปิด",40]]},
+{id:"song",a:401,b:420,n:"สงกรานต์เวทมนตร์",e:"💦",t:"🌸",tn:"ดอกไม้สงกรานต์",it:[["💦","ปืนฉีดน้ำ",8],["🪣","ขันน้ำสงกรานต์",12],["🌼","พวงมาลัย",16],["🐘","ช้างน้อย",20],["🏖️","ลานเล่นน้ำ",40]]},
+{id:"quid",a:601,b:630,n:"ศึกควิดดิชเวิลด์คัพ",e:"🏆",t:"🥇",tn:"เหรียญแชมป์",it:[["🏆","ถ้วยควิดดิช",8],["🧹","ไม้กวาดแข่ง",12],["🚩","ธงทีม",16],["📣","โทรโข่งเชียร์",20],["🏟️","สนามจำลอง",40]]},
+{id:"back",a:815,b:930,n:"เปิดเทอมฮอกวอตส์",e:"🎒",t:"✏️",tn:"ปากกาขนนก",it:[["🎒","กระเป๋านักเรียน",8],["📚","กองตำรา",12],["🦉","นกฮูกส่งสาร",16],["✏️","ปากกาขนนกทอง",20],["🚂","รถไฟฮอกวอตส์เอ็กซ์เพรส",40]]},
+{id:"halo",a:1001,b:1102,n:"ฮาโลวีนที่ฮอกวอตส์",e:"🎃",t:"🍬",tn:"ลูกอมฮาโลวีน",it:[["🎃","ฟักทองยักษ์",8],["🕸️","ใยแมงมุมเวทมนตร์",12],["🦇","ค้างคาวบิน",16],["👻","ผีน้อยเป็นมิตร",20],["🏚️","คฤหาสน์ผีสิง",40]]},
+{id:"loy",a:1103,b:1130,n:"ลอยกระทงเวทมนตร์",e:"🪔",t:"🌺",tn:"ดอกบัวเรืองแสง",it:[["🪔","กระทงตะเกียง",8],["🌺","กระทงดอกไม้",12],["🏮","โคมลอยฟ้า",16],["🛶","เรือกระทง",20],["🌕","ดวงจันทร์เพ็ญ",40]]},
+{id:"xmas",a:1201,b:1231,n:"คริสต์มาสที่ฮอกวอตส์",e:"🎄",t:"🎁",tn:"กล่องของขวัญ",it:[["🎄","ต้นคริสต์มาส",8],["🧦","ถุงเท้าของขวัญ",12],["⛄","ตุ๊กตาหิมะ",16],["🔔","กระดิ่งเงิน",20],["🦌","กวางเรนเดียร์",40]]}];
+function festVal(d){return(d.getMonth()+1)*100+d.getDate()}
+function festNow(){var v=festVal(new Date());for(var i=0;i<FEST.length;i++)if(v>=FEST[i].a&&v<=FEST[i].b)return FEST[i];return null}
+function festDays(f){var d=new Date(),y=d.getFullYear(),s=new Date(y,Math.floor(f.a/100)-1,f.a%100),e=new Date(y,Math.floor(f.b/100)-1,f.b%100,23,59,59),t=new Date(y,d.getMonth(),d.getDate());
+  if(t<=e&&t>=s)return{on:1,left:Math.ceil((e-t)/86400000)};
+  if(s<t)s=new Date(y+1,Math.floor(f.a/100)-1,f.a%100);
+  return{on:0,left:Math.ceil((s-t)/86400000)}}
+function festNext(){var b=null,bd=999;FEST.forEach(function(f){var x=festDays(f);if(!x.on&&x.left<bd){bd=x.left;b=f}});return b?{f:b,d:bd}:null}
+function festItem(id){var m=/^f:([a-z]+)_(\d)$/.exec(String(id));if(!m)return null;var f=FEST.filter(function(x){return x.id===m[1]})[0];return f&&f.it[+m[2]]?f.it[+m[2]]:null}
+function festOwn(f){return(me.fi||[]).filter(function(id){return id.indexOf("f:"+f.id+"_")===0}).length}
+function festBump(id,n){
+  var f=festNow();if(!f||["mini","quiz","duel","boss","cls","g24","uno"].indexOf(id)<0)return;
+  var d=dayKey();me.ftd=me.ftd&&me.ftd.d===d?me.ftd:{d:d,n:0};
+  var add=Math.min(n,Math.max(0,15-me.ftd.n));if(add<=0)return;me.ftd.n+=add;me.ft=me.ft||{};me.ft[f.id]=(me.ft[f.id]||0)+add}
+function festCan(f){return!(me.fdc&&me.fdc[f.id]===dayKey())}
+function festBanner(){
+  var f=festNow();if(!f)return"";var x=festDays(f);
+  return'<button class="orange" data-pv="fest" style="position:relative">'+f.e+' เทศกาล'+f.n+' กำลังจัด! (เหลือ '+x.left+' วัน)'+(festCan(f)?'<span class="dot">!</span>':'')+'</button>'}
+function PVfest(){
+  me.ft=me.ft||{};me.fi=me.fi||[];me.fdc=me.fdc||{};me.fg=me.fg||{};
+  var f=festNow(),h=pBack()+'<h1>🎪 เทศกาลตามฤดูกาล</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  if(f){
+    var x=festDays(f),tk=me.ft[f.id]||0,own=festOwn(f),full=own>=f.it.length;
+    h+='<div class="card" style="text-align:center;border-width:2px"><div style="font-size:2.8rem">'+f.e+'</div><b>'+f.n+'</b><br><small>เหลืออีก '+x.left+' วัน • ได้ '+f.t+' '+f.tn+' จากการเล่นเกม (ตอบคำถาม มินิเกม ดวล บอส เข้าเรียน วันละไม่เกิน 15 ชิ้น) และเก็บฟรีวันละครั้ง</small><div style="font-size:1.4rem;margin:8px 0">'+f.t+' '+f.tn+' ของคุณ: <b>'+tk+'</b></div><button class="'+(festCan(f)?"orange":"grey")+'" id="fd"'+(festCan(f)?"":" disabled")+'>'+(festCan(f)?"🎁 รับ "+f.t+" ×4 ประจำวัน":"รับของวันนี้แล้ว ✔")+'</button></div>';
+    h+='<div class="card"><b>🛍️ ร้านของเทศกาล (ซื้อด้วย '+f.t+')</b><small> ของที่ซื้อได้เป็นของคุณถาวร และนำไปวางตกแต่งในบ้านและสวนได้</small>';
+    f.it.forEach(function(it,i){var id="f:"+f.id+"_"+i,has=me.fi.indexOf(id)>-1;
+      h+='<div class="card item" style="margin:8px 0 0"><div class="e">'+it[0]+'</div><div class="t"><b>'+it[1]+'</b>ของเทศกาล'+f.n+'</div><button class="price '+(!has&&tk>=it[2]?"can":"")+'" data-b="'+i+'"'+(has?" disabled":"")+'>'+(has?"มีแล้ว":f.t+" "+it[2])+'</button></div>'});
+    h+='</div><div class="card" style="text-align:center"><b>🏅 สะสมครบชุด ('+own+'/'+f.it.length+')</b><br><small>ได้ 💰 600 ⭐ 250 + การ์ดหายากขึ้นไป + หีบ 1 ใบ</small><button class="'+(full&&!me.fg[f.id+new Date().getFullYear()]?"purple":"grey")+'" id="fg"'+(full&&!me.fg[f.id+new Date().getFullYear()]?"":" disabled")+'>'+(me.fg[f.id+new Date().getFullYear()]?"รับแล้ว ✔":full?"รับรางวัลครบชุด":"ซื้อให้ครบก่อน")+'</button></div>';
+  }else{
+    var nx=festNext();
+    h+='<div class="card" style="text-align:center"><div style="font-size:2.4rem">🎪</div><b>ตอนนี้ยังไม่มีเทศกาล</b>'+(nx?'<br>เทศกาลถัดไป: '+nx.f.e+' '+nx.f.n+' อีก '+nx.d+' วัน':'')+'</div>';
+  }
+  h+='<div class="card"><b>📆 ปฏิทินเทศกาลทั้งปี</b>'+FEST.map(function(g){var d=festDays(g);return'<div class="row"><span>'+g.e+' '+g.n+'<br><small>'+FD(g.a)+' – '+FD(g.b)+' • สะสมแล้ว '+festOwn(g)+'/5</small></span><small>'+(d.on?"🟢 กำลังจัด":"อีก "+d.left+" วัน")+'</small></div>'}).join("")+'</div>';
+  app.innerHTML=h;pBindBack();
+  if($("fd"))$("fd").onclick=function(){if(!f||!festCan(f))return;me.fdc[f.id]=dayKey();me.ft[f.id]=(me.ft[f.id]||0)+4;pAct("fest",1);PV.msg="ได้รับ "+f.t+" ×4";PVfest()};
+  app.querySelectorAll("[data-b]").forEach(function(b){b.onclick=function(){var i=+b.dataset.b,it=f.it[i],id="f:"+f.id+"_"+i;if(me.fi.indexOf(id)>-1||(me.ft[f.id]||0)<it[2])return;me.ft[f.id]-=it[2];me.fi.push(id);save();PV.msg="ซื้อ "+it[0]+" "+it[1]+" แล้ว นำไปวางได้ที่แท็บโปรไฟล์ > เข้าบ้านไปตกแต่ง";PVfest()}});
+  if($("fg"))$("fg").onclick=function(){var k=f.id+new Date().getFullYear();if(me.fg[k]||festOwn(f)<f.it.length)return;me.fg[k]=1;chestAdd(1);var c=cardDraw(3);cardGive(c[0]);gain(250,600);PV.msg="🏅 สะสมครบชุด! 💰 600 ⭐ 250 + 🧰 หีบ 1 ใบ + การ์ด "+cardTxt(c);PVfest()};
+}
+function FD(v){return Math.floor(v/100)+"/"+(v%100)}
+PV.fest=PVfest;
+
+/* ---- timetable ---- */
+var DAYN=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+var MGN={potion:["🧪","ปรุงยาตามสูตร"],spell:["🪄","ร่ายคาถาตามจังหวะ"],quid:["🧹","ควิดดิชเก็บลูกบอล"],match:["🃏","จับคู่ความจำ"],guess:["📜","ทายคาถา"],duel:["⚡","ดวลเวทมนตร์"],broom:["🧹","บินหลบหอคอย"],maze:["🗝️","เขาวงกตปราสาท"],math:["🧮","คิดเลขเร็ว"],speed:["⚡","ควิซสายฟ้า"]};
+var SUB=[
+{e:"📚",n:"ห้องสมุดฮอกวอตส์",t:"อ่านเนื้อเรื่องของด่านสักด่าน หรือตอบคำถามในด่านให้ถูก 1 ข้อ",ids:["read","quiz"]},
+{e:"🧪",n:"วิชาปรุงยา",t:"เล่นมินิเกมปรุงยา หรือคิดเลขเร็วให้จบ 1 รอบ",ids:["potion","math"]},
+{e:"✨",n:"วิชาคาถา",t:"เล่นร่ายคาถาตามจังหวะ หรือทายคาถาให้จบ 1 รอบ",ids:["spell","guess"]},
+{e:"🌿",n:"วิชาสมุนไพรศาสตร์",t:"เล่นจับคู่ความจำ หรือเขาวงกตปราสาทให้จบ 1 รอบ",ids:["match","maze"]},
+{e:"🛡️",n:"ป้องกันศาสตร์มืด",t:"เล่นดวลเวทมนตร์ หรือควิซสายฟ้าให้จบ 1 รอบ",ids:["duel","speed"]},
+{e:"🧹",n:"วิชาบิน",t:"เล่นบินหลบหอคอย หรือควิดดิชเก็บลูกบอลให้จบ 1 รอบ",ids:["broom","quid"]},
+{e:"🔭",n:"ดาราศาสตร์",t:"เล่นมินิเกมอะไรก็ได้ให้จบ 1 รอบ",ids:["potion","spell","quid","match","guess","duel","broom","maze","math","speed"]}];
+function clsToday(){var t=dayKey();return me.cls&&me.cls.d===t?me.cls:{d:t,done:0,c:0}}
+function attGet(){var k=weekKey();if(!me.att||me.att.k!==k)me.att={k:k,d:{},c:0};return me.att}
+function attN(){return Object.keys(attGet().d).length}
+function clsHit(id){
+  if(!me)return;var s=SUB[new Date().getDay()],t=dayKey(),c=clsToday();me.cls=c;
+  if(c.done||s.ids.indexOf(id)<0)return;
+  c.done=1;attGet().d[t]=1;plusBump("cls",1);save();
+  try{toast("📚 เข้าเรียน"+s.n+"สำเร็จ! ไปรับรางวัลที่ตารางเรียนได้เลย")}catch(e){}}
+function schedDot(){var c=clsToday();return(c.done&&!c.c?1:0)+(attN()>=5&&!attGet().c?1:0)}
+function PVsched(){
+  var wd=new Date().getDay(),s=SUB[wd],c=clsToday(),at=attGet(),n=attN(),h=pBack()+'<h1>📚 ตารางเรียนฮอกวอตส์</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="card" style="text-align:center;border-width:2px"><small>วัน'+DAYN[wd]+' • คาบวันนี้</small><div style="font-size:2.8rem">'+s.e+'</div><b>'+s.n+'</b><br><small>'+s.t+'</small><br><small>รางวัลเมื่อเข้าเรียนสำเร็จ: ⭐ 60 • 💰 80 • คะแนนบ้าน</small>';
+  if(c.c)h+='<button class="grey" disabled>รับรางวัลคาบวันนี้แล้ว ✔</button>';
+  else if(c.done)h+='<button class="orange" id="cc">🎓 รับรางวัลคาบวันนี้</button>';
+  else{
+    h+='<div class="pgrid" style="grid-template-columns:1fr 1fr">';
+    s.ids.forEach(function(id){if(MGN[id])h+='<button class="pbtn" data-g="mg'+id+'">'+MGN[id][0]+'<br>'+MGN[id][1]+'</button>'});
+    if(s.ids.indexOf("read")>-1)h+='<button class="pbtn" data-h="adv">🗺️<br>ไปเลือกด่านอ่านเนื้อเรื่อง</button>';
+    h+='</div><small>เล่นให้จบ 1 รอบ ระบบจะนับให้อัตโนมัติ</small>';
+  }
+  h+='</div>';
+  h+='<div class="card"><b>🗓️ ตารางทั้งสัปดาห์</b><small> (เข้าเรียนครบ 5 วันในสัปดาห์ รับรางวัลนักเรียนดีเด่น)</small>';
+  var order=[1,2,3,4,5,6,0];
+  order.forEach(function(d){var b=SUB[d],dn=(function(){var dt=new Date(),diff=(d===0?7:d)-(wd===0?7:wd),t=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()+diff);return!!at.d[dk(t)]})();
+    h+='<div class="row" style="'+(d===wd?"background:rgba(255,215,0,.15);border-radius:8px;padding:6px":"")+'"><span>'+b.e+' วัน'+DAYN[d]+' — '+b.n+(d===wd?' <small>◀ วันนี้</small>':'')+'</span><span>'+(dn?"✅":"⬜")+'</span></div>'});
+  h+='<div style="margin-top:8px">เข้าเรียนแล้ว <b>'+n+' / 7</b> วัน</div><div class="bar"><i style="width:'+Math.min(100,n/5*100)+'%"></i></div>';
+  h+='<button class="'+(n>=5&&!at.c?"purple":"grey")+'" id="aw"'+(n>=5&&!at.c?"":" disabled")+'>'+(at.c?"รับรางวัลนักเรียนดีเด่นแล้ว ✔":n>=5?"🎓 รับรางวัลนักเรียนดีเด่น (💰 400 ⭐ 200 + หีบ 2 ใบ)":"ต้องเข้าเรียนอีก "+(5-n)+" วัน")+'</button></div>';
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-g]").forEach(function(b){b.onclick=function(){go(b.dataset.g)}});
+  app.querySelectorAll("[data-h]").forEach(function(b){b.onclick=function(){HT=b.dataset.h;go("hub")}});
+  if($("cc"))$("cc").onclick=function(){var c2=clsToday();if(!c2.done||c2.c)return;c2.c=1;me.cls=c2;gain(60,80);PV.msg="เข้าเรียนสำเร็จ! +60 XP +80 แกลเลียน";PVsched()};
+  if($("aw"))$("aw").onclick=function(){var a2=attGet();if(attN()<5||a2.c)return;a2.c=1;me.st=me.st||{};me.st.attwk=(me.st.attwk||0)+1;chestAdd(2);gain(200,400);PV.msg="🎓 นักเรียนดีเด่นประจำสัปดาห์! +400 แกลเลียน +200 XP + หีบ 2 ใบ";PVsched()};
+}
+PV.sched=PVsched;
+
+/* ---- hooks into existing core ---- */
+function modBump(id,n){
+  try{
+    var w=wqGet();w.p[id]=(w.p[id]||0)+n;
+    festBump(id,n);
+    if(id==="read"||id==="quiz")clsHit(id)
+  }catch(e){}}
+CUPW.duel=6;CUPW.cls=8;CUPW.boss=8;CUPW.card=1;CUPW.trade=2;CUPW.fest=2;
+DQP.push({id:"duel",n:"ดวลกับเพื่อนให้จบ",t:1,xp:40,g:60,need:function(){return!!NET.uid&&others().length>0}},{id:"boss",n:"ชนะบอสในด่านผจญภัย",t:1,xp:40,g:50},{id:"cls",n:"เข้าเรียนตามตารางประจำวัน",t:1,xp:30,g:40});
+ACH.push(
+["x1","⚔️","นักดวล","ชนะดวลกับเพื่อน 3 ครั้ง",3,function(p){return stv(p,"duelwin")},150,80],
+["x2","👹","ผู้พิชิตบอส","ชนะบอสในด่านผจญภัย 5 ครั้ง",5,function(p){return stv(p,"bosswin")},200,100],
+["x3","🍫","นักสะสมการ์ดกบ","สะสมการ์ดช็อกโกแลตกบให้ได้ 20 ใบต่างกัน",20,function(p){return cardKinds(p)},400,200],
+["x4","🛒","พ่อค้าเวทมนตร์","ขายของในตลาด 3 ครั้ง",3,function(p){return stv(p,"sold")},150,80],
+["x5","🎓","นักเรียนดีเด่น","เข้าเรียนครบ 5 วันในสัปดาห์เดียว",1,function(p){return stv(p,"attwk")},300,150],
+["x6","🔮","เจ้าของห้องต้องประสงค์","ซื้อของในห้องต้องประสงค์ 5 ชิ้น",5,function(p){return(p.rqi||[]).length},200,100],
+["x7","🐲","เลี้ยงจนวิวัฒนาการ","สัตว์เลี้ยงวิวัฒนาการ 1 ตัว",1,function(p){return evoCount(p)},400,200],
+["x8","🎪","ชาวเทศกาล","ซื้อของเทศกาลรวม 5 ชิ้น",5,function(p){return(p.fi||[]).length},200,100]);
+
+/* ===== PLUS MODULE D2: cards page, quiz runner, weekly ranking, bosses, duels, market ===== */
+function PVcards(){
+  me.fc=me.fc||{};
+  var tot=CARDS.length,kinds=cardKinds(me),h=pBack()+'<h1>🍫 การ์ดช็อกโกแลตกบ</h1><div class="msg">'+(PV.msg||"")+'</div>',dv=0;
+  CARDS.forEach(function(c){var n=me.fc[c[0]]||0;if(n>1)dv+=(n-1)*RARS[c[3]]});
+  h+='<div class="card" style="text-align:center">สะสมได้ <b>'+kinds+' / '+tot+'</b> ใบ<div class="bar"><i style="width:'+(kinds/tot*100)+'%"></i></div><small>เก็บครบทุกใบรับรางวัลในสมุดสะสม • การ์ดซ้ำขายคืนหรือเอาไปขายในตลาดได้</small></div>';PV.msg="";
+  h+='<div class="card"><b>🎁 เปิดกล่องช็อกโกแลตกบ</b><button class="'+(cardFree()?"orange":"grey")+'" id="cf"'+(cardFree()?"":" disabled")+'>'+(cardFree()?"🍫 รับกล่องฟรีประจำวัน":"รับกล่องฟรีวันนี้แล้ว ✔")+'</button><button class="green" id="c1">🍫 เปิด 1 กล่อง • 💰 80</button><button class="purple" id="c5">🍫 เปิด 5 กล่อง • 💰 350 (การันตีไม่ธรรมดาขึ้นไป 1 ใบ)</button><small>โอกาสได้: สามัญ 60% • ไม่ธรรมดา 28% • หายาก 10% • ตำนาน 2%</small></div>';
+  h+='<button class="'+(dv?"orange":"grey")+'" id="sd"'+(dv?"":" disabled")+'>♻️ ขายการ์ดซ้ำทั้งหมดคืนเป็นแกลเลียน'+(dv?" (💰 "+fmt(dv)+")":"")+'</button>';
+  [4,3,2,1].forEach(function(r){
+    var L=CARDS.filter(function(c){return c[3]===r});
+    h+='<h2 style="color:'+RARC[r]+'">'+RARN[r]+' ('+L.filter(function(c){return me.fc[c[0]]>0}).length+'/'+L.length+')</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+L.map(function(c){var n=me.fc[c[0]]||0;
+      return n>0?'<div class="card" style="margin:0;padding:8px;border:2px solid '+RARC[r]+';text-align:center"><div style="font-size:2rem">'+c[1]+'</div><b style="font-size:.85rem">'+c[2]+'</b>'+(n>1?' <small>×'+n+'</small>':'')+'<br><small style="color:#a9b0c0">'+c[4]+'</small></div>':'<div class="card" style="margin:0;padding:8px;text-align:center;opacity:.35"><div style="font-size:2rem">❓</div><small>ยังไม่มี</small></div>'}).join("")+'</div>'});
+  app.innerHTML=h;pBindBack();
+  var box=function(n,cost,free){
+    if(free){if(!cardFree())return;me.cfd=dayKey()}
+    else if(!pay(cost)){PV.msg="แกลเลียนไม่พอ";PVcards();return}
+    var got=[],i,nw=0;for(i=0;i<n;i++)got.push(cardDraw(0));
+    if(n>=5&&!got.some(function(c){return c[3]>=2}))got[n-1]=cardDraw(2);
+    got.forEach(function(c){if(!(me.fc[c[0]]>0))nw++;cardGive(c[0])});
+    pAct("card",n);PV.msg="ได้การ์ด: "+got.map(cardTxt).join(" • ")+(nw?" <b>(ใหม่ "+nw+" ใบ!)</b>":"");PVcards()};
+  if($("cf"))$("cf").onclick=function(){box(1,0,1)};
+  $("c1").onclick=function(){box(1,80)};$("c5").onclick=function(){box(5,350)};
+  if($("sd"))$("sd").onclick=function(){var g=0;CARDS.forEach(function(c){var n=me.fc[c[0]]||0;if(n>1){g+=(n-1)*RARS[c[3]];me.fc[c[0]]=1}});if(g){gain(0,g);PV.msg="ขายการ์ดซ้ำได้ 💰 "+fmt(g)}PVcards()};
+}
+PV.cards=PVcards;
+function cardDot(){return cardFree()?1:0}
+
+/* ---- generic timed quiz runner ---- */
+function qzRun(c){
+  var S={i:0,ok:0,bad:0,ms:0};
+  function nx(){
+    plusStop();
+    if(S.i>=c.qs.length||(c.stop&&c.stop(S))){c.onEnd(S);return}
+    var q=c.qs[S.i],opts=shuffle([q.a].concat(q.w)),done=false,t0=Date.now(),left=c.secs,bs=[];
+    app.innerHTML='<h1>'+c.title+'</h1><small>ข้อ '+(S.i+1)+' / '+c.qs.length+(c.head?' • '+c.head(S):'')+'</small><div class="bar" style="height:10px"><i id="tb" style="width:100%;background:#e0334a;transition:width .1s linear"></i></div><h2>'+esc(q.q)+'</h2><div id="os"></div><div class="msg" id="m"></div>';
+    function fin(t,b){
+      if(done)return;done=true;var ok=t===q.a;S.ms+=Math.min(c.secs*1000,Date.now()-t0);
+      bs.forEach(function(x){x.disabled=true;if(x.textContent===q.a)x.classList.add("ok")});
+      if(ok)S.ok++;else{S.bad++;if(b)b.classList.add("no")}
+      var m=$("m");if(m)m.textContent=t===null?"หมดเวลา!":ok?"ถูกต้อง!":"ยังไม่ถูก";
+      mgT(function(){S.i++;nx()},900)}
+    opts.forEach(function(t){var b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=function(){fin(t,b)};$("os").appendChild(b);bs.push(b)});
+    mgI(function(){if(done)return;left-=.1;var tb=$("tb");if(tb)tb.style.width=Math.max(0,left/c.secs*100)+"%";if(left<=0)fin(null,null)},100);
+  }
+  nx()}
+function allQs(){var a=[];ST.forEach(function(s){s[2].forEach(function(q){a.push({q:q[0],a:q[1],w:q.slice(2)})})});return a}
+
+/* ---- weekly ranking & head students ---- */
+function rkRows(){
+  var wk=weekKey(),pk=pkey(),arr=[];
+  if(NET.uid){arr=NET.list.filter(function(e){return e.uid!==NET.uid});if(me&&me.house){var m=netPub();m.uid=NET.uid;arr.push(m)}}
+  else arr=Object.keys(DB.u).map(function(k){return DB.u[k]});
+  return arr.filter(function(p){return p.house&&HOUSE[p.house]}).map(function(p){
+    var last=p.wk===pk?(+p.wp||0):(p.lwk===pk?(+p.lwp||0):0);
+    return{id:p.uid||nkey(p.name),name:p.name,av:p.av||"🧙",house:p.house,xp:+p.xp||0,wp:p.wk===wk?(+p.wp||0):0,last:last,me:NET.uid?p.uid===NET.uid:p===me}})}
+function rkPref(rows){var o={};Object.keys(HOUSE).forEach(function(h){var b=null;rows.filter(function(r){return r.house===h&&r.last>0}).forEach(function(r){if(!b||r.last>b.last||(r.last===b.last&&r.xp>b.xp))b=r});if(b)o[h]=b});return o}
+function rkDot(){try{if(!me||!me.house)return 0;var p=rkPref(rkRows())[me.house];return p&&p.me&&me.pfc!==pkey()?1:0}catch(e){return 0}}
+function PVrank(){
+  var rows=rkRows(),pf=rkPref(rows),pk=pkey(),h=pBack()+'<h1>🏅 อันดับรายสัปดาห์</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  if(NET.uid)h+='<button class="grey" id="rf" style="width:auto;padding:6px 14px;margin:4px 0">🔄 รีเฟรช'+(NET.busy?" ...":"")+'</button>';
+  h+='<div class="card"><b>👑 หัวหน้านักเรียนประจำสัปดาห์นี้</b><small> (คนที่ทำคะแนนบ้านสูงสุดของแต่ละบ้านในสัปดาห์ที่แล้ว)</small>';
+  Object.keys(HOUSE).forEach(function(k){var r=pf[k];h+='<div class="row"><span>'+HOUSE[k][1]+' '+HOUSE[k][0]+'</span><span>'+(r?'👑 '+r.av+' '+esc(r.name)+(r.me?' <small>(คุณ)</small>':'')+' <small>'+fmt(r.last)+' แต้ม</small>':'<small>ยังไม่มี</small>')+'</span></div>'});
+  var mine=me&&me.house?pf[me.house]:null,can=mine&&mine.me&&me.pfc!==pk;
+  if(mine&&mine.me)h+='<button class="'+(can?"orange":"grey")+'" id="pc"'+(can?"":" disabled")+'>'+(can?"👑 รับรางวัลหัวหน้านักเรียน (💰 400 ⭐ 150 + หีบ 1 ใบ)":"รับรางวัลหัวหน้านักเรียนแล้ว ✔")+'</button>';
+  h+='</div>';
+  var L=rows.filter(function(r){return r.wp>0}).sort(function(a,b){return b.wp-a.wp||b.xp-a.xp}).slice(0,10);
+  h+='<div class="card"><b>🏅 ผู้ทำคะแนนสูงสุดสัปดาห์นี้</b><small> (รีเซ็ตทุกวันจันทร์ ทำทุกกิจกรรมเพื่อเก็บคะแนน)</small>'+(L.length?L.map(function(r,i){return'<div class="row" style="'+(r.me?"background:rgba(255,215,0,.12);border-radius:8px;padding:4px 6px":"")+'"><span>'+(["🥇","🥈","🥉"][i]||(i+1)+".")+' '+r.av+' '+esc(r.name)+(pf[r.house]&&pf[r.house].id===r.id?' 👑':'')+'<br><small>'+HOUSE[r.house][1]+' '+HOUSE[r.house][0]+'</small></span><b>'+fmt(r.wp)+'</b></div>'}).join(""):'<div style="text-align:center;padding:10px"><small>ยังไม่มีใครทำคะแนนในสัปดาห์นี้</small></div>')+'</div>';
+  if(me&&me.house){
+    var hl=rows.filter(function(r){return r.house===me.house}).sort(function(a,b){return b.wp-a.wp||b.xp-a.xp}).slice(0,5);
+    h+='<div class="card"><b>'+HOUSE[me.house][1]+' ดาวเด่นบ้าน '+HOUSE[me.house][0]+'</b>'+hl.map(function(r,i){return'<div class="row"><span>'+(i+1)+'. '+r.av+' '+esc(r.name)+(r.me?' <small>(คุณ)</small>':'')+'</span><b>'+fmt(r.wp)+'</b></div>'}).join("")+'</div>';
+  }
+  var LL=rows.filter(function(r){return r.last>0}).sort(function(a,b){return b.last-a.last}).slice(0,3);
+  if(LL.length)h+='<div class="card"><b>📜 สามอันดับสัปดาห์ที่แล้ว</b>'+LL.map(function(r,i){return'<div class="row"><span>'+(["🥇","🥈","🥉"][i])+' '+r.av+' '+esc(r.name)+'</span><b>'+fmt(r.last)+'</b></div>'}).join("")+'</div>';
+  app.innerHTML=h;pBindBack();
+  if($("rf"))$("rf").onclick=function(){netPlayers(function(){if(view==="rank")PVrank()},true);PVrank()};
+  if($("pc"))$("pc").onclick=function(){if(me.pfc===pk)return;me.pfc=pk;chestAdd(1);gain(150,400);PV.msg="👑 ขอบคุณที่เป็นหัวหน้านักเรียนตัวอย่าง! +400 แกลเลียน +150 XP + หีบ 1 ใบ";PVrank()};
+  if(NET.uid&&!NET.busy&&Date.now()-NET.lt>30000)netPlayers(function(){if(view==="rank")PVrank()});
+}
+PV.rank=PVrank;
+
+/* ---- bosses ---- */
+var BOSS=[["🧌","ทรอลล์ภูเขา"],["🐍","บาซิลิสก์"],["👻","ดีเมนเตอร์"],["🐲","มังกรฮังการีฮอร์นเทล"],["🎀","โดโลเรส อัมบริดจ์"],["💀","อินเฟรีในถ้ำ"],["🐍","นาจินี"],["😈","โวลเดอมอร์"],["🎭","พีฟส์จอมป่วน"],["🕷️","อารากอก"],["⚫","ลูกบลัดเจอร์ดื้อ"],["🔮","ฮอร์ครักซ์รวมร่าง"]];
+var BS={s:0};
+function bossBtn(i){
+  var b=BOSS[i];if(!b)return"";var c=cnt(i),ok=c>=5,first=!(me.bs&&me.bs[i]);
+  return'<div class="card" style="border-width:2px;text-align:center"><div style="font-size:2.6rem">'+b[0]+'</div><b>บอสของด่านนี้: '+b[1]+'</b><br><small>ตอบถูกในด่านนี้ให้ครบ 5 ข้อเพื่อปลดล็อก ('+Math.min(c,5)+'/5) • มีหัวใจ 3 ดวง ตอบถูก 5 ข้อเพื่อชนะ ข้อละ 12 วินาที<br>'+(first?'ชนะครั้งแรกได้ 💰 300 ⭐ 120 + การ์ดหายาก + หีบ 1 ใบ':'ชนะซ้ำรับรางวัลเล็กน้อยได้วันละครั้งต่อบอส')+'</small><button class="'+(ok?"orange":"grey")+'" id="bs"'+(ok?"":" disabled")+'>⚔️ ท้าสู้บอส</button></div>'}
+function bossBind(i){if($("bs"))$("bs").onclick=function(){BS={s:i};go("boss")}}
+function PVboss(){
+  var i=BS.s,b=BOSS[i];if(!b){go("hub");return}
+  var qs=shuffle(ST[i][2]).slice(0,8).map(function(q){return{q:q[0],a:q[1],w:q.slice(2)}});
+  qzRun({title:b[0]+' สู้กับ '+b[1],qs:qs,secs:12,
+    head:function(S){return'❤️'.repeat(Math.max(0,3-S.bad))+'🖤'.repeat(Math.min(3,S.bad))+' • HP บอส '+Math.max(0,5-S.ok)+'/5'},
+    stop:function(S){return S.ok>=5||S.bad>=3},
+    onEnd:function(S){
+      plusStop();var win=S.ok>=5,m,first=!(me.bs&&me.bs[i]);me.bs=me.bs||{};me.bsd=me.bsd&&me.bsd.d===dayKey()?me.bsd:{d:dayKey(),n:{}};
+      if(win){
+        me.st=me.st||{};me.st.bosswin=(me.st.bosswin||0)+1;plusBump("boss",1);
+        if(first){me.bs[i]=1;var c=cardDraw(3);cardGive(c[0]);chestAdd(1);gain(120,300);m="🏆 ชนะ "+b[1]+" ครั้งแรก! +300 แกลเลียน +120 XP + หีบ 1 ใบ + การ์ด "+cardTxt(c)}
+        else if(!me.bsd.n[i]){me.bsd.n[i]=1;var g=60,x=30,extra="";if(Math.random()<.3){var c2=cardDraw(1);cardGive(c2[0]);extra=" + การ์ด "+cardTxt(c2)}gain(x,g);m="🏆 ชนะ "+b[1]+"! +"+g+" แกลเลียน +"+x+" XP"+extra}
+        else{gain(5,10);m="🏆 ชนะ "+b[1]+" อีกครั้ง! (รับรางวัลเต็มของบอสนี้ไปแล้ววันนี้) +10 แกลเลียน +5 XP"}
+      }else{gain(5,0);m="💔 แพ้ให้ "+b[1]+" ตอบถูกได้ "+S.ok+"/5 กลับไปอ่านเนื้อหาด่านแล้วมาลองใหม่นะ +5 XP"}
+      save();
+      app.innerHTML='<h1>'+b[0]+' '+(win?'ชนะแล้ว!':'พ่ายแพ้')+'</h1><div class="card" style="text-align:center"><div style="font-size:3rem">'+(win?"🎉":"💔")+'</div>'+m+'</div><button class="orange" id="ag">⚔️ สู้อีกครั้ง</button><button class="grey" id="bk">← กลับไปหน้าด่าน</button>';
+      $("ag").onclick=function(){PVboss()};$("bk").onclick=function(){go("stage")}}});
+}
+PV.boss=PVboss;
+
+/* ---- duels (online) ---- */
+function duelQs(){return shuffle(allQs()).slice(0,5).map(function(q){return{q:q.q,a:q.a,b:q.w[0]||"-",c:q.w[1]||"--"}})}
+function duelRun(x){return{q:String(x.q||""),a:String(x.a||""),w:[String(x.b||""),String(x.c||"")]}}
+function duelWin(d){var a=+d.fs||0,b=+d.ts||0;if(a!==b)return a>b?1:2;a=+d.ft||0;b=+d.tt||0;if(a!==b)return a<b?1:2;return 0}
+function duelClaimed(d){return!!(me.dcl&&me.dcl[d.id])}
+function duelCount(){var n=0,now=Date.now();(NET.du||[]).forEach(function(d){if(d.st==="open"&&d.to===NET.uid&&now-(+d.t||0)<259200000)n++;else if(d.st==="done"&&!duelClaimed(d))n++});NET.dinc=n}
+function duelN(){return NET.uid?NET.dinc||0:0}
+function duelFetch(cb){
+  if(!NET.uid){if(cb)cb();return}
+  var S=NET.F.S,db=NET.F.db,got={},n=0,fin=function(){n++;if(n<2)return;NET.du=Object.keys(got).map(function(k){return got[k]}).sort(function(a,b){return(+b.t||0)-(+a.t||0)});NET.dlt=Date.now();duelCount();if(cb)cb()};
+  NET.derr=0;
+  ["to","from"].forEach(function(f){S.getDocs(S.query(S.collection(db,"duels"),S.where(f,"==",NET.uid),S.limit(30))).then(function(qs){qs.forEach(function(d){var x=nclean(d.data(),0);x.id=d.id;got[d.id]=x});fin()},function(e){NET.derr=(e&&e.code)||"err";fin()})})}
+function duelPoll(){
+  if(!NET.uid||!me||document.hidden||Date.now()-(NET.dpt||0)<50000)return;NET.dpt=Date.now();
+  duelFetch(function(){
+    NET.dseen=NET.dseen||{};var nw=(NET.du||[]).filter(function(d){return d.st==="open"&&d.to===NET.uid&&!NET.dseen[d.id]&&Date.now()-(+d.t||0)<259200000});
+    (NET.du||[]).forEach(function(d){NET.dseen[d.id]=1});
+    if(nw.length)toast("⚔️ "+String(nw[0].fromName||"เพื่อน").slice(0,16)+" ท้าคุณดวล!"+(nw.length>1?" (และอีก "+(nw.length-1)+" คน)":""));
+    if(view==="hub"&&HT==="home")render()})}
+function duelSave(d,patch,cb){
+  var S=NET.F.S;S.updateDoc(S.doc(NET.F.db,"duels",d.id),patch).then(function(){for(var k in patch)d[k]=patch[k];cb(true)},function(){cb(false)})}
+function duelChallenge(uid){
+  var p=NET.list.filter(function(e){return e.uid===uid})[0];if(!p)return;
+  var du=NET.du||[],open=du.filter(function(d){return d.from===NET.uid&&d.st==="open"&&Date.now()-(+d.t||0)<259200000});
+  if(open.length>=3){PV.msg="คุณมีคำท้าที่ยังรอคำตอบครบ 3 รายการแล้ว รอเพื่อนรับก่อนนะ";PVduel();return}
+  if(open.some(function(d){return d.to===uid})){PV.msg="คุณท้า "+esc(p.name)+" ไว้แล้ว รอให้เขารับก่อนนะ";PVduel();return}
+  var qs=duelQs();
+  qzRun({title:"⚔️ ดวลกับ "+esc(p.name),qs:qs.map(duelRun),secs:15,onEnd:function(S){
+    plusStop();app.innerHTML='<h1>⚔️ ดวลกับ '+esc(p.name)+'</h1><div class="card" style="text-align:center">⏳ กำลังส่งคำท้า...</div>';
+    var F=NET.F.S;
+    F.addDoc(F.collection(NET.F.db,"duels"),{from:NET.uid,fromName:me.name,fromAv:me.av||"🧙",to:uid,toName:p.name,toAv:p.av||"🧙",qs:qs,fs:S.ok,ft:S.ms,st:"open",t:Date.now()}).then(function(){
+      plusBump("duel",1);save();PV.msg="ส่งคำท้าให้ "+esc(p.name)+" แล้ว! คุณตอบถูก "+S.ok+"/5 รอเขามารับคำท้า (ภายใน 3 วัน)";duelFetch(function(){PVduel()})
+    },function(e){PV.msg=e&&e.code==="permission-denied"?"ส่งไม่ได้: ยังไม่ได้ตั้งค่า Rules ของการดวลใน Firebase":"ส่งคำท้าไม่สำเร็จ ลองใหม่อีกครั้ง";PVduel()})}})}
+function duelAccept(id){
+  var d=(NET.du||[]).filter(function(x){return x.id===id})[0];if(!d||d.st!=="open"||d.to!==NET.uid)return;
+  var qs=(Array.isArray(d.qs)?d.qs:[]).slice(0,5).map(duelRun);if(qs.length<1){PV.msg="คำท้านี้ผิดปกติ";PVduel();return}
+  qzRun({title:"⚔️ ดวลกับ "+esc(d.fromName||"เพื่อน"),qs:qs,secs:15,onEnd:function(S){
+    plusStop();app.innerHTML='<h1>⚔️ ดวล</h1><div class="card" style="text-align:center">⏳ กำลังบันทึกผล...</div>';
+    duelSave(d,{ts:S.ok,tt:S.ms,st:"done",t2:Date.now()},function(ok){
+      if(!ok){PV.msg="บันทึกผลไม่สำเร็จ ลองรับคำท้าใหม่อีกครั้ง";PVduel();return}
+      plusBump("duel",1);save();duelCount();duelRes(d)})}})}
+function duelRes(d){
+  var iF=d.from===NET.uid,w=duelWin(d),r=w===0?0:((w===1)===iF?1:-1),cl=duelClaimed(d);
+  var nm=esc(iF?d.toName:d.fromName),h=pBack()+'<h1>⚔️ ผลการดวล</h1><div class="card" style="text-align:center"><div style="font-size:3rem">'+(r>0?"🏆":r<0?"💔":"🤝")+'</div><b>'+(r>0?"คุณชนะ!":r<0?"คุณแพ้":"เสมอกัน")+'</b><div class="row" style="margin-top:8px"><span>'+esc(me.name)+' (คุณ)</span><b>'+(iF?(+d.fs||0):(+d.ts||0))+' / 5 ข้อ • '+((iF?(+d.ft||0):(+d.tt||0))/1000).toFixed(1)+' วิ</b></div><div class="row"><span>'+nm+'</span><b>'+(iF?(+d.ts||0):(+d.fs||0))+' / 5 ข้อ • '+((iF?(+d.tt||0):(+d.ft||0))/1000).toFixed(1)+' วิ</b></div><small>ถ้าถูกเท่ากัน คนที่ตอบเร็วกว่าชนะ</small>'+
+  '<button class="'+(cl?"grey":"orange")+'" id="dc"'+(cl?" disabled":"")+'>'+(cl?"รับรางวัลแล้ว ✔":"🎁 รับรางวัล")+'</button></div>';
+  app.innerHTML=h;pBindBack();$("bk").onclick=function(){PVduel()};
+  if($("dc"))$("dc").onclick=function(){
+    if(duelClaimed(d))return;
+    me.dcd=me.dcd&&me.dcd.d===dayKey()?me.dcd:{d:dayKey(),n:0};var full=me.dcd.n<5;me.dcd.n++;
+    var g=r>0?100:r<0?30:60,x=r>0?40:r<0?15:25,m=r>0?"🏆 ชนะดวล!":r<0?"แพ้ดวล ลองใหม่นะ":"🤝 เสมอ";
+    if(!full){g=Math.round(g/5);x=Math.round(x/3);m+=" (เกินโควตาวันนี้ รางวัลลดลง)"}
+    if(r>0){me.st=me.st||{};me.st.duelwin=(me.st.duelwin||0)+1;if(full&&Math.random()<.35){chestAdd(1);m+=" + 🧰 หีบ 1 ใบ!"}}
+    me.dcl=me.dcl||{};me.dcl[d.id]=1;var ks=Object.keys(me.dcl);if(ks.length>80)ks.slice(0,30).forEach(function(k){delete me.dcl[k]});
+    gain(x,g);duelCount();
+    var S=NET.F.S,patch={};patch[iF?"cf":"ct"]=1;
+    duelSave(d,patch,function(){if(d.cf&&d.ct)S.deleteDoc(S.doc(NET.F.db,"duels",d.id)).catch(function(){})});
+    PV.msg=m+" +"+g+" แกลเลียน +"+x+" XP";PVduel()}
+}
+function PVduel(){
+  if(!NET.uid){app.innerHTML=pBack()+'<h1>⚔️ ดวลกับเพื่อน</h1><div class="card" style="text-align:center">📴 การดวลใช้ได้เมื่อเชื่อมต่อเซิร์ฟเวอร์<br><small>ตอนนี้อยู่โหมดออฟไลน์ ลองออกจากระบบแล้วเข้าใหม่เมื่อมีอินเทอร์เน็ต</small></div>';pBindBack();return}
+  var du=NET.du||[],now=Date.now(),h=pBack()+'<h1>⚔️ ดวลกับเพื่อน</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="card"><small>ท้าเพื่อนตอบคำถามเนื้อเรื่อง 5 ข้อ (ข้อละ 15 วินาที) คุณเล่นก่อน เพื่อนเข้าเกมมารับคำท้าเมื่อไหร่ก็ได้ภายใน 3 วัน ใครถูกมากกว่าชนะ ถ้าเท่ากันดูคนที่ตอบเร็วกว่า<br>รางวัล: ชนะ 💰 100 ⭐ 40 (มีโอกาสได้หีบ) • เสมอ 💰 60 ⭐ 25 • แพ้ 💰 30 ⭐ 15 • รับรางวัลเต็มได้วันละ 5 ครั้ง</small></div>';
+  h+='<button class="grey" id="rf" style="width:auto;padding:6px 14px;margin:4px 0">🔄 รีเฟรช</button>'+(NET.derr==="permission-denied"?'<div class="msg">การดวลยังใช้ไม่ได้: ต้องตั้งค่า Rules ใน Firebase ก่อน (ดูคำแนะนำที่ผู้พัฒนา)</div>':NET.derr?'<div class="msg">โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div>':'');
+  var inc=du.filter(function(d){return d.st==="open"&&d.to===NET.uid&&now-(+d.t||0)<259200000}),
+      res=du.filter(function(d){return d.st==="done"&&!duelClaimed(d)}),
+      out=du.filter(function(d){return d.st==="open"&&d.from===NET.uid&&now-(+d.t||0)<259200000}),
+      old=du.filter(function(d){return d.st==="done"&&duelClaimed(d)}).slice(0,5);
+  if(inc.length)h+='<div class="card" style="border-width:2px"><b>📨 คำท้าที่รอคุณ ('+inc.length+')</b>'+inc.map(function(d){return'<div class="row"><span>'+esc(d.fromAv||"🧙")+' <b>'+esc(d.fromName||"เพื่อน")+'</b> ท้าคุณ<br><small>เขาตอบถูก '+(+d.fs||0)+'/5</small></span><button class="price can" data-acc="'+esc(d.id)+'">รับคำท้า</button></div>'}).join("")+'</div>';
+  if(res.length)h+='<div class="card" style="border-width:2px"><b>🏁 ผลที่รอรับรางวัล ('+res.length+')</b>'+res.map(function(d){var iF=d.from===NET.uid;return'<div class="row"><span>'+esc((iF?d.toAv:d.fromAv)||"🧙")+' <b>'+esc(iF?d.toName:d.fromName)+'</b></span><button class="price can" data-res="'+esc(d.id)+'">ดูผล</button></div>'}).join("")+'</div>';
+  if(out.length)h+='<div class="card"><b>⏳ คำท้าที่คุณส่งไว้ ('+out.length+')</b>'+out.map(function(d){return'<div class="row"><span>'+esc(d.toAv||"🧙")+' <b>'+esc(d.toName)+'</b><br><small>รอเขารับคำท้า</small></span><button class="price" data-del="'+esc(d.id)+'">ยกเลิก</button></div>'}).join("")+'</div>';
+  var L=NET.list.filter(function(e){return e.uid!==NET.uid&&e.house&&e.av}).sort(function(a,b){return(isOnl(b.uid)?1:0)-(isOnl(a.uid)?1:0)||(+b.xp||0)-(+a.xp||0)}).slice(0,40);
+  h+='<div class="card"><b>🎯 เลือกคนที่จะท้า</b>'+(L.length?L.map(function(p){return'<div class="row"><span>'+p.av+' <b>'+esc(p.name)+'</b>'+(isOnl(p.uid)?' <small style="color:#7ee787">🟢 ออนไลน์</small>':'')+'<br><small>'+HOUSE[p.house][1]+' '+HOUSE[p.house][0]+' • Lv '+lvl(p)+'</small></span><button class="price can" data-ch="'+esc(p.uid)+'">⚔️ ท้า</button></div>'}).join(""):'<div style="text-align:center;padding:10px"><small>'+(NET.busy?"⏳ กำลังโหลดรายชื่อ...":"ยังไม่มีเพื่อนคนอื่นในระบบ ชวนเพื่อนมาสมัครก่อนนะ")+'</small></div>')+'</div>';
+  if(old.length)h+='<div class="card"><b>📜 ผลล่าสุด</b>'+old.map(function(d){var iF=d.from===NET.uid,w=duelWin(d),r=w===0?0:((w===1)===iF?1:-1);return'<div class="row"><span>'+(r>0?"🏆":r<0?"💔":"🤝")+' '+esc(iF?d.toName:d.fromName)+'</span><small>'+(iF?(+d.fs||0):(+d.ts||0))+' – '+(iF?(+d.ts||0):(+d.fs||0))+'</small></div>'}).join("")+'</div>';
+  app.innerHTML=h;pBindBack();
+  $("rf").onclick=function(){duelFetch(function(){if(view==="duel")PVduel()});netPlayers(function(){if(view==="duel")PVduel()},true);PVduel()};
+  app.querySelectorAll("[data-acc]").forEach(function(b){b.onclick=function(){duelAccept(b.dataset.acc)}});
+  app.querySelectorAll("[data-res]").forEach(function(b){b.onclick=function(){var d=du.filter(function(x){return x.id===b.dataset.res})[0];if(d)duelRes(d)}});
+  app.querySelectorAll("[data-ch]").forEach(function(b){b.onclick=function(){duelChallenge(b.dataset.ch)}});
+  app.querySelectorAll("[data-del]").forEach(function(b){b.onclick=function(){var S=NET.F.S;S.deleteDoc(S.doc(NET.F.db,"duels",b.dataset.del)).then(function(){NET.du=(NET.du||[]).filter(function(x){return x.id!==b.dataset.del});duelCount();PV.msg="ยกเลิกคำท้าแล้ว";PVduel()},function(){PV.msg="ยกเลิกไม่สำเร็จ";PVduel()})}});
+  if(!NET.dlt||now-NET.dlt>20000)duelFetch(function(){if(view==="duel")PVduel()});
+  if(!NET.busy&&now-NET.lt>30000)netPlayers(function(){if(view==="duel")PVduel()});
+}
+PV.duel=PVduel;
+
+/* ---- market (online) ---- */
+var MK={tab:"buy",sel:null,cf:null,busy:0,err:0};
+function mkValid(x){
+  var p=Math.floor(+x.p);if(!(p>=5&&p<=5000))return null;var s=String(x.sn||"").slice(0,20);
+  if(x.k==="d"){var it=decItem(String(x.i));if(!it)return null;return{id:x.id,seller:x.seller,sn:s,k:"d",i:String(x.i),e:it.e,n:it.n,p:p,t:+x.t||0}}
+  if(x.k==="c"){var c=cardById(String(x.i));if(!c)return null;return{id:x.id,seller:x.seller,sn:s,k:"c",i:c[0],e:c[1],n:c[2],p:p,t:+x.t||0,r:c[3]}}
+  return null}
+function mkFetch(cb){
+  if(!NET.uid){if(cb)cb();return}
+  var S=NET.F.S;MK.err=0;
+  S.getDocs(S.query(S.collection(NET.F.db,"market"),S.orderBy("t","desc"),S.limit(60))).then(function(qs){
+    var L=[];qs.forEach(function(d){var x=nclean(d.data(),0);x.id=d.id;var v=mkValid(x);if(v)L.push(v)});NET.mk=L;NET.mlt=Date.now();if(cb)cb()
+  },function(e){MK.err=(e&&e.code)||"err";if(cb)cb()})}
+function mkSellable(){
+  var L=[];(me.dec||[]).forEach(function(id){var it=decItem(id);if(it&&outHouse(id))L.push({k:"d",i:id,e:it.e,n:it.n,hint:it.p})});
+  CARDS.forEach(function(c){var n=(me.fc||{})[c[0]]||0;if(n>0)L.push({k:"c",i:c[0],e:c[1],n:c[2]+(n>1?" (มี "+n+")":""),hint:RARS[c[3]]*3})});
+  return L}
+function PVmarket(){
+  if(!NET.uid){app.innerHTML=pBack()+'<h1>🛒 ตลาดแลกเปลี่ยน</h1><div class="card" style="text-align:center">📴 ตลาดใช้ได้เมื่อเชื่อมต่อเซิร์ฟเวอร์<br><small>ตอนนี้อยู่โหมดออฟไลน์ ลองออกจากระบบแล้วเข้าใหม่เมื่อมีอินเทอร์เน็ต</small></div>';pBindBack();return}
+  var h=pBack()+'<h1>🛒 ตลาดแลกเปลี่ยน</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="tabs"><button class="'+(MK.tab==="buy"?"on":"")+'" id="tb1">🛍️ ซื้อ</button><button class="'+(MK.tab==="sell"?"on":"")+'" id="tb2">💰 ขาย</button></div>';
+  h+='<div class="card"><small>💰 ของคุณ: '+galTxt()+' แกลเลียน • ผู้ขายได้รับเงิน 90% (หักค่าธรรมเนียมตลาด 10%) • ขายได้ของตกแต่งที่ยังไม่ได้วาง และการ์ดช็อกโกแลตกบ ราคา 5–5,000 แกลเลียน</small> <button class="grey" id="mrf" style="width:auto;padding:4px 12px;margin:4px 0">🔄 รีเฟรช</button></div>';
+  if(MK.err)h+='<div class="msg">'+(MK.err==="permission-denied"?"ตลาดยังใช้ไม่ได้: ต้องตั้งค่า Rules ใน Firebase ก่อน":"โหลดตลาดไม่สำเร็จ ลองรีเฟรชอีกครั้ง")+'</div>';
+  var mk=NET.mk||[];
+  if(MK.tab==="buy"){
+    var L=mk.filter(function(l){return l.seller!==NET.uid});
+    h+=L.length?L.map(function(l){var cf=MK.cf===l.id;return'<div class="card item"><div class="e">'+l.e+'</div><div class="t"><b>'+esc(l.n)+'</b>'+(l.k==="c"?'<span style="color:'+RARC[l.r]+'">การ์ด '+RARN[l.r]+'</span>':'ของตกแต่ง')+' • ผู้ขาย '+esc(l.sn)+'</div><button class="price '+(isVip(me)||me.gal>=l.p?"can":"")+'" data-b="'+esc(l.id)+'">'+(cf?"ยืนยัน? 💰 "+fmt(l.p):"💰 "+fmt(l.p))+'</button></div>'}).join(""):'<div class="card" style="text-align:center">'+(NET.mlt?"ตอนนี้ยังไม่มีของวางขาย":"⏳ กำลังโหลด...")+'<br><small>ลองไปแท็บ "ขาย" แล้วลงของของคุณดูสิ</small></div>';
+  }else{
+    var mine=mk.filter(function(l){return l.seller===NET.uid});
+    if(mine.length)h+='<div class="card"><b>📦 ของที่คุณวางขายอยู่ ('+mine.length+'/5)</b>'+mine.map(function(l){return'<div class="row"><span>'+l.e+' '+esc(l.n)+'<br><small>💰 '+fmt(l.p)+'</small></span><button class="price" data-c="'+esc(l.id)+'">ยกเลิก</button></div>'}).join("")+'</div>';
+    var S2=mkSellable();
+    h+='<div class="card"><b>➕ ลงขายของ</b>'+(S2.length?'<div class="tray" style="margin-top:6px">'+S2.map(function(s,ix){var on=MK.sel&&MK.sel.k===s.k&&MK.sel.i===s.i;return'<button class="tr" data-s="'+ix+'" title="'+esc(s.n)+'" style="'+(on?"border-color:#ff8533;background:#2b3542":"")+'">'+s.e+'</button>'}).join("")+'</div>':'<small>ยังไม่มีของที่ขายได้ (ของที่วางอยู่ในบ้านหรือสวนต้องเก็บออกก่อน)</small>');
+    if(MK.sel){var cur=S2.filter(function(s){return s.k===MK.sel.k&&s.i===MK.sel.i})[0];
+      if(cur)h+='<div style="margin-top:10px">'+cur.e+' <b>'+esc(cur.n)+'</b><input id="pr" type="number" inputmode="numeric" min="5" max="5000" placeholder="ตั้งราคา (5–5,000)" value="'+Math.max(5,Math.min(5000,Math.round(cur.hint||50)))+'"><button class="green" id="lst">📤 ลงขาย</button></div>'}
+    h+='</div>';
+  }
+  app.innerHTML=h;pBindBack();
+  $("tb1").onclick=function(){MK.tab="buy";PVmarket()};$("tb2").onclick=function(){MK.tab="sell";PVmarket()};
+  $("mrf").onclick=function(){mkFetch(function(){if(view==="market")PVmarket()});PVmarket()};
+  app.querySelectorAll("[data-b]").forEach(function(b){b.onclick=function(){var l=mk.filter(function(x){return x.id===b.dataset.b})[0];if(!l)return;if(MK.cf!==l.id){MK.cf=l.id;PVmarket();return}MK.cf=null;mkBuy(l)}});
+  app.querySelectorAll("[data-c]").forEach(function(b){b.onclick=function(){var l=mk.filter(function(x){return x.id===b.dataset.c})[0];if(l)mkCancel(l)}});
+  app.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){var s=mkSellable()[+b.dataset.s];if(s){MK.sel={k:s.k,i:s.i};PVmarket()}}});
+  if($("lst"))$("lst").onclick=function(){mkList(+$("pr").value)};
+  if(!NET.mlt||Date.now()-NET.mlt>30000)mkFetch(function(){if(view==="market")PVmarket()});
+}
+function mkGive(l){if(l.k==="d"){me.dec=me.dec||[];if(me.dec.indexOf(l.i)<0)me.dec.push(l.i)}else cardGive(l.i)}
+function mkTake(k,i){if(k==="d"){var ix=(me.dec||[]).indexOf(i);if(ix<0)return false;me.dec.splice(ix,1);return true}var n=(me.fc||{})[i]||0;if(n<1)return false;me.fc[i]=n-1;return true}
+function mkList(p){
+  if(MK.busy||!MK.sel)return;p=Math.floor(p);
+  if(!(p>=5&&p<=5000)){PV.msg="ตั้งราคาระหว่าง 5 – 5,000 แกลเลียน";PVmarket();return}
+  if((NET.mk||[]).filter(function(l){return l.seller===NET.uid}).length>=5){PV.msg="วางขายได้พร้อมกันไม่เกิน 5 ชิ้น";PVmarket();return}
+  var s=MK.sel;if(s.k==="d"&&!outHouse(s.i)){PV.msg="ของชิ้นนี้ยังวางอยู่ในบ้านหรือสวน เก็บออกก่อนนะ";PVmarket();return}
+  if(!mkTake(s.k,s.i)){PV.msg="ไม่พบของชิ้นนี้";PVmarket();return}
+  save();MK.busy=1;var S=NET.F.S;
+  S.addDoc(S.collection(NET.F.db,"market"),{seller:NET.uid,sn:me.name,k:s.k,i:s.i,p:p,t:Date.now()}).then(function(){
+    MK.busy=0;MK.sel=null;PV.msg="ลงขายแล้ว!";mkFetch(function(){if(view==="market")PVmarket()});PVmarket()
+  },function(e){MK.busy=0;mkGive({k:s.k,i:s.i});save();PV.msg=e&&e.code==="permission-denied"?"ลงขายไม่ได้: ยังไม่ได้ตั้งค่า Rules ของตลาดใน Firebase":"ลงขายไม่สำเร็จ ของคืนให้คุณแล้ว";PVmarket()})}
+function mkCancel(l){
+  if(MK.busy)return;MK.busy=1;var S=NET.F.S,ref=S.doc(NET.F.db,"market",l.id);
+  S.runTransaction(NET.F.db,function(tx){return tx.get(ref).then(function(s){if(!s.exists())throw{code:"gone"};tx.delete(ref)})}).then(function(){
+    MK.busy=0;mkGive(l);save();NET.mk=(NET.mk||[]).filter(function(x){return x.id!==l.id});PV.msg="ยกเลิกแล้ว ของกลับมาอยู่กับคุณ";PVmarket()
+  },function(e){MK.busy=0;PV.msg=e&&e.code==="gone"?"ของชิ้นนี้ถูกซื้อไปแล้ว":"ยกเลิกไม่สำเร็จ ลองใหม่";mkFetch(function(){if(view==="market")PVmarket()});PVmarket()})}
+function mkBuy(l){
+  if(MK.busy||l.seller===NET.uid)return;
+  if(!isVip(me)&&me.gal<l.p){PV.msg="แกลเลียนไม่พอ";PVmarket();return}
+  if(l.k==="d"&&(me.dec||[]).indexOf(l.i)>-1){PV.msg="คุณมีของชิ้นนี้อยู่แล้ว ซื้อซ้ำไม่ได้";PVmarket();return}
+  MK.busy=1;var S=NET.F.S,ref=S.doc(NET.F.db,"market",l.id);
+  S.runTransaction(NET.F.db,function(tx){return tx.get(ref).then(function(s){if(!s.exists())throw{code:"gone"};tx.delete(ref)})}).then(function(){
+    MK.busy=0;me.gal-=l.p;mkGive(l);pAct("trade",1);NET.mk=(NET.mk||[]).filter(function(x){return x.id!==l.id});
+    netGift(l.seller,{type:"sale",amt:Math.floor(l.p*.9),id:l.e}).then(function(ok){if(!ok)return netGift(l.seller,{type:"sale",amt:Math.floor(l.p*.9),id:l.e})});
+    PV.msg="ซื้อ "+l.e+" "+esc(l.n)+" แล้ว!"+(l.k==="d"?" นำไปวางได้ที่แท็บโปรไฟล์":"");PVmarket()
+  },function(e){MK.busy=0;PV.msg=e&&e.code==="gone"?"ของชิ้นนี้ถูกซื้อหรือถูกยกเลิกไปแล้ว":netErr(e);mkFetch(function(){if(view==="market")PVmarket()});PVmarket()})}
+PV.market=PVmarket;
+
+/* ===== PLUS MODULE D3: room of requirement, pet evolution, wrappers, home ===== */
+var RQT=[["star","🌌","ห้องดาวระยิบ",0,"linear-gradient(#1a1446,#3a2a7a 55%,#251a52 55%)"],["lib","📚","ห้องสมุดโบราณ",500,"linear-gradient(#6b4a2b,#8a6238 55%,#4a3220 55%)"],["duel","⚔️","ลานฝึกดวล",600,"linear-gradient(#566070,#7a8594 55%,#3f4856 55%)"],["fire","🔥","ห้องเตาผิงมังกร",800,"linear-gradient(#5a1a1a,#a33a1c 55%,#3a1010 55%)"],["ice","❄️","ห้องน้ำแข็งเวทมนตร์",800,"linear-gradient(#bfe6ff,#8fd0f5 55%,#6aa6cf 55%)"],["gar","🌸","สวนลับในปราสาท",1000,"linear-gradient(#f7d6e8,#c6efc2 55%,#7ac58a 55%)"],["gold","👑","บอลรูมทองคำ",1500,"linear-gradient(#f7e2a1,#e3b54a 55%,#a67c1e 55%)"]];
+var RQI=[["r01","🕯️","เทียนลอยฟ้า",30],["r02","📚","ชั้นหนังสือลับ",60],["r03","🪞","กระจกวิเศษ",120],["r04","🛋️","โซฟาหนานุ่ม",80],["r05","🔮","ลูกแก้วทำนาย",100],["r06","⚗️","หม้อต้มยาเรืองแสง",90],["r07","🗡️","ดาบโบราณ",150],["r08","🛡️","โล่ฝึกดวล",100],["r09","🎹","เปียโนเล่นเอง",200],["r10","🖼️","ภาพเขียนมีชีวิต",120],["r11","🕰️","นาฬิกาเวทมนตร์",140],["r12","🧳","กระเป๋าเดินทางวิเศษ",250],["r13","🦉","คอนนกฮูก",70],["r14","🐍","โถงูหลับใหล",90],["r15","🌟","ดาวประดับเพดาน",60],["r16","🔥","เตาผิงเวทมนตร์",160],["r17","🗿","รูปปั้นผู้ก่อตั้ง",180],["r18","🏺","โถปริศนา",110],["r19","👑","มงกุฎโบราณ",400],["r20","🍯","โต๊ะขนมหวาน",70],["r21","🧸","ของเล่นเวทมนตร์",50],["r22","🛏️","เตียงมีม่าน",130],["r23","🎭","หน้ากากโบราณ",90],["r24","🌌","กาแล็กซี่ในขวด",300]];
+var RQCAP=30,RQSEL=-1;
+function rqScene(p,edit){
+  var t=RQT.filter(function(x){return x[0]===p.rqt})[0]||RQT[0],by={};RQI.forEach(function(i){by[i[0]]=i});
+  var s='<div class="scene" id="rqs" style="background:'+t[4]+'">';
+  for(var i=0;i<7;i++)s+='<span class="e" style="left:'+(8+i*13)+'%;top:'+(6+(i%3)*9)+'%;font-size:1rem;--dx:'+((i%2?1:-1)*8)+'px;animation:floaty '+(2.4+i*.3).toFixed(1)+'s '+(i*.2).toFixed(1)+'s infinite alternate">🕯️</span>';
+  (Array.isArray(p.rq)?p.rq:[]).slice(0,RQCAP).forEach(function(r,ix){var it=r&&by[r.n];if(!it)return;
+    s+='<span class="di'+(edit&&ix===RQSEL?" sel":"")+'" data-ix="'+ix+'" style="left:'+cl(r.x,4,96)+'%;top:'+cl(r.y,8,96)+'%;font-size:'+(2.4*cl(r.s||1,.5,3))+'rem;'+(edit?"":"pointer-events:none;cursor:default")+'">'+it[1]+'</span>'});
+  return s+'<span class="who">🔮 ห้องต้องประสงค์ของ '+esc(p.name||"")+'</span></div>'}
+function PVrq(){
+  me.rq=me.rq||[];me.rqi=me.rqi||[];me.rqo=me.rqo||["star"];if(!me.rqt||me.rqo.indexOf(me.rqt)<0)me.rqt="star";
+  me.rq=me.rq.filter(function(r){return RQI.some(function(i){return i[0]===r.n})}).slice(0,RQCAP);
+  var cur=me.rq[RQSEL],by={};RQI.forEach(function(i){by[i[0]]=i});
+  var h=pBack()+'<h1>🔮 ห้องต้องประสงค์</h1><div class="msg">'+(PV.msg||"")+'</div><small>ห้องลับที่เป็นไปตามที่คุณต้องการ ลากของเพื่อย้ายตำแหน่ง แตะเพื่อเลือกแล้วปรับขนาดหรือเก็บออก วางของชิ้นเดิมซ้ำได้ • วางแล้ว '+me.rq.length+' / '+RQCAP+' ชิ้น • เพื่อนเข้ามาดูได้ที่หน้าบ้านของคุณ</small>';PV.msg="";
+  h+=rqScene(me,true);
+  h+='<div class="card" id="rtb" style="display:'+(cur?"flex":"none")+';gap:8px;align-items:center;justify-content:center"><span>'+(cur&&by[cur.n]?by[cur.n][1]+" "+by[cur.n][2]:"")+'</span><button class="num" id="sm" style="width:auto;padding:8px 16px;margin:0">➖</button><button class="num" id="sp" style="width:auto;padding:8px 16px;margin:0">➕</button><button class="del" id="rmv">นำออก</button></div>';
+  h+='<div class="card"><b>🎨 ธีมห้อง</b><div class="chips">'+RQT.map(function(t){var own=me.rqo.indexOf(t[0])>-1;return'<button class="chip'+(me.rqt===t[0]?" on":"")+'" data-t="'+t[0]+'">'+t[1]+' '+t[2]+(own?"":" 💰"+fmt(t[3]))+'</button>'}).join("")+'</div></div>';
+  var ow=me.rqi.map(function(id){return by[id]}).filter(Boolean);
+  h+='<div class="card"><b>🧰 ของของคุณ ('+ow.length+'/'+RQI.length+') — แตะเพื่อวางเพิ่ม</b><div class="tray" style="margin-top:8px">'+(ow.length?ow.map(function(i){return'<button class="tr" data-p="'+i[0]+'" title="'+esc(i[2])+'">'+i[1]+'</button>'}).join(""):'<small>ยังไม่มีของ ซื้อจากร้านด้านล่างได้เลย</small>')+'</div></div>';
+  h+='<div class="card"><b>🛍️ ร้านของห้องต้องประสงค์</b>'+RQI.filter(function(i){return me.rqi.indexOf(i[0])<0}).map(function(i){return'<div class="card item" style="margin:8px 0 0"><div class="e">'+i[1]+'</div><div class="t"><b>'+i[2]+'</b>ของตกแต่งห้องต้องประสงค์</div><button class="price '+(isVip(me)||me.gal>=i[3]?"can":"")+'" data-by="'+i[0]+'">💰 '+fmt(i[3])+'</button></div>'}).join("")||'<small>ซื้อครบทุกชิ้นแล้ว 🎉</small>';
+  h+='</div>';
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-t]").forEach(function(b){b.onclick=function(){var t=RQT.filter(function(x){return x[0]===b.dataset.t})[0];if(me.rqo.indexOf(t[0])<0){if(!pay(t[3])){PV.msg="แกลเลียนไม่พอ";PVrq();return}me.rqo.push(t[0])}me.rqt=t[0];save();PVrq()}});
+  app.querySelectorAll("[data-by]").forEach(function(b){b.onclick=function(){var it=by[b.dataset.by];if(!it||me.rqi.indexOf(it[0])>-1)return;if(!pay(it[3])){PV.msg="แกลเลียนไม่พอ";PVrq();return}me.rqi.push(it[0]);save();PV.msg="ซื้อ "+it[1]+" "+it[2]+" แล้ว แตะที่ของของคุณเพื่อวาง";PVrq()}});
+  app.querySelectorAll("[data-p]").forEach(function(b){b.onclick=function(){if(me.rq.length>=RQCAP){PV.msg="ห้องเต็มแล้ว (สูงสุด "+RQCAP+" ชิ้น) เก็บของบางชิ้นออกก่อน";PVrq();return}me.rq.push({n:b.dataset.p,x:Math.round(20+Math.random()*60),y:Math.round(30+Math.random()*60),s:1});RQSEL=me.rq.length-1;save();PVrq()}});
+  if(cur){
+    $("sm").onclick=function(){cur.s=Math.max(.5,(cur.s||1)-.25);save();PVrq()};
+    $("sp").onclick=function(){cur.s=Math.min(3,(cur.s||1)+.25);save();PVrq()};
+    $("rmv").onclick=function(){me.rq.splice(RQSEL,1);RQSEL=-1;save();PVrq()}}
+  app.querySelectorAll("#rqs .di").forEach(function(el){
+    var ix=+el.dataset.ix,it=me.rq[ix],drag=false,moved=false;if(!it)return;
+    el.onpointerdown=function(ev){ev.preventDefault();drag=true;moved=false;el.setPointerCapture(ev.pointerId);app.querySelectorAll("#rqs .di").forEach(function(x){x.classList.toggle("sel",x===el)})};
+    el.onpointermove=function(ev){if(!drag)return;moved=true;var r=$("rqs").getBoundingClientRect();
+      it.x=Math.round(Math.max(4,Math.min(96,(ev.clientX-r.left)/r.width*100))*10)/10;it.y=Math.round(Math.max(8,Math.min(96,(ev.clientY-r.top)/r.height*100))*10)/10;el.style.left=it.x+"%";el.style.top=it.y+"%"};
+    el.onpointerup=function(){drag=false;save();if(RQSEL!==ix||!moved){RQSEL=ix;PVrq()}}})}
+PV.rq=PVrq;
+/* friend's room of requirement shown on the visit page */
+function friendRq(){
+  var p=pOf(VK),lk=$("lk");if(!p||!lk)return;
+  var has=(Array.isArray(p.rq)&&p.rq.length)||(p.rqt&&p.rqt!=="star");if(!has)return;
+  me.sg=me.sg||{};var signed=me.sg[VK]===dayKey();
+  lk.insertAdjacentHTML("beforebegin",'<div class="card"><b>🔮 ห้องต้องประสงค์ของ '+esc(p.name)+'</b>'+rqScene(p,false)+'<button class="'+(signed?"grey":"purple")+'" id="sgn"'+(signed?" disabled":"")+'>'+(signed?"✍️ เซ็นสมุดเยี่ยมวันนี้แล้ว":"✍️ เซ็นสมุดเยี่ยม (+15 XP)")+'</button></div>');
+  if($("sgn"))$("sgn").onclick=function(){
+    if(NET.sending||me.sg[VK]===dayKey())return;
+    var done=function(){me.sg[VK]=dayKey();gain(15,0);VMSG="เซ็นสมุดเยี่ยมห้องต้องประสงค์ของ "+esc(p.name)+" แล้ว +15 XP";PVfriend()};
+    if(!NET.uid){applyGift(p,{type:"sign"},me.name);done();return}
+    NET.sending=1;netGift(VK,{type:"sign"}).then(function(r){NET.sending=0;if(r)done();else{VMSG="ส่งไม่สำเร็จ ลองใหม่";PVfriend()}})}}
+var PVfriend0=PVfriend;PVfriend=function(){PVfriend0();try{friendRq()}catch(e){}};PV.friend=PVfriend;
+
+/* ---- pet evolution ---- */
+var EVO={"🐱":["🐯","เสือเวทมนตร์"],"🐶":["🐺","หมาป่าผู้พิทักษ์"],"🐸":["🐊","จระเข้หนองลึก"],"🦉":["🦅","อินทรีแห่งฟากฟ้า"],"🐍":["🐲","งูมังกรโบราณ"],"🐉":["🦖","มังกรยักษ์โบราณ"],"🦄":["🦄🌈","ยูนิคอร์นสายรุ้ง"],"🔥":["🦅🔥","ฟีนิกซ์เพลิงนิรันดร์"]};
+var EVLV=15,EVCOST=1500;
+function evoOn(p,e){return!!(p&&p.pp&&p.pp[e]&&p.pp[e].ev&&EVO[e])}
+function evoCount(p){var n=0;(p.pets||[]).forEach(function(e){if(evoOn(p,e))n++});return n}
+function petPlus(){
+  if(!me.pets||!me.pets.length)return;
+  var c=app.querySelector(".card");if(!c)return;
+  var e=me.ap;if(!e||me.pets.indexOf(e)<0||!EVO[e])return;
+  var s=petInfo(e),L=pLv(s.x),pt=PETS.filter(function(v){return v[0]===e})[0],on=!!s.ev,ev=EVO[e],can=L>=EVLV&&!on;
+  if(on){var d=c.firstChild;if(d&&d.innerHTML)d.innerHTML=d.innerHTML.replace(e,ev[0])}
+  var gd=me.pgd&&me.pgd===dayKey(),gg=15+L*2+(on?40:0),html='<div class="card" style="border-width:2px"><b>🐲 วิวัฒนาการ & ของขวัญจากสัตว์เลี้ยง</b><br><small>'+
+    (on?"✨ ร่างวิวัฒนาการ: "+ev[0]+" "+ev[1]+" (โตกว่าเดิม และได้ของขวัญมากขึ้น)":"เมื่อ "+pt[1]+" ถึง Lv. "+EVLV+" วิวัฒนาการเป็น "+ev[0]+" "+ev[1]+" ได้ (ใช้ 💰 "+fmt(EVCOST)+") • ตอนนี้ Lv. "+L)+'</small>'+
+    (on?'':'<button class="'+(can?"purple":"grey")+'" id="evo"'+(can?"":" disabled")+'>'+(can?"🐲 วิวัฒนาการ (💰 "+fmt(EVCOST)+")":"ต้องถึง Lv. "+EVLV+" ก่อน")+'</button>')+
+    '<button class="'+(gd?"grey":"orange")+'" id="pgf"'+(gd?" disabled":"")+'>'+(gd?"รับของขวัญวันนี้แล้ว ✔":"🎁 รับของขวัญประจำวันจาก "+e+" (💰 "+gg+(on?" + อาหาร":"")+")")+'</button></div>';
+  c.insertAdjacentHTML("afterend",html);
+  if($("evo"))$("evo").onclick=function(){if(petInfo(e).ev||pLv(petInfo(e).x)<EVLV)return;if(!pay(EVCOST)){PV.msg="แกลเลียนไม่พอ";PVpet();return}petInfo(e).ev=1;save();PV.msg="🎉 "+pt[1]+" วิวัฒนาการเป็น "+ev[0]+" "+ev[1]+" แล้ว!";PVpet()};
+  if($("pgf"))$("pgf").onclick=function(){if(me.pgd===dayKey())return;me.pgd=dayKey();var m="ได้รับ 💰 "+gg;
+    if(on){me.food=me.food||{};var f=PFOOD[ri(0,PFOOD.length-1)];me.food[f[0]]=(me.food[f[0]]||0)+1;m+=" + "+f[1]+" "+f[2];if(Math.random()<.25){var cd=cardDraw(1);cardGive(cd[0]);m+=" + การ์ด "+cardTxt(cd)}}
+    gain(0,gg);PV.msg=m;PVpet()}}
+var PVpet0=PVpet;PVpet=function(){PVpet0();try{petPlus()}catch(e){}};PV.pet=PVpet;
+var petHtml0=petHtml;petHtml=function(p){p=p||me;var o=petHtml0(p),e=p&&p.ap;if(o&&e&&evoOn(p,e))o=o.replace(e,EVO[e][0]);return o};
+
+/* ---- wrappers ---- */
+var colInfo0=colInfo;colInfo=function(p){
+  var L=colInfo0(p),fi=[];
+  FEST.forEach(function(f){f.it.forEach(function(x,i){fi.push({e:x[0],o:(p.fi||[]).indexOf("f:"+f.id+"_"+i)>-1})})});
+  var add=[{id:"frog",n:"🍫 การ์ดช็อกโกแลตกบ",items:CARDS.map(function(c){return{e:c[1],o:((p.fc||{})[c[0]]||0)>0}}),r:[1500,700]},{id:"fest",n:"🎪 ของเทศกาลทั้งปี",items:fi,r:[1000,500]},{id:"rqi",n:"🔮 ของห้องต้องประสงค์",items:RQI.map(function(x){return{e:x[1],o:(p.rqi||[]).indexOf(x[0])>-1}}),r:[800,400]}];
+  add.forEach(function(c){c.have=c.items.filter(function(i){return i.o}).length;c.total=c.items.length;L.push(c)});return L};
+var netPull0=netPull;netPull=function(){try{duelPoll()}catch(e){}return netPull0.apply(this,arguments)};
+
+/* ---- home ---- */
+function plusNewCard(){
+  var b=function(id,e,t,n){return'<button class="pbtn" data-pv="'+id+'">'+e+'<br>'+t+(n?'<span class="dot">'+n+'</span>':'')+'</button>'};
+  return'<div class="card"><b>🆕 ฮอกวอตส์ภาคพิเศษ</b><div class="pgrid">'+b("sched","📚","ตารางเรียน",schedDot())+b("wq","🎯","ภารกิจสัปดาห์ & หีบ",wqClaimable())+b("duel","⚔️","ดวลกับเพื่อน",duelN())+b("market","🛒","ตลาดแลกเปลี่ยน",0)+b("cards","🍫","การ์ดช็อกโกแลตกบ",cardDot())+b("rank","🏅","อันดับ & หัวหน้านักเรียน",rkDot())+b("rq","🔮","ห้องต้องประสงค์",0)+b("fest","🎪","เทศกาล",festNow()&&festCan(festNow())?1:0)+'</div></div>'}
+
+function plusHome(){return netBadge()+netOnlBar()+festBanner()+plusHome0()+plusNewCard()}
 load();render();$("mus").onclick=toggleMusic;musUpd();netBoot();
 </script>
 </body>
