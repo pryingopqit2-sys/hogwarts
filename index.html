@@ -755,10 +755,40 @@ function rGacha(res,err){
   if(!ks.length)h+='<p style="color:#a9b0c0">ยังไม่มีไม้กายสิทธิ์ ลองหมุนดู</p>';
   ks.forEach(function(k,i){var w=WANDS.filter(function(x){return x[0]===k})[0];
     h+='<div class="row"><span>'+RAR[w[1]][1]+' '+k+' ×'+me.wands[k]+'</span>'+(me.eq===k?'<small>กำลังถือ</small>':'<button class="price can" data-w="'+i+'">ถือ</button>')+'</div>'});
+  h+=cwCardHtml();
   app.innerHTML=h+'</div>';
   bindST();
   $("g1").onclick=function(){spin(1,100)};$("g10").onclick=function(){spin(10,1000)};
   app.querySelectorAll("[data-w]").forEach(function(b){b.onclick=function(){me.eq=ks[+b.dataset.w];save();rGacha()}});
+  cwBind();
+}
+
+/* ---- ช่างทำไม้กายสิทธิ์: ประดิษฐ์ไม้ที่ถือ ให้มีพลังพิเศษ ---- */
+var CW_EFF=[["✨ เพิ่ม XP","🦄","ทุกกิจกรรมได้ XP เพิ่ม"],["💰 เพิ่มแกลเลียน","🐉","ทุกกิจกรรมได้แกลเลียนเพิ่ม"],["🌟 เพิ่มทั้งคู่ (ครึ่งๆ)","🔥","ได้ทั้ง XP และแกลเลียนเพิ่มเล็กน้อย"]];
+var CW_PCT=[0.03,0.05,0.08,0.12];
+function cwBonus(){
+  var c=me.cw;if(!c)return[0,0];
+  var w=WANDS.filter(function(x){return x[0]===c.base})[0];var p=CW_PCT[w?w[1]:0];
+  return c.eff===0?[p,0]:c.eff===1?[0,p]:[p/2,p/2];
+}
+var gain0=gain;
+gain=function(xp,g){var b=cwBonus();gain0(Math.round(xp*(1+b[0])),Math.round(g*(1+b[1])))};
+function cwCardHtml(){
+  var c=me.cw,b=cwBonus(),cur=c?'<p>🛠️ ไม้ประดิษฐ์: <b>'+esc(c.base)+'</b> • '+CW_EFF[c.eff][0]+' (โบนัส +'+Math.round(b[0]*100)+'% XP / +'+Math.round(b[1]*100)+'% แกลเลียน)</p>':'<p style="color:#a9b0c0">ยังไม่มีไม้ประดิษฐ์</p>';
+  var h='<div class="card"><b>🛠️ ช่างทำไม้กายสิทธิ์</b>'+cur+'<small>เลือกไม้ที่กำลังถืออยู่เป็นฐาน แล้วเลือกพลังแกน ครั้งแรก 300 แกลเลียน • เปลี่ยนพลังภายหลัง 150 • โบนัสขึ้นกับความหายากของไม้</small>';
+  if(!me.eq)h+='<p style="color:#ffb020">ต้องกดถือไม้ก่อน (จากคอลเลกชันด้านบน)</p>';
+  else CW_EFF.forEach(function(e,i){h+='<div class="row"><span>'+e[1]+' '+e[0]+'<br><small>'+e[2]+'</small></span><button class="price can" data-ce="'+i+'">ประดิษฐ์</button></div>'});
+  return h+'<div class="msg" id="cwm"></div></div>';
+}
+function cwBind(){
+  app.querySelectorAll("[data-ce]").forEach(function(b){b.onclick=function(){
+    var i=+b.dataset.ce;
+    if(!me.eq){$("cwm").textContent="ต้องกดถือไม้ก่อน";return}
+    if(!(me.wands&&me.wands[me.eq])){$("cwm").textContent="ต้องมีไม้นี้ในคอลเลกชัน";return}
+    var cost=me.cw?150:300;
+    if(me.gal<cost){$("cwm").textContent="แกลเลียนไม่พอ ต้องใช้ "+cost;return}
+    me.gal-=cost;me.cw={base:me.eq,eff:i};save();rGacha();
+  }});
 }
 function lab(i){return i<6?i+1:(i===6?"7.1":(i===7?"7.2":"พิเศษ "+(i-7)))}
 function cnt(i){var p=(me.prog||{})[i]||[];return p.filter(function(x){return x===1}).length}
@@ -2360,7 +2390,345 @@ function houseModal(){
     d.querySelectorAll("[data-h]").forEach(function(b){b.onclick=function(){
       if(pick!==b.dataset.h){pick=b.dataset.h;d.querySelectorAll("[data-h]").forEach(function(x){x.className="chip"+(x===b?" on":"")});$("hcmsg").textContent="กดอีกครั้งที่ "+HOUSE[pick][0]+" เพื่อยืนยัน (เปลี่ยนได้ครั้งเดียว)";return}
       me.house=pick;me.hch=1;save();d.remove();toast("✅ ย้ายไปบ้าน "+HOUSE[pick][0]+" แล้ว "+HOUSE[pick][1]);if(NET.uid)netAgg();render()}})})}
-function plusHome(){return netBadge()+netOnlBar()+festBanner()+plusHome0()+plusNewCard()}
+/* ===== batch 1: วงล้อนำโชค / ห้องปรุงยา / สนามฝึกสัตว์เลี้ยง ===== */
+var HERBS=[["ใบมินต์","🌿"],["รากมันดราเก","🌱"],["ดอกลาเวนเดอร์","💜"],["เห็ดเวทย์","🍄"]];
+var WHEEL=[["gal",40,"💰 แกลเลียน"],["xp",20,"✨ XP"],["herb",20,"🌿 สมุนไพร"],["food",10,"🍖 อาหารสัตว์"],["card",8,"🍫 การ์ดช็อกโกแลตกบ"],["potion",1,"🧪 ยาตัดตัวเลือก"],["jack",1,"🏆 รางวัลใหญ่"]];
+function wheelRoll(){var t=0,r=Math.random()*100;for(var i=0;i<WHEEL.length;i++){t+=WHEEL[i][1];if(r<t)return WHEEL[i][0]}return"gal"}
+function wheelApply(k){
+  var m="";
+  if(k==="gal"){var g=ri(50,300);gain(0,g);m="💰 +"+g+" แกลเลียน"}
+  else if(k==="xp"){var x=ri(30,120);gain(x,0);m="✨ +"+x+" XP"}
+  else if(k==="herb"){var h=HERBS[ri(0,HERBS.length-1)];me.herb=me.herb||{};me.herb[h[0]]=(me.herb[h[0]]||0)+1;m=h[1]+" "+h[0]+" 1 ชิ้น"}
+  else if(k==="food"){me.food=me.food||{};var f=PFOOD[ri(0,PFOOD.length-1)];me.food[f[0]]=(me.food[f[0]]||0)+1;m=f[1]+" "+f[2]+" 1 ชิ้น"}
+  else if(k==="card"){var cd=cardDraw(1);cardGive(cd[0]);m="🍫 การ์ด "+cardTxt(cd)}
+  else if(k==="potion"){me.potion=(me.potion||0)+1;m="🧪 ยาตัดตัวเลือก 1 ขวด"}
+  else{gain(0,2000);m="🏆 แจ็กพอต! +2,000 แกลเลียน"}
+  return m;
+}
+function PVwheel(){
+  var done=me.wh===dayKey();
+  var h=pBack()+'<h1>🎡 วงล้อนำโชครายวัน</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="card" style="text-align:center"><div id="wv" style="font-size:4rem;line-height:1.3">🎡</div>'+(done?'<small>วันนี้หมุนไปแล้ว พรุ่งนี้หมุนได้ใหม่</small>':'<small>หมุนได้วันละ 1 ครั้ง</small>')+'<button class="orange" id="ws"'+(done?' disabled':'')+'>🎡 หมุนเลย</button></div>';
+  h+='<div class="card"><b>โอกาสได้รับ</b>'+WHEEL.map(function(w){return'<div class="row"><span>'+w[2]+'</span><small>'+w[1]+'%</small></div>'}).join("")+'</div>';
+  app.innerHTML=h;pBindBack();
+  if(!done)$("ws").onclick=function(){
+    var k=wheelRoll(),m=wheelApply(k);me.wh=dayKey();me.whN=(me.whN||0)+1;save();
+    $("ws").disabled=true;var i=0,t=setInterval(function(){var el=$("wv");if(el)el.textContent=WHEEL[i++%WHEEL.length][2].split(" ")[0]},90);
+    setTimeout(function(){clearInterval(t);PV.msg="🎉 ได้รับ "+m;PVwheel()},1200);
+  };
+}
+PV.wheel=PVwheel;
+
+var RECIPES=[
+  ["ยาปัญญา","🧪","ใบมินต์ 2 + เห็ดเวทย์ 1",{"ใบมินต์":2,"เห็ดเวทย์":1},{k:"xp",n:5},"ได้ XP เพิ่ม 50% ใน 5 กิจกรรมถัดไป"],
+  ["ยาทองคำ","⚗️","รากมันดราเก 2 + ดอกลาเวนเดอร์ 1",{"รากมันดราเก":2,"ดอกลาเวนเดอร์":1},{k:"gal",n:5},"ได้แกลเลียนเพิ่ม 50% ใน 5 กิจกรรมถัดไป"],
+  ["ยาปลุกพลัง","💫","ดอกลาเวนเดอร์ 2 + เห็ดเวทย์ 2",{"ดอกลาเวนเดอร์":2,"เห็ดเวทย์":2},null,"ได้หีบสมบัติ 1 ใบทันที"]
+];
+function herbN(k){return(me.herb&&me.herb[k])||0}
+function PVbrew(){
+  var act=me.elx&&me.elx.n>0;
+  var h=pBack()+'<h1>⚗️ ห้องปรุงยา</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="card">'+(act?'🧪 ฤทธิ์ยาที่ใช้อยู่: <b>'+(me.elx.k==="xp"?"เพิ่ม XP":"เพิ่มแกลเลียน")+'</b> เหลือ '+me.elx.n+' กิจกรรม':'ยังไม่มียาที่กำลังออกฤทธิ์')+'</div>';
+  h+='<div class="card"><b>🌿 สมุนไพรของคุณ</b>'+HERBS.map(function(x){return'<div class="row"><span>'+x[1]+' '+x[0]+'</span><b>'+herbN(x[0])+'</b></div>'}).join("")+'<small>ได้สมุนไพรจากวงล้อนำโชครายวัน</small></div>';
+  RECIPES.forEach(function(r,i){
+    var ok=true;Object.keys(r[3]).forEach(function(k){if(herbN(k)<r[3][k])ok=false});
+    var can=ok&&!(r[4]&&act);
+    h+='<div class="card"><b>'+r[1]+' '+r[0]+'</b><br><small>ส่วนผสม: '+r[2]+'</small><br><small>ผล: '+r[5]+'</small><br><button class="'+(can?"purple":"grey")+'" data-br="'+i+'"'+(can?"":" disabled")+'>'+(can?"ปรุงยา":(r[4]&&act?"มียาอื่นออกฤทธิ์อยู่":"วัตถุดิบไม่พอ"))+'</button></div>';
+  });
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-br]").forEach(function(b){b.onclick=function(){
+    var r=RECIPES[+b.dataset.br];
+    Object.keys(r[3]).forEach(function(k){me.herb[k]-=r[3][k]});
+    if(r[4])me.elx={k:r[4].k,n:r[4].n};else{me.chests=(me.chests||0)+1}
+    me.brewN=(me.brewN||0)+1;save();PV.msg="⚗️ ปรุง"+r[0]+"สำเร็จ! "+r[5];PVbrew();
+  }});
+}
+PV.brew=PVbrew;
+var gainCw=gain;
+gain=function(xp,g){
+  var e=me&&me.elx;
+  if(e&&e.n>0&&((e.k==="xp"&&xp>0)||(e.k==="gal"&&g>0))){
+    if(e.k==="xp")xp=Math.round(xp*1.5);else g=Math.round(g*1.5);
+    e.n--;if(e.n<=0)me.elx=null;
+  }
+  gainCw(xp,g);
+};
+
+var TRAITS=[["sp","💪","พลัง"],["sd","⚡","ความเร็ว"],["wi","🧠","ความฉลาด"]];
+function trGet(){var d=dayKey();if(!me.tr||me.tr.d!==d)me.tr={d:d,n:6};return me.tr}
+function petStat(e){var s=petInfo(e);s.st=s.st||{sp:0,sd:0,wi:0};return s.st}
+function PVtrain(){
+  me.pets=me.pets||[];
+  var h=pBack()+'<h1>🏋️ สนามฝึกสัตว์เลี้ยง</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  if(!me.pets.length){app.innerHTML=h+'<div class="card">ยังไม่มีสัตว์เลี้ยง ไปรับเลี้ยงที่ร้านค้าก่อน</div>';pBindBack();return}
+  if(!me.ap||me.pets.indexOf(me.ap)<0)me.ap=me.pets[0];
+  var e=me.ap,pt=PETS.filter(function(v){return v[0]===e})[0],s=petStat(e),t=trGet(),L=pLv(petInfo(e).x);
+  h+='<div class="card" style="text-align:center"><div style="font-size:3rem">'+e+'</div><b>'+pt[1]+'</b> • Lv. '+L+'<br><small>ฝึกวันนี้เหลือ '+t.n+' ครั้ง (รีเซ็ตทุกวัน)</small>'+
+    TRAITS.map(function(x){return'<div class="row"><span>'+x[1]+' '+x[2]+'</span><b>'+s[x[0]]+'/100</b></div>'}).join("")+'</div>';
+  h+='<div class="card"><b>เลือกฝึก (ใช้ 1 ครั้งต่อการกด)</b><div class="pgrid">'+TRAITS.map(function(x){return'<button class="pbtn" data-tr="'+x[0]+'"'+(t.n<=0||s[x[0]]>=100?' disabled':'')+'><span style="font-size:1.6rem">'+x[1]+'</span><br>'+x[2]+'</button>'}).join("")+'</div><small>ยิ่งเลเวลสูง โอกาสฝึกสำเร็จยิ่งมาก</small></div>';
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-tr]").forEach(function(b){b.onclick=function(){
+    var k=b.dataset.tr,ok=Math.random()<Math.min(.9,.5+L*.02),inc=ok?ri(2,4)+(L>=8?1:0):0;
+    t.n--;me.trN=(me.trN||0)+1;s[k]=Math.min(100,s[k]+inc);save();
+    var nm=TRAITS.filter(function(x){return x[0]===k})[0][2];
+    PV.msg=ok?"💪 ฝึกสำเร็จ! "+nm+" +"+inc:"😿 ฝึกไม่สำเร็จ ลองใหม่ได้";PVtrain();
+  }});
+}
+PV.train=PVtrain;
+
+function plusNew2Card(){
+  var b=function(id,e,t,n){return'<button class="pbtn" data-pv="'+id+'">'+e+'<br>'+t+(n?'<span class="dot">'+n+'</span>':'')+'</button>'};
+  return'<div class="card"><b>🧪 ไอเทมและการฝึกฝน</b><div class="pgrid">'+b("wheel","🎡","วงล้อนำโชค",me.wh===dayKey()?0:1)+b("brew","⚗️","ห้องปรุงยา",0)+b("train","🏋️","สนามฝึกสัตว์เลี้ยง",0)+'</div></div>';
+}
+/* ===== batch 2: ประลองสัตว์เลี้ยง / ควิดดิช / ห้องนั่งเล่น / เวรบ้าน / คาถา / นิยายเลือกฉาก / ฉายา / ชุดอวตาร ===== */
+
+/* ---- 1. ประลองสัตว์เลี้ยง (กับสัตว์ป่า) ---- */
+var WILD=["🐺","🦉","🐍","🐸","🐱","🐶","🦄","🐉"];
+function pbGet(){var d=dayKey();if(!me.pb||me.pb.d!==d)me.pb={d:d,n:5};return me.pb}
+function petPower(e){var s=petInfo(e),L=pLv(s.x),st=petStat(e);return L*3+st.sp+st.sd+st.wi+(evoOn(me,e)?20:0)}
+function PVpbat(){
+  me.pets=me.pets||[];
+  var h=pBack()+'<h1>⚔️ ประลองสัตว์เลี้ยง</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  if(!me.pets.length){app.innerHTML=h+'<div class="card">ยังไม่มีสัตว์เลี้ยง ไปรับเลี้ยงที่ร้านค้าก่อน</div>';pBindBack();return}
+  if(!me.ap||me.pets.indexOf(me.ap)<0)me.ap=me.pets[0];
+  var e=me.ap,pb=pbGet(),L=pLv(petInfo(e).x),pw=petPower(e);
+  h+='<div class="card" style="text-align:center"><div style="font-size:3rem">'+e+'</div>พลังรวม <b>'+pw+'</b> • Lv. '+L+'<br><small>พลังมาจากเลเวล และค่าฝึกที่สนามฝึก • ประลองวันนี้เหลือ '+pb.n+' ครั้ง • ชนะรวม '+(me.pbw||0)+' ครั้ง</small></div>';
+  h+='<div class="card"><button class="'+(pb.n>0?"orange":"grey")+'" id="pbgo"'+(pb.n>0?"":" disabled")+'>⚔️ ท้าสัตว์ป่า</button><small>ชนะ 2 ใน 3 รอบ ได้แกลเลียนและ XP และสัตว์เลี้ยงได้ค่าพลังเพิ่ม</small></div>';
+  if(PV.pbl)h+='<div class="card">'+PV.pbl+'</div>';
+  app.innerHTML=h;pBindBack();
+  if($("pbgo"))$("pbgo").onclick=function(){
+    pb.n--;
+    var wild=WILD[ri(0,WILD.length-1)],wl=Math.max(1,L+ri(-2,2)),wp=wl*3+ri(5,25),rounds=[],w=0;
+    for(var i=0;i<3;i++){var a=pw+ri(0,30),b=wp+ri(0,30);if(a>=b){w++;rounds.push("รอบ "+(i+1)+" ✅")}else rounds.push("รอบ "+(i+1)+" ❌")}
+    var win=w>=2;
+    if(win){me.pbw=(me.pbw||0)+1;gain(40+L*4,30+L*5);var k=TRAITS[ri(0,2)][0],st=petStat(e);st[k]=Math.min(100,st[k]+1)}
+    else gain(10,0);
+    save();
+    PV.pbl='<b>'+(win?"🏆 ชนะ!":"💀 แพ้")+' vs '+wild+' (Lv. '+wl+')</b><br><small>'+rounds.join(" • ")+'</small><br><small>'+(win?"ได้แกลเลียน + XP และค่าพลังสัตว์เลี้ยง +1":"ได้ XP ปลอบใจ 10")+'</small>';
+    PVpbat();
+  };
+}
+PV.pbat=PVpbat;
+
+/* ---- 2. ควิดดิชแมตช์ (กับทีมคู่แข่ง) ---- */
+CUPW.quid=6;
+function qbGet(){var d=dayKey();if(!me.qb||me.qb.d!==d)me.qb={d:d,n:3};return me.qb}
+function PVquid(){
+  var q=qbGet(),M=PV.qm,h=pBack()+'<h1>🧹 ควิดดิชแมตช์</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="card"><small>แมตช์วันนี้เหลือ '+q.n+' ครั้ง • ชนะรวม '+(me.qbw||0)+' ครั้ง</small></div>';
+  if(M&&!M.done){
+    h+='<div class="card"><b>รอบ '+(M.round+1)+' / 5</b> • คะแนนคุณ '+M.me+' : '+M.bot+' คู่แข่ง<br><small>'+M.log.slice(-3).join("<br>")+'</small>'+
+      '<div class="pgrid" style="margin-top:8px"><button class="pbtn" data-qa="0">🏃<br>พุ่งจับสนิช</button><button class="pbtn" data-qa="1">🏐<br>ยิงควัฟเฟิล</button><button class="pbtn" data-qa="2">🛡️<br>ป้องกันห่วง</button></div></div>';
+  }else{
+    if(M&&M.done)h+='<div class="card">'+M.res+'</div>';
+    h+='<div class="card"><button class="'+(q.n>0?"orange":"grey")+'" id="qgo"'+(q.n>0?"":" disabled")+'>🧹 เริ่มแมตช์</button><small>ชนะถ้าจับสนิชได้ หรือทำคะแนนมากกว่าคู่แข่ง • รางวัล 💰 80 + ✨ 60 XP • ชนะแล้วได้คะแนนบ้านด้วย</small></div>';
+  }
+  app.innerHTML=h;pBindBack();
+  if($("qgo"))$("qgo").onclick=function(){q.n--;save();PV.qm={round:0,me:0,bot:0,log:[],done:0,snitch:0};PVquid()};
+  app.querySelectorAll("[data-qa]").forEach(function(b){b.onclick=function(){qbPlay(+b.dataset.qa)}});
+}
+function qbPlay(a){
+  var M=PV.qm,lv=lvl(me);if(!M||M.done)return;
+  if(a===0){if(Math.random()<.2+lv*.01){M.me+=30;M.snitch=1;M.log.push("🏆 จับสนิชได้! +30")}else M.log.push("💨 สนิชหนีไปได้")}
+  else if(a===1){if(Math.random()<.6){M.me+=10;M.log.push("⚽ ยิงเข้า +10")}else M.log.push("🧤 ผู้รักษาประตูกันไว้ได้")}
+  else{if(Math.random()<.5)M.log.push("🛡️ ป้องกันห่วงสำเร็จ");else{M.bot+=10;M.log.push("🔴 คู่แข่งยิงเข้า +10")}}
+  if(!M.snitch&&Math.random()<.4){M.bot+=10;M.log.push("🔴 คู่แข่งทำแต้ม +10")}
+  M.round++;
+  if(M.snitch||M.round>=5)qbEnd(M);
+  PVquid();
+}
+function qbEnd(M){
+  M.done=1;var win=!!M.snitch||M.me>M.bot;
+  if(win){me.qbw=(me.qbw||0)+1;gain(60,80);plusBump("quid",1);M.res="🏆 ชนะ "+M.me+" : "+M.bot+(M.snitch?" (จับสนิชได้)":"")+" รับ 💰 80 + ✨ 60 XP และคะแนนบ้าน"}
+  else{gain(15,10);M.res="💀 แพ้ "+M.me+" : "+M.bot+" ได้ 💰 10 + ✨ 15 XP ปลอบใจ"}
+  save();
+}
+PV.quid=PVquid;
+
+/* ---- 3. ห้องนั่งเล่นประจำบ้าน (บอร์ดเฉพาะบ้านเดียวกัน) ---- */
+function PVhboard(){
+  var h=pBack()+'<h1>🛋️ ห้องนั่งเล่นประจำบ้าน</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  if(!me.house){app.innerHTML=h+'<div class="card">ต้องเลือกบ้านก่อน</div>';pBindBack();return}
+  if(!NET.uid||!NET.F){app.innerHTML=h+'<div class="card">ต้องเชื่อมต่อออนไลน์ก่อน ลองกลับไปหน้าหลักแล้วรอให้ขึ้นสถานะออนไลน์</div>';pBindBack();return}
+  h+='<div class="card"><small>ข้อความที่ฝากไว้ เห็นได้เฉพาะคนในบ้านเดียวกันของคุณ</small><input id="hbi" maxlength="100" placeholder="ฝากข้อความถึงเพื่อนบ้านเดียวกัน (ไม่มีลิงก์)"><button class="orange" id="hbs">📨 ส่งข้อความ</button></div><div class="card" id="hbl">กำลังโหลด...</div>';
+  app.innerHTML=h;pBindBack();
+  $("hbs").onclick=function(){hbSend($("hbi").value)};
+  hbLoad();
+}
+function hbLoad(){
+  var S=NET.F.S;
+  S.getDocs(S.query(S.collection(NET.F.db,"hboard"),S.where("house","==",me.house),S.limit(50))).then(function(qs){
+    var L=[];qs.forEach(function(d){L.push(d.data())});L.sort(function(a,b){return(b.t||0)-(a.t||0)});hbRender(L)
+  },function(e){hbRender(null,e)});
+}
+function hbRender(L,e){
+  var el=$("hbl");if(!el)return;
+  if(!L){el.innerHTML='<div class="msg">โหลดไม่สำเร็จ: '+(e&&e.code==="permission-denied"?"ต้องตั้งค่า Rules ของ hboard ใน Firebase ก่อน":"ลองใหม่อีกครั้ง")+'</div>';return}
+  if(!L.length){el.innerHTML='ยังไม่มีข้อความในบ้านของคุณ ลองทักทายเพื่อนบ้านดูสิ 👋';return}
+  el.innerHTML=L.map(function(m){var d=new Date(m.t||0);
+    return'<div class="cmsg'+(m.uid===NET.uid?" me":"")+'"><b>'+esc(m.av||"🧙")+" "+esc(m.name)+'</b> <small>'+("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)+'</small><br>'+esc(m.text)+'</div>'}).join("");
+}
+function hbSend(txt){
+  txt=String(txt||"").replace(/\s+/g," ").trim();
+  if(!txt){PV.msg="พิมพ์ข้อความก่อน";PVhboard();return}
+  if(txt.length>100)txt=txt.slice(0,100);
+  if(/(https?:|www\.|\.com|\.net|line\.me)/i.test(txt)){PV.msg="ห้ามส่งลิงก์";PVhboard();return}
+  if(Date.now()-(NET.hbT||0)<3000){PV.msg="ส่งเร็วเกินไป รอสักครู่";PVhboard();return}
+  NET.hbT=Date.now();txt=txt.replace(CHATBAD,"***");
+  var S=NET.F.S;
+  S.addDoc(S.collection(NET.F.db,"hboard"),{uid:NET.uid,name:me.name,av:me.av||"🧙",house:me.house,text:txt,t:Date.now()}).then(function(){PV.msg="ส่งแล้ว ✔";PVhboard()},function(e){PV.msg=e&&e.code==="permission-denied"?"ส่งไม่ได้: ต้องตั้งค่า Rules ของ hboard ใน Firebase":"ส่งไม่ได้ ลองใหม่อีกครั้ง";PVhboard()});
+}
+PV.hboard=PVhboard;
+
+/* ---- 4. เวรประจำบ้านร่วมกัน (ภารกิจทั้งบ้าน) ---- */
+var HM_TARGET=500;
+function PVhmiss(){
+  var h=pBack()+'<h1>🏠 เวรประจำบ้านร่วมกัน</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  if(!me.house){app.innerHTML=h+'<div class="card">ต้องเลือกบ้านก่อน</div>';pBindBack();return}
+  var c=cupGet(),pts=(c.p&&c.p[me.house])||0,wk=weekKey(),done=me.hmk===wk,ok=pts>=HM_TARGET;
+  h+='<div class="card"><b>ภารกิจประจำสัปดาห์ของบ้าน</b><br><small>ทุกคนในบ้านช่วยกันสะสมคะแนนบ้านให้ถึง '+HM_TARGET+' คะแนนภายในสัปดาห์นี้ กิจกรรมทุกอย่างในเกมนับเป็นคะแนน</small>'+
+    '<div class="bar"><i style="width:'+Math.min(100,pts/HM_TARGET*100)+'%"></i></div><small>ตอนนี้ '+Math.floor(pts)+' / '+HM_TARGET+' คะแนน</small></div>';
+  h+='<div class="card"><button class="'+(ok&&!done?"orange":"grey")+'" id="hmc"'+(ok&&!done?"":" disabled")+'>'+(done?"รับรางวัลสัปดาห์นี้แล้ว ✔":ok?"🎁 รับรางวัลเวรบ้าน (💰 300 • ✨ 150 XP)":"ต้องถึง "+HM_TARGET+" คะแนนก่อน")+'</button><small>รับได้คนละ 1 ครั้งต่อสัปดาห์</small></div>';
+  app.innerHTML=h;pBindBack();
+  if($("hmc"))$("hmc").onclick=function(){if(me.hmk===wk)return;me.hmk=wk;gain(150,300);PV.msg="🎁 ได้รับรางวัลเวรประจำบ้านแล้ว!";PVhmiss()};
+}
+PV.hmiss=PVhmiss;
+
+/* ---- 5. เรียนคาถาและฝึกร่าย ---- */
+function spNeed(i){return Math.floor(i*1.5)}
+function spCost(i){return 60+i*20}
+function PVspell(){
+  me.spl=me.spl||[];var L=me.spl,lv=lvl(me);
+  var h=pBack()+'<h1>🪄 เรียนคาถาและฝึกร่าย</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  h+='<div class="card"><b>📖 คาถาที่เรียนแล้ว '+L.length+' / '+SPELLS.length+' บท</b></div>';
+  h+='<div class="card"><b>เรียนคาถาใหม่</b>';
+  SPELLS.forEach(function(s,i){
+    var got=L.indexOf(s[0])>-1,okLv=lv>=spNeed(i),can=okLv&&me.gal>=spCost(i);
+    h+='<div class="row"><span>'+esc(s[0])+'<br><small>'+esc(s[1])+'</small></span>'+(got?'<small>เรียนแล้ว ✔</small>':'<button class="'+(can?"purple":"grey")+'" data-ls="'+i+'"'+(can?"":" disabled")+'>'+(okLv?"เรียน 💰 "+spCost(i):"ต้องถึง Lv. "+spNeed(i))+'</button>')+'</div>';
+  });
+  h+='</div>';
+  if(L.length)h+='<div class="card"><b>🪄 ฝึกร่าย</b><br><small>ดูลำดับจุดที่กะพริบ แล้วแตะตามลำดับให้ถูกทั้ง 4 จุด ร่ายสำเร็จได้ ✨ 25 XP และ 💰 10</small><br><button class="orange" id="spp">เริ่มฝึกร่าย</button></div>';
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-ls]").forEach(function(b){b.onclick=function(){
+    var i=+b.dataset.ls,s=SPELLS[i];
+    if(!pay(spCost(i))){PV.msg="แกลเลียนไม่พอ";PVspell();return}
+    L.push(s[0]);save();PV.msg="🪄 เรียนคาถา "+s[0]+" แล้ว!";PVspell();
+  }});
+  if($("spp"))$("spp").onclick=spellPractice;
+}
+function spellPractice(){
+  var seq=[];while(seq.length<4){var n=ri(0,8);if(seq[seq.length-1]!==n)seq.push(n)}
+  PV.sp={seq:seq,pos:0,stage:"show"};
+  var g="";for(var i=0;i<9;i++)g+='<button class="pbtn" id="sg'+i+'" data-sg="'+i+'" style="height:70px">✨</button>';
+  app.innerHTML=pBack()+'<h1>🪄 ฝึกร่าย</h1><div class="msg" id="spm">ดูลำดับ...</div><div class="pgrid" style="grid-template-columns:repeat(3,1fr);max-width:260px;margin:12px auto">'+g+'</div>';
+  pBindBack();
+  seq.forEach(function(n,k){MG.t.push(setTimeout(function(){var b=$("sg"+n);if(b){b.style.background="#ffb020";MG.t.push(setTimeout(function(){var c=$("sg"+n);if(c)c.style.background=""},450))}},k*650))});
+  MG.t.push(setTimeout(function(){PV.sp.stage="input";var m=$("spm");if(m)m.textContent="ถึงตาคุณ! แตะตามลำดับ"},seq.length*650+200));
+  app.querySelectorAll("[data-sg]").forEach(function(b){b.onclick=function(){spTap(+b.dataset.sg)}});
+}
+function spTap(i){
+  var S=PV.sp;if(!S||S.stage!=="input")return;
+  var b=$("sg"+i);
+  if(i!==S.seq[S.pos]){S.stage="done";PV.msg="❌ ร่ายพลาด ลองใหม่อีกครั้ง";PVspell();return}
+  if(b)b.style.background="#4cc38a";
+  S.pos++;
+  if(S.pos>=S.seq.length){S.stage="done";gain(25,10);PV.msg="✨ ร่ายสำเร็จ! +25 XP และ 💰 10";PVspell()}
+}
+PV.spell=PVspell;
+
+/* ---- 6. นิยายเลือกฉาก (4 ตอนจบ) ---- */
+var BR={
+ s:{t:"คืนหนึ่งมีจดหมายผนึกทองสอดอยู่ใต้ประตูห้องของคุณ เขียนว่า \"จงมาที่หอคอยเมื่อเที่ยงคืน\" คุณจะทำอย่างไร?",c:[["เปิดจดหมายอ่านต่อ","a"],["เดินไปห้องต้องประสงค์ก่อน","b"]]},
+ a:{t:"ในจดหมายมีแผนที่ทางลับเล็กๆ วาดไว้ คุณจะทำอย่างไร?",c:[["เดินไปหอคอยทันที","e1"],["ส่งนกฮูกไปถามอาจารย์ก่อน","e2"]]},
+ b:{t:"ห้องเปลี่ยนเป็นกระจกเงาบานใหญ่ ในกระจกคุณเห็นตัวเองถือไม้ที่เปล่งแสงสีทอง คุณจะทำอย่างไร?",c:[["ถามกระจกว่านั่นคืออนาคตไหม","e3"],["หันหลังกลับ ยังไม่อยากรู้เร็วเกินไป","e4"]]},
+ e1:{t:"🏰 คุณพบห้องเก็บตำราโบราณที่ไม่มีใครเคยเปิด และได้รับรางวัลใหญ่จากผู้ดูแลหอคอย",end:"ความลับของหอคอย",g:200,x:100},
+ e2:{t:"🦉 นกฮูกกลับมาพร้อมข้อความว่า อาจารย์รอคุณอยู่ที่ห้องโถง และฝากให้คุณได้เพื่อนร่วมทางที่ไว้ใจได้",end:"ผู้ส่งสารนกฮูก",g:150,x:80},
+ e3:{t:"🔮 กระจกแสดงภาพอนาคต คุณจะได้เป็นผู้นำทีมของบ้านในสักวัน ไม่ว่าจะเลือกทางไหนก็ตาม",end:"ภาพในกระจก",g:120,x:120},
+ e4:{t:"🌙 คุณหันหลังกลับและหลับสบาย ตื่นมาพบการ์ดช็อกโกแลตกบวางอยู่บนหมอนพร้อมโน้ตสั้นๆ",end:"ความสงบที่ได้มา",g:100,x:60,card:1}
+};
+function PVstory2(){
+  me.ends=me.ends||[];
+  var n=PV.st2||"s",N=BR[n];
+  var h=pBack()+'<h1>📜 นิยายเลือกฉาก: จดหมายจากหอคอย</h1>';
+  if(N.end){
+    var got=me.ends.indexOf(N.end)<0;
+    if(got){me.ends.push(N.end);gain(N.x,N.g);if(N.card){var cd=cardDraw(1);cardGive(cd[0])}}
+    h+='<div class="card">'+N.t+'</div><div class="card" style="text-align:center"><b>🏁 จบ: '+N.end+'</b><br><small>'+(got?"ได้รับ 💰 "+N.g+" • ✨ "+N.x+" XP"+(N.card?" • 🍫 การ์ด 1 ใบ":""):"ตอนจบนี้เคยปลดล็อกแล้ว")+'</small><br><small>ตอนจบที่พบแล้ว '+me.ends.length+' / 4</small><br><button class="orange" id="str">📖 เล่นใหม่</button></div>';
+    save();
+  }else{
+    h+='<div class="card">'+N.t+'</div>'+N.c.map(function(c){return'<button class="purple" data-sc="'+c[1]+'" style="margin:6px 0">'+c[0]+'</button>'}).join("");
+  }
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-sc]").forEach(function(b){b.onclick=function(){PV.st2=b.dataset.sc;PVstory2()}});
+  if($("str"))$("str").onclick=function(){PV.st2="s";PVstory2()};
+}
+PV.story2=PVstory2;
+
+/* ---- 7. ฉายาความสำเร็จ ---- */
+var ACH2=[
+ ["⚔️","นักดวลผู้อดทน","ชนะประลองสัตว์เลี้ยง 5 ครั้ง",function(){return(me.pbw||0)>=5}],
+ ["🧹","นักควิดดิช","ชนะควิดดิชแมตช์ 3 ครั้ง",function(){return(me.qbw||0)>=3}],
+ ["⚗️","ผู้ปรุงยาฝึกหัด","ปรุงยาสำเร็จ 3 ครั้ง",function(){return(me.brewN||0)>=3}],
+ ["🏋️","ผู้ฝึกสัตว์ตัวยง","ฝึกสัตว์เลี้ยงรวม 20 ครั้ง",function(){return(me.trN||0)>=20}],
+ ["🎡","นักหมุนโชค","หมุนวงล้อนำโชค 10 วัน",function(){return(me.whN||0)>=10}],
+ ["📖","นักอ่านหลายบท","จบนิยายเลือกฉาก 3 ตอนจบ",function(){return(me.ends||[]).length>=3}],
+ ["🪄","จอมคาถา","เรียนคาถาได้ 5 บท",function(){return(me.spl||[]).length>=5}],
+ ["🐲","ผู้เลี้ยงมังกร","ทำให้สัตว์เลี้ยงวิวัฒนาการ 1 ตัว",function(){return evoCount(me)>=1}]
+];
+function achTitle(){var i=me.ttl;return(typeof i==="number"&&ACH2[i]&&ACH2[i][3]())?ACH2[i][1]:""}
+function PVach(){
+  var h=pBack()+'<h1>🏷️ ฉายาความสำเร็จ</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  var cur=achTitle();
+  h+='<div class="card">ฉายาที่ใช้อยู่: <b>'+(cur||"ยังไม่ได้เลือก")+'</b><br><small>ฉายาจะแสดงในโปรไฟล์ของคุณ</small>'+(cur?'<br><button class="grey" id="achx">ไม่แสดงฉายา</button>':'')+'</div>';
+  ACH2.forEach(function(a,i){
+    var ok=a[3]();
+    h+='<div class="row"><span>'+a[0]+' <b>'+a[1]+'</b><br><small>'+a[2]+'</small></span>'+(ok?'<button class="'+(me.ttl===i?"grey":"orange")+'" data-ach="'+i+'">'+(me.ttl===i?"ใช้อยู่ ✔":"ใช้ฉายานี้")+'</button>':'<small>🔒 ยังไม่ปลดล็อก</small>')+'</div>';
+  });
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-ach]").forEach(function(b){b.onclick=function(){me.ttl=+b.dataset.ach;save();PVach()}});
+  if($("achx"))$("achx").onclick=function(){me.ttl=null;save();PVach()};
+}
+PV.ach=PVach;
+
+/* ---- 8. ชุดอวตาร ---- */
+var OUTFITS=[["basic","ชุดนักเรียนปกติ","",0],["blue","ชุดคลุมเวทสีน้ำเงิน","🔷",200],["gold","ชุดคลุมทอง","🥇",500],["dark","ชุดคลุมดำลึกลับ","🖤",800]];
+function outfitOf(p){var id=(p&&p.outf)||"basic";return OUTFITS.filter(function(x){return x[0]===id})[0]||OUTFITS[0]}
+function PVoutfit(){
+  me.outOwn=me.outOwn||["basic"];
+  var h=pBack()+'<h1>👗 ชุดอวตาร</h1><div class="msg">'+(PV.msg||"")+'</div>';PV.msg="";
+  var cur=outfitOf(me);
+  h+='<div class="card" style="text-align:center"><div style="font-size:3.5rem">'+me.av+cur[2]+'</div><b>'+cur[1]+'</b><br><small>ชุดที่ใส่อยู่จะแสดงข้างอวตารในโปรไฟล์</small></div>';
+  h+='<div class="card">'+OUTFITS.map(function(o){
+    var own=me.outOwn.indexOf(o[0])>-1,on=cur[0]===o[0];
+    return'<div class="row"><span>'+o[2]+' '+o[1]+(own?"":"<br><small>💰 "+o[3]+"</small>")+'</span>'+
+      (on?'<small>ใส่อยู่ ✔</small>':own?'<button class="purple" data-of="'+o[0]+'">ใส่ชุดนี้</button>':'<button class="orange" data-buy="'+o[0]+'">ซื้อ 💰 '+o[3]+'</button>')+'</div>'}).join("")+'</div>';
+  app.innerHTML=h;pBindBack();
+  app.querySelectorAll("[data-buy]").forEach(function(b){b.onclick=function(){
+    var o=OUTFITS.filter(function(x){return x[0]===b.dataset.buy})[0];
+    if(!pay(o[3])){PV.msg="แกลเลียนไม่พอ";PVoutfit();return}
+    me.outOwn.push(o[0]);me.outf=o[0];save();PV.msg="👗 ซื้อและใส่ "+o[1]+" แล้ว!";PVoutfit();
+  }});
+  app.querySelectorAll("[data-of]").forEach(function(b){b.onclick=function(){me.outf=b.dataset.of;save();PV.msg="👗 เปลี่ยนชุดแล้ว";PVoutfit()}});
+}
+PV.outfit=PVoutfit;
+
+/* ---- ปุ่มเข้าเมนูกิจกรรมใหม่ + แสดงฉายา/ชุดในโปรไฟล์ ---- */
+function plusNew3Card(){
+  var b=function(id,e,t){return'<button class="pbtn" data-pv="'+id+'">'+e+'<br>'+t+'</button>'};
+  return'<div class="card"><b>🌟 กิจกรรมเพิ่มเติม</b><div class="pgrid">'+
+    b("pbat","⚔️","ประลองสัตว์เลี้ยง")+b("quid","🧹","ควิดดิชแมตช์")+b("hboard","🛋️","ห้องนั่งเล่นบ้าน")+
+    b("hmiss","🏠","เวรประจำบ้าน")+b("spell","🪄","เรียนคาถา")+b("story2","📜","นิยายเลือกฉาก")+
+    b("ach","🏷️","ฉายาความสำเร็จ")+b("outfit","👗","ชุดอวตาร")+'</div></div>';
+}
+var profCard0=profCard;
+profCard=function(){
+  var o=profCard0(),t=achTitle(),of=outfitOf(me);
+  o=o.replace('<div class="av">'+me.av+'</div>','<div class="av">'+me.av+of[2]+'</div>');
+  if(t)o=o.replace('<div class="nm">'+esc(me.name)+'</div>','<div class="nm">'+esc(me.name)+' <small style="color:#ffb020">['+t+']</small></div>');
+  return o;
+};
+
+function plusHome(){return netBadge()+netOnlBar()+festBanner()+plusHome0()+plusNewCard()+plusNew2Card()+plusNew3Card()}
 load();render();$("mus").onclick=toggleMusic;musUpd();netBoot();
 </script>
 </body>
