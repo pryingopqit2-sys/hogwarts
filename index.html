@@ -517,7 +517,7 @@ function rHub(){
   else if(HT==="top"){
     var a=topList();
     body='<h2>🏆 อันดับผู้เล่น</h2><div class="card">'+a.map(function(p,i){return'<div class="row"><span>'+(["🥇","🥈","🥉"][i]||(i+1)+".")+' '+p.av+' '+esc(p.name)+'<br><small>'+HOUSE[p.house][1]+' '+HOUSE[p.house][0]+'</small></span><span>เลเวล '+lvl(p)+'<br><small>'+titleOf(p)[2]+'</small></span></div>'}).join("")+'</div><small>'+(NET.uid?'ผู้เล่นทั้งหมดในระบบ (อัปเดตทุกครั้งที่เปิดหน้านี้)':'แสดงเฉพาะผู้เล่นในเครื่องนี้')+'</small>'+hsc;
-  }else body=profScene()+houseCard()+'<button class="orange" id="rm">🚪 เข้าบ้านไปตกแต่ง</button><button class="green" id="yd">🌳 ตกแต่งภายนอกบ้าน</button>'+dnBtn()+badgesHtml()+titlesHtml()+(me.own.length>1?'<div class="card"><small>เลือกตัวละคร</small><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:1.9rem">'+me.own.map(function(a){return'<span role="button" tabindex="0" data-a="'+a+'" style="cursor:pointer;opacity:'+(a===me.av?1:.4)+'">'+a+'</span>'}).join("")+'</div></div>':'')+'<div class="card"><b>🎵 เพลงประกอบ</b><button class="orange" id="mt">🎵 เปิดเพลง</button><label class="mfl">📂 เลือกเพลงจากเครื่องของคุณ<input id="mf" type="file" accept="audio/*" hidden></label><small>เพลงในเกมเป็นทำนองที่สร้างขึ้นเองสไตล์เวทมนตร์ ไม่ใช่เพลงของหนัง ถ้าอยากฟังเพลงแฮร์รี่ พอตเตอร์ ให้เลือกไฟล์เพลงที่คุณมีอยู่ในเครื่อง</small></div><button class="purple" id="pl">👥 รายชื่อผู้เล่นที่สมัครแล้ว</button><button class="orange" id="cp">🔑 เปลี่ยนรหัสผ่าน</button><button class="grey" id="lo">🚪 ออกจากระบบ</button>';
+  }else body=profScene()+houseCard()+'<button class="orange" id="rm">🚪 เข้าบ้านไปตกแต่ง</button><button class="green" id="yd">🌳 ตกแต่งภายนอกบ้าน</button>'+dnBtn()+badgesHtml()+titlesHtml()+(me.own.length>1?'<div class="card"><small>เลือกตัวละคร</small><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:1.9rem">'+me.own.map(function(a){return'<span role="button" tabindex="0" data-a="'+a+'" style="cursor:pointer;opacity:'+(a===me.av?1:.4)+'">'+a+'</span>'}).join("")+'</div></div>':'')+'<div class="card"><b>🎵 เพลงประกอบ</b><button class="orange" id="mt">🎵 เปิดเพลง</button><label class="mfl">📂 เลือกเพลงจากเครื่องของคุณ<input id="mf" type="file" accept="audio/*" hidden></label><small>เพลงในเกมเป็นทำนองที่สร้างขึ้นเองสไตล์เวทมนตร์ ไม่ใช่เพลงของหนัง ถ้าอยากฟังเพลงแฮร์รี่ พอตเตอร์ ให้เลือกไฟล์เพลงที่คุณมีอยู่ในเครื่อง</small></div><button class="purple" id="pl">👥 รายชื่อผู้เล่นที่สมัครแล้ว</button>'+acctBtns()+'<button class="orange" id="cp">🔑 เปลี่ยนรหัสผ่าน</button><button class="grey" id="lo">🚪 ออกจากระบบ</button>';
   app.innerHTML='<h1>⚡ แฮร์รี่ พอตเตอร์ ด่านผจญภัย ⚡</h1>'+DEV+body;
   app.querySelectorAll("[data-i]").forEach(function(b){b.onclick=function(){Q={s:+b.dataset.i};go("stage")}});
   app.querySelectorAll("[data-a]").forEach(function(b){b.onclick=function(){me.av=b.dataset.a;save();render()}});
@@ -525,7 +525,7 @@ function rHub(){
   if($("g4"))$("g4").onclick=function(){newG();go("g24")};
   if($("un"))$("un").onclick=function(){newU();go("uno")};
   if($("pl"))$("pl").onclick=function(){go("list")};if($("ev"))$("ev").onclick=function(){go("event")};if($("rm"))$("rm").onclick=function(){RSEL=null;go("room")};if($("yd"))$("yd").onclick=function(){RSEL=null;go("yard")};if($("hu"))$("hu").onclick=upHouse;app.querySelectorAll("[data-sh]").forEach(function(b){b.onclick=function(){me.shw=b.dataset.sh;save();render()}});if($("mt")){$("mt").onclick=toggleMusic;$("mf").onchange=function(){musFile(this)};musUpd()}
-  if($("cp"))$("cp").onclick=pwModal;
+  if($("cp"))$("cp").onclick=pwModal;if($("rn"))$("rn").onclick=renameModal;if($("hc"))$("hc").onclick=houseModal;
   if($("chb"))$("chb").onclick=function(){go("chat")};
   if($("lo"))$("lo").onclick=function(){netLogout(function(){me=null;HT="home";go("login")})};
   plusHubBind();
@@ -1498,7 +1498,9 @@ async function netAuth(nm,pw,k){
   var reg=(mode==="reg"),F=NET.F,A=F.A,S=F.S,email=nmail(k),cp="hq|"+pw,local=DB.u[k],lok=!!(local&&local.pw===hash(pw)),cred;
   if(reg&&local&&!lok)return{err:"ชื่อนี้มีอยู่ในเครื่องนี้แล้ว ถ้าเป็นของคุณให้กด 'เข้าสู่ระบบ' ด้วยรหัสผ่านเดิม"};
   try{
+    var aliasMail=async function(em){try{var sn=await S.getDoc(S.doc(F.db,"aliases",em));return sn.exists()?String(sn.data().mail||""):""}catch(e0){return""}};
     if(reg){
+      if(await aliasMail(email))return{err:"ชื่อนี้มีคนใช้แล้ว"};
       try{cred=await A.createUserWithEmailAndPassword(F.auth,email,cp)}
       catch(e){if(e&&e.code==="auth/email-already-in-use")return{err:"ชื่อนี้มีคนใช้แล้ว"};throw e}
     }else{
@@ -1506,9 +1508,12 @@ async function netAuth(nm,pw,k){
       catch(e){
         var c=e&&e.code||"";
         if(/user-not-found|invalid-credential|invalid-login|wrong-password/.test(c)){
+          var am=await aliasMail(email);
+          if(am){try{cred=await A.signInWithEmailAndPassword(F.auth,am,cp)}catch(e3){if(/user-not-found|invalid-credential|invalid-login|wrong-password/.test(e3&&e3.code||""))return{err:"ชื่อหรือรหัสผ่านไม่ถูกต้อง"};throw e3}}
+          else{
           if(!lok)return{err:"ชื่อหรือรหัสผ่านไม่ถูกต้อง"};
           try{cred=await A.createUserWithEmailAndPassword(F.auth,email,cp)}
-          catch(e2){if(e2&&e2.code==="auth/email-already-in-use")return{err:"ชื่อหรือรหัสผ่านไม่ถูกต้อง"};throw e2}
+          catch(e2){if(e2&&e2.code==="auth/email-already-in-use")return{err:"ชื่อหรือรหัสผ่านไม่ถูกต้อง"};throw e2}}
         }else throw e}
     }
     var uid=cred.user.uid,sn=await S.getDoc(S.doc(F.db,"players",uid)),cl=sn.exists()?sn.data():null,obj=null;
@@ -1642,7 +1647,7 @@ function others(){
 /* ---- change password ---- */
 function pwDo(old,nw,cb){
   if(!NET.uid){if(me.pw!==hash(old))return cb("รหัสผ่านเดิมไม่ถูกต้อง");me.pw=hash(nw);save();return cb("");}
-  var F=NET.F,A=F.A,email=nmail(nkey(me.name));
+  var F=NET.F,A=F.A,email=me.am||nmail(nkey(me.name));
   A.signInWithEmailAndPassword(F.auth,email,"hq|"+old).then(function(c){return A.updatePassword(c.user,"hq|"+nw)}).then(function(){me.pw=hash(nw);save();cb("")},function(e){
     var k=e&&e.code||"";cb(/invalid-credential|wrong-password|invalid-login/.test(k)?"รหัสผ่านเดิมไม่ถูกต้อง":netErr(e))})}
 function pwModal(){
@@ -2305,6 +2310,56 @@ function plusNewCard(){
   var b=function(id,e,t,n){return'<button class="pbtn" data-pv="'+id+'">'+e+'<br>'+t+(n?'<span class="dot">'+n+'</span>':'')+'</button>'};
   return'<div class="card"><b>🆕 ฮอกวอตส์ภาคพิเศษ</b><div class="pgrid">'+b("sched","📚","ตารางเรียน",schedDot())+b("wq","🎯","ภารกิจสัปดาห์ & หีบ",wqClaimable())+b("duel","⚔️","ดวลกับเพื่อน",duelN())+b("market","🛒","ตลาดแลกเปลี่ยน",0)+b("cards","🍫","การ์ดช็อกโกแลตกบ",cardDot())+b("rank","🏅","อันดับ & หัวหน้านักเรียน",rkDot())+b("rq","🔮","ห้องต้องประสงค์",0)+b("fest","🎪","เทศกาล",festNow()&&festCan(festNow())?1:0)+'</div></div>'}
 
+/* ===== rename once / change house once ===== */
+function acctBtns(){
+  var vip=isVip(me)||/เทพทั/.test(me.name);
+  return'<button class="'+(me.rn||vip?"grey":"orange")+'" id="rn"'+(me.rn||vip?" disabled":"")+'>✏️ เปลี่ยนชื่อ '+(vip?"(ไม่ใช้กับบัญชีผู้พัฒนา)":me.rn?"(ใช้สิทธิ์แล้ว)":"(เหลือ 1 ครั้ง)")+'</button><button class="'+(me.hch||vip?"grey":"purple")+'" id="hc"'+(me.hch||vip?" disabled":"")+'>🏠 เปลี่ยนบ้าน '+(vip?"(ไม่ใช้กับบัญชีผู้พัฒนา)":me.hch?"(ใช้สิทธิ์แล้ว)":"(เหลือ 1 ครั้ง)")+'</button>'}
+function nameOk(nn){
+  if(!nn)return"กรอกชื่อใหม่ก่อน";
+  if(nn.length>20)return"ชื่อยาวเกิน 20 ตัวอักษร";
+  if(/[<>"'`&]/.test(nn))return"ห้ามใช้ตัวอักษร < > \" ' ` &";
+  if(/เทพทั|theppathat/i.test(nn))return"ชื่อนี้สงวนไว้สำหรับผู้พัฒนาเกม";
+  return""}
+function renameDo(nn,cb){
+  var ok=nkey(me.name),nk=nkey(nn),S,db,rulesMsg="เปลี่ยนชื่อไม่ได้: ยังไม่ได้ตั้งค่า Rules ใหม่ใน Firebase (ติดต่อผู้พัฒนา)";
+  if(nk!==ok&&DB.u[nk])return cb("ชื่อนี้มีคนใช้แล้ว");
+  var fin=function(){me.am=me.am||nmail(ok);delete DB.u[ok];me.name=nn;me.rn=1;DB.u[nk]=me;save();if(NET.uid)netPush();cb("")};
+  if(!NET.uid||nk===ok)return fin();
+  S=NET.F.S;db=NET.F.db;
+  S.getDocs(S.query(S.collection(db,"players"),S.where("k","==",nk),S.limit(3))).then(function(qs){
+    var taken=false;qs.forEach(function(d){if(d.id!==NET.uid)taken=true});
+    if(taken||NET.list.some(function(e){return e.uid!==NET.uid&&nkey(e.name)===nk}))return cb("ชื่อนี้มีคนใช้แล้ว");
+    var am=me.am||nmail(ok),ref=S.doc(db,"aliases",nmail(nk));
+    return S.getDoc(ref).then(function(sn){
+      if(sn.exists())return cb("ชื่อนี้มีคนใช้แล้ว");
+      return S.setDoc(ref,{mail:am,uid:NET.uid,t:Date.now()}).then(fin,function(e){cb(e&&e.code==="permission-denied"?rulesMsg:netErr(e))})})
+  }).catch(function(e){cb(e&&e.code==="permission-denied"?rulesMsg:netErr(e))})}
+function acctModal(id,html,bind){
+  if($(id))return;
+  var d=document.createElement("div");d.id=id;d.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:99;display:flex;align-items:center;justify-content:center;padding:16px";
+  d.innerHTML='<div class="card" style="max-width:340px;width:100%;background:#1c1f2e">'+html+'</div>';document.body.appendChild(d);bind(d)}
+function renameModal(){
+  if(me.rn)return;
+  acctModal("rnm",'<b>✏️ เปลี่ยนชื่อ</b><small style="display:block;margin:6px 0;color:#ffb454">⚠️ เปลี่ยนได้ครั้งเดียวเท่านั้น!</small><input id="rn1" maxlength="20" placeholder="ชื่อใหม่ (ไม่เกิน 20 ตัวอักษร)" autocomplete="off"><small style="display:block;color:#a9b0c0;margin:4px 0">หลังเปลี่ยน ใช้ชื่อใหม่ล็อกอินได้เลย (ชื่อเดิมก็ยังล็อกอินได้) ข้อมูลทุกอย่างยังอยู่ครบ</small><div class="msg" id="rnmsg"></div><button class="green" id="rnok">ตกลง</button><button class="grey" id="rnno">ยกเลิก</button>',function(d){
+    var m=$("rnmsg"),busy=0,step=0,nn="";
+    $("rnno").onclick=function(){d.remove()};
+    $("rnok").onclick=function(){
+      if(busy)return;
+      if(!step){nn=$("rn1").value.trim().replace(/\s+/g," ");var e=nameOk(nn);if(e){m.textContent=e;return}
+        if(nn===me.name){m.textContent="ชื่อใหม่ต้องไม่ซ้ำกับชื่อเดิม";return}
+        step=1;$("rn1").disabled=true;m.textContent="แน่ใจไหมว่าจะเปลี่ยนเป็น \""+nn+"\" ? (เปลี่ยนได้ครั้งเดียว)";$("rnok").textContent="ยืนยันเปลี่ยนชื่อ";return}
+      busy=1;m.textContent="⏳ กำลังเปลี่ยนชื่อ...";
+      renameDo(nn,function(err){busy=0;if(err){step=0;$("rn1").disabled=false;$("rnok").textContent="ตกลง";m.textContent=err;return}
+        d.remove();toast("✅ เปลี่ยนชื่อเป็น "+nn+" แล้ว");render()})}})}
+function houseModal(){
+  if(me.hch)return;
+  var hs=Object.keys(HOUSE).filter(function(k){return k!==me.house});
+  acctModal("hcm",'<b>🏠 เปลี่ยนบ้าน</b><small style="display:block;margin:6px 0;color:#ffb454">⚠️ เปลี่ยนได้ครั้งเดียวเท่านั้น! เลือกให้ดีก่อนกดยืนยัน</small><div id="hcl">'+hs.map(function(k){return'<button class="chip" data-h="'+k+'" style="width:100%;margin:4px 0;font-size:1rem">'+HOUSE[k][1]+' '+HOUSE[k][0]+'</button>'}).join("")+'</div><small style="display:block;color:#a9b0c0;margin:4px 0">คะแนนบ้านที่คุณสะสมไว้จะย้ายไปกับคุณ</small><div class="msg" id="hcmsg"></div><button class="grey" id="hcno">ยกเลิก</button>',function(d){
+    var pick=null;
+    $("hcno").onclick=function(){d.remove()};
+    d.querySelectorAll("[data-h]").forEach(function(b){b.onclick=function(){
+      if(pick!==b.dataset.h){pick=b.dataset.h;d.querySelectorAll("[data-h]").forEach(function(x){x.className="chip"+(x===b?" on":"")});$("hcmsg").textContent="กดอีกครั้งที่ "+HOUSE[pick][0]+" เพื่อยืนยัน (เปลี่ยนได้ครั้งเดียว)";return}
+      me.house=pick;me.hch=1;save();d.remove();toast("✅ ย้ายไปบ้าน "+HOUSE[pick][0]+" แล้ว "+HOUSE[pick][1]);if(NET.uid)netAgg();render()}})})}
 function plusHome(){return netBadge()+netOnlBar()+festBanner()+plusHome0()+plusNewCard()}
 load();render();$("mus").onclick=toggleMusic;musUpd();netBoot();
 </script>
